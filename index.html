@@ -71,6 +71,17 @@
             gap: 10px;
         }
 
+        .btn-profile-top {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
         .btn-logout {
             background: #ef4444;
             color: white;
@@ -298,6 +309,17 @@
         }
 
         .perm-item input { width: auto; }
+
+        .badge-perm {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 3px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -330,6 +352,7 @@
             <h1>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
             <div class="user-info-bar">
                 <span id="userNameDisplay"></span>
+                <button class="btn-profile-top" onclick="switchTab('profileTab')">👤 ملفي الشخصي</button>
                 <button class="btn-logout" onclick="handleLogout()">خروج 🚪</button>
             </div>
         </div>
@@ -339,6 +362,7 @@
             <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')" style="display:none;">📊 السجل والتقارير</button>
             <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')" style="display:none;">⚙️ إدارة البيانات الأساسية</button>
             <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')" style="display:none;">👥 إدارة المستخدمين والصلاحيات</button>
+            <button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profileTab')">👤 الملف الشخصي</button>
         </div>
 
         <!-- التبويب الأول: الإدخال اليومي -->
@@ -557,6 +581,35 @@
             </div>
         </div>
 
+        <!-- التبويب الخامس: الملف الشخصي وتغيير كلمة السر -->
+        <div id="profileTab" class="tab-content">
+            <div class="card" style="max-width: 550px; margin: 0 auto;">
+                <h3 style="color: var(--primary); text-align: center;">👤 ملفك الشخصي في النظام</h3>
+                
+                <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin: 5px 0;"><b>اسم المستخدم:</b> <span id="profUsername" style="color:var(--secondary); font-size: 16px;"></span></p>
+                    <p style="margin: 10px 0 5px 0;"><b>الصلاحيات المتاحة لك:</b></p>
+                    <div id="profPermsBadges"></div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+                <h4 style="color: var(--primary); margin-bottom: 12px;">🔒 تغيير كلمة المرور</h4>
+                <form onsubmit="handleChangePassword(event)">
+                    <div style="margin-bottom: 15px;">
+                        <label>كلمة المرور الجديدة:</label>
+                        <input type="password" id="newPass1" placeholder="أدخل كلمة المرور الجديدة" required minlength="6">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label>تأكيد كلمة المرور الجديدة:</label>
+                        <input type="password" id="newPass2" placeholder="أعد كتابة كلمة المرور الجديدة" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn-submit" style="background-color: var(--secondary);">تحديث كلمة المرور 🔐</button>
+                </form>
+                <div id="passMsg" style="text-align: center; margin-top: 12px; font-weight: bold;"></div>
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -600,6 +653,7 @@
 
             currentUsername = user.email.split('@')[0];
             document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
+            document.getElementById('profUsername').innerText = currentUsername;
 
             if (currentUsername.toLowerCase() === "admin") {
                 applyPermissions({
@@ -624,11 +678,9 @@
         }
     });
 
-    // تطبيق الأذونات الفردية وتفعيل/إخفاء عناصر الشاشة
     function applyPermissions(p) {
         userPermissions = p;
 
-        // إخفاء كافة الأزرار والتبويبات أولاً
         document.getElementById('tabEntryBtn').style.display = p.entry ? 'inline-block' : 'none';
         document.getElementById('tabHistoryBtn').style.display = p.history ? 'inline-block' : 'none';
         document.getElementById('tabMasterBtn').style.display = p.master ? 'inline-block' : 'none';
@@ -637,11 +689,21 @@
         document.getElementById('aiSection').style.display = p.ai ? 'block' : 'none';
         document.getElementById('excelBtn').style.display = p.excel ? 'inline-block' : 'none';
 
-        // فتح أول تبويب متاح للمستخدم تلقائياً
+        // إظهار الشارات الصلاحية في ملف المستخدم
+        const badgesContainer = document.getElementById('profPermsBadges');
+        badgesContainer.innerHTML = '';
+        if(p.entry) badgesContainer.innerHTML += '<span class="badge-perm">📝 إدخال وردية</span>';
+        if(p.history) badgesContainer.innerHTML += '<span class="badge-perm">📊 السجل والتقارير</span>';
+        if(p.ai) badgesContainer.innerHTML += '<span class="badge-perm">💡 تحليل الذكاء الاصطناعي</span>';
+        if(p.excel) badgesContainer.innerHTML += '<span class="badge-perm">📈 تصدير إكسيل</span>';
+        if(p.master) badgesContainer.innerHTML += '<span class="badge-perm">⚙️ البيانات الأساسية</span>';
+        if(p.users) badgesContainer.innerHTML += '<span class="badge-perm">👥 إدارة المستخدمين</span>';
+
         if (p.entry) switchTab('entryTab');
         else if (p.history) switchTab('historyTab');
         else if (p.master) switchTab('masterTab');
         else if (p.users) switchTab('usersTab');
+        else switchTab('profileTab');
 
         if (p.users) loadUsersTable();
     }
@@ -665,10 +727,37 @@
                     });
                 });
             } else {
-                errDiv.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة! (أو لم يتم منحك صلاحيات حتى الآن)";
+                errDiv.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة!";
                 errDiv.style.display = 'block';
             }
         });
+    }
+
+    // دالة تغيير كلمة المرور للمستخدم الحالي
+    function handleChangePassword(e) {
+        e.preventDefault();
+        const p1 = document.getElementById('newPass1').value;
+        const p2 = document.getElementById('newPass2').value;
+        const msg = document.getElementById('passMsg');
+
+        if (p1 !== p2) {
+            msg.style.color = "red";
+            msg.innerText = "خطأ: كلمتا المرور غير متطابقتين!";
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (user) {
+            user.updatePassword(p1).then(() => {
+                msg.style.color = "green";
+                msg.innerText = "✅ تم تغيير كلمة المرور بنجاح!";
+                document.getElementById('newPass1').value = '';
+                document.getElementById('newPass2').value = '';
+            }).catch((error) => {
+                msg.style.color = "red";
+                msg.innerText = "حدث خطأ: يرجى تسجيل الدخول مجدداً ثم إعادتها.";
+            });
+        }
     }
 
     function handleAddNewUser(e) {
