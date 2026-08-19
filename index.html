@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة إنتاج أطباق الميلامين</title>
+    
+    <!-- مكتبات Firebase السحابية -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- مكتبة تصدير شيتات الإكسيل XLSX -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <style>
         :root {
             --primary: #1e3a8a;
@@ -405,8 +413,8 @@
     <div id="historyTab" class="tab-content">
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>سجل إنتاج الميلامين المحفوظ</h3>
-                <button class="btn-excel" onclick="exportToExcel()">تصدير لـ Excel (CSV)</button>
+                <h3>سجل إنتاج الميلامين المحفوظ (السحابي)</h3>
+                <button class="btn-excel" onclick="exportToExcel()">تصدير لـ Excel (XLSX) 📊</button>
             </div>
             <div style="overflow-x:auto;">
                 <table>
@@ -433,6 +441,20 @@
 </div>
 
 <script>
+    // 1. إعدادات Firebase الخاصة بمصنع المنار
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
+      authDomain: "almanar-industry.firebaseapp.com",
+      projectId: "almanar-industry",
+      storageBucket: "almanar-industry.firebasestorage.app",
+      messagingSenderId: "113518445928",
+      appId: "1:113518445928:web:d9d3e645cdbd157ea8c2dd",
+      measurementId: "G-LL2P27RD7X"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const NONE_OPTION = "--- اختر الخيار ---";
 
     const defaultMasterData = {
@@ -452,7 +474,7 @@
         }
         renderMasterData();
         updateFormDropdowns();
-        renderHistory();
+        listenToFirebaseHistory();
     });
 
     function switchTab(tabId) {
@@ -594,7 +616,8 @@
             totalProduction,
             totalDefects,
             defectRate,
-            isPassed: defectRate <= 8
+            isPassed: defectRate <= 8,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         document.getElementById('kpiTotal').innerText = totalProduction;
@@ -615,37 +638,45 @@
         document.getElementById('resultCard').style.display = 'block';
         document.getElementById('aiOutput').style.display = 'none';
 
-        saveRecord(currentRecord);
+        saveRecordToFirebase(currentRecord);
     }
 
-    function saveRecord(record) {
-        let history = JSON.parse(localStorage.getItem('melamine_prod_history') || '[]');
-        history.unshift(record);
-        localStorage.setItem('melamine_prod_history', JSON.stringify(history));
-        renderHistory();
+    // حفظ في داتابيز Firebase مباشرة
+    function saveRecordToFirebase(record) {
+        db.collection("melamine_production").add(record)
+        .then(() => {
+            console.log("تم الحفظ في الداتابيز السحابية بنجاح!");
+        })
+        .catch((error) => {
+            alert("حدث خطأ أثناء الحفظ في السيرفر: " + error.message);
+        });
     }
 
-    function renderHistory() {
-        let history = JSON.parse(localStorage.getItem('melamine_prod_history') || '[]');
-        const tbody = document.getElementById('historyBody');
-        tbody.innerHTML = '';
+    // الاستماع الفوري لقاعدة البيانات وتحديث السجل
+    function listenToFirebaseHistory() {
+        db.collection("melamine_production").orderBy("timestamp", "desc")
+        .onSnapshot((snapshot) => {
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = '';
 
-        history.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${item.date}</td>
-                <td>${item.machine}</td>
-                <td>${item.worker}</td>
-                <td>${item.product}</td>
-                <td><b>${item.appearance}</b></td>
-                <td>${item.g1}</td>
-                <td>${item.g2}</td>
-                <td>${item.g3}</td>
-                <td>${item.waste}</td>
-                <td><b>${item.defectRate}%</b></td>
-                <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
-            `;
-            tbody.appendChild(tr);
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || ''}</td>
+                    <td>${item.machine || ''}</td>
+                    <td>${item.worker || ''}</td>
+                    <td>${item.product || ''}</td>
+                    <td><b>${item.appearance || ''}</b></td>
+                    <td>${item.g1 || 0}</td>
+                    <td>${item.g2 || 0}</td>
+                    <td>${item.g3 || 0}</td>
+                    <td>${item.waste || 0}</td>
+                    <td><b>${item.defectRate || 0}%</b></td>
+                    <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
         });
     }
 
@@ -699,23 +730,39 @@
         }
     }
 
+    // تصدير ملف Excel حقيقي (.xlsx) من بيانات السيرفر مباشرة
     function exportToExcel() {
-        let history = JSON.parse(localStorage.getItem('melamine_prod_history') || '[]');
-        if (history.length === 0) {
-            alert("لا توجد بيانات محفوظة للتصدير!");
-            return;
-        }
+        db.collection("melamine_production").get().then((querySnapshot) => {
+            let reportsData = [];
+            
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                reportsData.push({
+                    "التاريخ": data.date,
+                    "المكبس": data.machine,
+                    "العامل": data.worker,
+                    "المنتج": data.product,
+                    "المظهر": data.appearance,
+                    "فرز أول": data.g1,
+                    "فرز ثاني": data.g2,
+                    "فرز ثالث": data.g3,
+                    "التالف": data.waste,
+                    "نسبة العيوب": data.defectRate + '%',
+                    "الحالة": data.isPassed ? 'مقبول' : 'مرفوض'
+                });
+            });
 
-        let csv = '\uFEFFالتاريخ,المكبس,العامل,المنتج,المظهر,فرز اول,فرز ثاني,فرز ثالث,تالف,نسبة العيوب,الحالة\n';
-        history.forEach(row => {
-            csv += `"${row.date}","${row.machine}","${row.worker}","${row.product}","${row.appearance}",${row.g1},${row.g2},${row.g3},${row.waste},"${row.defectRate}%","${row.isPassed ? 'مقبول' : 'مرفوض'}"\n`;
+            if(reportsData.length === 0) {
+                alert("لا توجد بيانات مخزنة حالياً لتصديرها.");
+                return;
+            }
+
+            const worksheet = XLSX.utils.json_to_sheet(reportsData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير_إنتاج_الميلامين");
+
+            XLSX.writeFile(workbook, `تقارير_ميلامين_${new Date().toISOString().slice(0,10)}.xlsx`);
         });
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `تقارير_ميلامين_${new Date().toISOString().slice(0,10)}.csv`;
-        link.click();
     }
 </script>
 
