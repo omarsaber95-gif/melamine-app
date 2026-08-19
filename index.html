@@ -83,9 +83,18 @@
         .master-list-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f1f5f9; border-radius: 6px; margin-bottom: 5px; font-size: 13px; }
         .btn-del { background: var(--danger); color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-        th, td { border: 1px solid #e2e8f0; padding: 7px; text-align: center; }
-        th { background: #f1f5f9; }
+        /* صندوق ذو ارتفاع ثابت مع شريط تمرير داخلي لحل مشكلة الصف الطويل */
+        .scrollable-container {
+            max-height: 380px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #e2e8f0; padding: 7px; text-align: center; background: white; }
+        th { background: #f1f5f9; position: sticky; top: 0; z-index: 2; }
 
         .clickable { cursor: pointer; color: var(--secondary); text-decoration: underline; font-weight: bold; }
         .btn-excel { background: #15803d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
@@ -202,7 +211,7 @@
             <!-- قائمة المراجعة والاستعراض المؤقت للوردية -->
             <div class="card" id="stagingCard" style="display:none;">
                 <h3 style="color: var(--primary);">📋 قائمة الاستعراض والمراجعة (الوردية الحالية قبل الترحيل)</h3>
-                <div style="overflow-x:auto;">
+                <div class="scrollable-container">
                     <table>
                         <thead>
                             <tr><th>المكبس</th><th>المشرف</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف</th><th>إجراء</th></tr>
@@ -237,7 +246,7 @@
                     <div style="display: flex; align-items: flex-end;"><button onclick="resetFilters()" style="background:#64748b; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:12px;">إلغاء الفلتر 🔄</button></div>
                 </div>
 
-                <div style="overflow-x:auto;">
+                <div class="scrollable-container">
                     <table>
                         <thead>
                             <tr><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف</th><th>نسبة العيوب</th><th>الحالة</th></tr>
@@ -264,7 +273,7 @@
                 </div>
                 <button class="btn-submit" style="background-color: var(--success); padding: 10px;" onclick="addDetailedMachine()">إضافة الماكينة 🛠️</button>
 
-                <div style="overflow-x:auto; margin-top: 15px;">
+                <div class="scrollable-container">
                     <table>
                         <thead><tr><th>اسم المكبس (اضغط للتفاصيل والصيانة)</th><th>النوع</th><th>القوة</th><th>فتحة المكبس (طول×عرض×ارتفاع)</th><th>عمليات الصيانة</th><th>حذف</th></tr></thead>
                         <tbody id="machinesTableBody"></tbody>
@@ -276,17 +285,17 @@
                 <div class="card">
                     <h3>أنواع المنتجات (سحابي)</h3>
                     <div class="list-add-box"><input type="text" id="newProduct" placeholder="منتج جديد"><button class="btn-add" onclick="addMasterDataFirestore('products', 'newProduct')">إضافة</button></div>
-                    <div id="productsList"></div>
+                    <div id="productsList" style="max-height: 200px; overflow-y: auto;"></div>
                 </div>
                 <div class="card">
                     <h3>الألوان السادة (سحابي)</h3>
                     <div class="list-add-box"><input type="text" id="newColor" placeholder="لون جديد"><button class="btn-add" onclick="addMasterDataFirestore('colors', 'newColor')">إضافة</button></div>
-                    <div id="colorsList"></div>
+                    <div id="colorsList" style="max-height: 200px; overflow-y: auto;"></div>
                 </div>
                 <div class="card">
                     <h3>الرسومات والتصاميم (سحابي)</h3>
                     <div class="list-add-box"><input type="text" id="newPattern" placeholder="رسمة جديدة"><button class="btn-add" onclick="addMasterDataFirestore('patterns', 'newPattern')">إضافة</button></div>
-                    <div id="patternsList"></div>
+                    <div id="patternsList" style="max-height: 200px; overflow-y: auto;"></div>
                 </div>
             </div>
         </div>
@@ -324,10 +333,12 @@
             </div>
             <div class="card">
                 <h3>إدارة المستخدمين والأدوار 🛡️</h3>
-                <table>
-                    <thead><tr><th>المستخدم</th><th>عامل؟</th><th>مشرف؟</th><th>إدخال</th><th>تقارير</th><th>إكسيل</th><th>البيانات</th><th>الصلاحيات</th><th>إجراءات</th></tr></thead>
-                    <tbody id="usersTableBody"></tbody>
-                </table>
+                <div class="scrollable-container">
+                    <table>
+                        <thead><tr><th>المستخدم</th><th>عامل؟</th><th>مشرف؟</th><th>إدخال</th><th>تقارير</th><th>إكسيل</th><th>البيانات</th><th>الصلاحيات</th><th>إجراءات</th></tr></thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -363,7 +374,7 @@
         </div>
         
         <h4 style="color: var(--primary);">سجل عمليات الصيانة السابقة:</h4>
-        <div style="overflow-x:auto; margin-bottom: 15px;">
+        <div class="scrollable-container" style="max-height: 220px; margin-bottom: 15px;">
             <table>
                 <thead><tr><th>التاريخ</th><th>نوع الصيانة</th><th>القائم بالصيانة</th><th>ملاحظات</th></tr></thead>
                 <tbody id="maintenanceTableBody"></tbody>
@@ -499,15 +510,9 @@
         const pass = document.getElementById('loginPassword').value;
         const errDiv = document.getElementById('loginError');
         errDiv.style.display = 'none';
-        
-        console.log("محاولة تسجيل دخول للمستخدم:", rawUsername);
 
         auth.signInWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass)
-        .then(() => {
-            console.log("تم تسجيل الدخول بنجاح!");
-        })
         .catch((error) => {
-            console.error("خطأ تسجيل الدخول:", error.code, error.message);
             if (rawUsername === "admin") {
                 auth.createUserWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass).then(() => {
                     db.collection("users_permissions").doc("admin").set({
@@ -532,7 +537,6 @@
         }).catch(() => { msg.style.color = "red"; msg.innerText = "أعد تسجيل الدخول ثم جرب مجدداً."; });
     }
 
-    // دالة إضافة المستخدم مع تنظيف المدخلات وإنشاء الحساب في الخلفية
     function handleAddNewUser(e) {
         e.preventDefault();
         let rawInput = document.getElementById('newUsername').value.trim();
