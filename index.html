@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة إنتاج أطباق الميلامين - المنار</title>
     
-    <!-- مكتبات Firebase السحابية (App, Auth, Firestore) -->
+    <!-- مكتبات Firebase السحابية -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -293,14 +293,14 @@
 
 <div class="container">
 
-    <!-- 1. شاشة تسجيل الدخول -->
+    <!-- 1. شاشة تسجيل الدخول باختيار اسم المستخدم -->
     <div id="loginSection">
         <div class="card" id="loginCard">
             <h2 style="color: var(--primary); margin-bottom: 20px;">دخول نظام إنتاج المنار</h2>
             <form onsubmit="handleLogin(event)">
                 <div style="margin-bottom: 15px; text-align: right;">
-                    <label>البريد الإلكتروني / الحساب:</label>
-                    <input type="email" id="loginEmail" placeholder="admin@almanar.com" required>
+                    <label>اسم المستخدم (Username):</label>
+                    <input type="text" id="usernameInput" placeholder="أدخل اسم المستخدم (مثال: admin أو amr)" required>
                 </div>
                 <div style="margin-bottom: 20px; text-align: right;">
                     <label>كلمة المرور:</label>
@@ -312,13 +312,13 @@
         </div>
     </div>
 
-    <!-- 2. الشاشة الرئيسية للتطبيق (تظهر بعد تسجيل الدخول) -->
+    <!-- 2. الشاشة الرئيسية للتطبيق -->
     <div id="appSection" style="display: none;">
         
         <div class="header">
             <h1>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
             <div class="user-info-bar">
-                <span id="userEmailDisplay"></span>
+                <span id="userNameDisplay"></span>
                 <span id="userRoleBadge" class="badge-role"></span>
                 <button class="btn-logout" onclick="handleLogout()">خروج 🚪</button>
             </div>
@@ -352,7 +352,7 @@
                         </div>
                     </div>
 
-                    <!-- الصف الثاني: المظهر (لون سادة أو رسمة مع تعطيل التبادل) -->
+                    <!-- الصف الثاني: المظهر -->
                     <div class="form-row">
                         <div class="form-group-flex">
                             <label>اللون (للطبق السادة):</label>
@@ -483,6 +483,7 @@
                         <thead>
                             <tr>
                                 <th>التاريخ</th>
+                                <th>المسجل</th>
                                 <th>المكبس</th>
                                 <th>العامل</th>
                                 <th>المنتج</th>
@@ -516,7 +517,6 @@
       measurementId: "G-LL2P27RD7X"
     };
 
-    // المفتاح المدمج في الخلفية للذكاء الاصطناعي (مخفي عن المستخدمين)
     const EMBEDDED_GEMINI_KEY = "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk"; 
 
     firebase.initializeApp(firebaseConfig);
@@ -535,22 +535,23 @@
 
     let masterData = JSON.parse(localStorage.getItem('melamine_master_data')) || defaultMasterData;
     let currentRecord = null;
-    let currentUserRole = "operator"; // الافتراضي: مشرف/عامل
+    let currentUsername = "";
 
     // متابعة حالة تسجيل الدخول تلقائياً
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
-            document.getElementById('userEmailDisplay').innerText = user.email;
 
-            // تحديد الصلاحيات بناءً على الإيميل (الإيميل اللي فيه admin ياخد كافة الصلاحيات)
-            if (user.email.includes("admin")) {
-                currentUserRole = "admin";
+            // استخراج اسم المستخدم الأصلي من الإيميل الوهمي
+            currentUsername = user.email.split('@')[0];
+            document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
+
+            // تحديد الصلاحيات بناءً على اسم المستخدم
+            if (currentUsername.toLowerCase() === "admin") {
                 document.getElementById('userRoleBadge').innerText = "مدير نظام";
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
             } else {
-                currentUserRole = "operator";
                 document.getElementById('userRoleBadge').innerText = "مشرف وردية";
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
             }
@@ -564,20 +565,23 @@
         }
     });
 
-    // دالة تسجيل الدخول
+    // دالة تحويل اسم المستخدم إلى إيميل لـ Firebase
     function handleLogin(e) {
         e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
+        const rawUsername = document.getElementById('usernameInput').value.trim().toLowerCase();
         const pass = document.getElementById('loginPassword').value;
         const errDiv = document.getElementById('loginError');
 
-        auth.signInWithEmailAndPassword(email, pass)
+        // تحويل اسم المستخدم البسيط إلى صيغة يقبلها Firebase
+        const formattedEmail = `${rawUsername}@almanar.factory`;
+
+        auth.signInWithEmailAndPassword(formattedEmail, pass)
         .catch((error) => {
-            // لو الحساب غير موجود يتم إنشاؤه تلقائياً في المرة الأولى!
-            if (error.code === 'auth/user-not-found') {
-                auth.createUserWithEmailAndPassword(email, pass)
+            // إنشاء المستخدم تلقائياً لو أول مرة يدخل
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                auth.createUserWithEmailAndPassword(formattedEmail, pass)
                 .catch((err) => {
-                    errDiv.innerText = "خطأ: " + err.message;
+                    errDiv.innerText = "كلمة المرور غير صحيحة لنفس الاسم!";
                     errDiv.style.display = 'block';
                 });
             } else {
@@ -587,7 +591,6 @@
         });
     }
 
-    // تسجيل الخروج
     function handleLogout() {
         auth.signOut();
     }
@@ -722,7 +725,7 @@
 
         currentRecord = {
             date: new Date().toLocaleString('ar-EG'),
-            entryBy: auth.currentUser ? auth.currentUser.email : 'مجهول',
+            entryBy: currentUsername,
             machine, worker, product, appearance,
             g1, g2, g3, waste,
             totalProduction,
@@ -774,6 +777,7 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${item.date || ''}</td>
+                    <td><b>${item.entryBy || 'عام'}</b></td>
                     <td>${item.machine || ''}</td>
                     <td>${item.worker || ''}</td>
                     <td>${item.product || ''}</td>
