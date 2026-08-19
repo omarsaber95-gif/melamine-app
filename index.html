@@ -520,6 +520,7 @@
         }).catch(() => { msg.style.color = "red"; msg.innerText = "أعد تسجيل الدخول ثم جرب مجدداً."; });
     }
 
+    // دالة إضافة المستخدم مع إنشاء حساب حقيقي في Firebase Auth بدون تسجيل خروج الأدمن
     function handleAddNewUser(e) {
         e.preventDefault();
         const username = document.getElementById('newUsername').value.trim().toLowerCase();
@@ -534,12 +535,30 @@
             users: document.getElementById('p_users').checked
         };
 
-        db.collection("users_permissions").doc(username).set({ username, isWorker, isSupervisor, perms }).then(() => {
-            alert(`تم إنشاء الحساب وتحديث القوائم (${username}) بنجاح!`);
-            document.getElementById('newUsername').value = ''; document.getElementById('newUserPass').value = '';
-            loadUsersTable();
-            loadWorkersAndSupervisorsDropdowns();
-        });
+        const email = `${username}@almanar.factory`;
+        const secondaryAppName = "SecondaryApp_" + Date.now();
+        const secondaryApp = firebase.initializeApp(firebaseConfig, secondaryAppName);
+        const secondaryAuth = firebase.auth(secondaryApp);
+
+        secondaryAuth.createUserWithEmailAndPassword(email, pass)
+            .then(() => {
+                return db.collection("users_permissions").doc(username).set({ username, isWorker, isSupervisor, perms });
+            })
+            .then(() => {
+                alert(`تم إنشاء حساب الدخول وصلاحيات المستخدم (${username}) بنجاح! 🚀`);
+                document.getElementById('newUsername').value = ''; 
+                document.getElementById('newUserPass').value = '';
+                loadUsersTable();
+                loadWorkersAndSupervisorsDropdowns();
+                return secondaryAuth.signOut();
+            })
+            .then(() => {
+                secondaryApp.delete();
+            })
+            .catch((error) => {
+                alert("حدث خطأ أثناء إنشاء الحساب: " + error.message);
+                secondaryApp.delete();
+            });
     }
 
     function loadUsersTable() {
@@ -716,7 +735,6 @@
         });
     }
 
-    // فتح نافذة تفاصيل وسجل صيانة المكبس
     function openMachineModal(docId) {
         activeMachineIdForModal = docId;
         db.collection("machines_detailed_specs").doc(docId).get().then((doc) => {
@@ -777,7 +795,7 @@
             document.getElementById('mMainBy').value = '';
             document.getElementById('mMainType').value = '';
             document.getElementById('mMainNote').value = '';
-            openMachineModal(activeMachineIdForModal); // تحديث القائمة في Modal
+            openMachineModal(activeMachineIdForModal);
         });
     }
 
