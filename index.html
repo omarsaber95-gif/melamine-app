@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة إنتاج أطباق الميلامين - المنار (نسخة احترافية)</title>
+    <title>نظام إدارة إنتاج المنار - المتكامل</title>
     
+    <!-- المكتبات -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -19,85 +20,97 @@
 
         body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; direction: rtl; }
         .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
         
+        /* الترويسة */
+        .header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .header h1 { font-size: 18px; margin: 0; }
+
+        /* التبويبات */
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 6px; border-radius: 10px; overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: bold; cursor: pointer; border-radius: 8px; white-space: nowrap; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: bold; cursor: pointer; border-radius: 8px; white-space: nowrap; font-size: 13px; }
         .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-        .form-group-flex { flex: 1; min-width: 130px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
-        
-        button.btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-add { background: var(--success); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
-        .btn-del { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .btn-edit { background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
-
-        /* Modal Styles */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; }
-
-        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 15px 0; }
-        .kpi-box { padding: 15px; background: #f1f5f9; border-radius: 8px; text-align: center; font-weight: bold; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        /* البطاقات والجداول */
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
         th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
         th { background: #f1f5f9; }
 
-        .filter-bar { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        /* الأزرار والمدخلات */
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+        .form-group-flex { flex: 1; min-width: 130px; }
+        button { cursor: pointer; font-weight: bold; border-radius: 8px; border: none; }
+        .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; }
+        .btn-del { background: var(--danger); color: white; padding: 5px 10px; }
+        .btn-add { background: var(--success); color: white; padding: 10px; }
+        .btn-edit { background: #f59e0b; color: white; padding: 5px 10px; }
+
+        /* مودال التأكيد */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; text-align: center; }
+
+        /* شارات الصلاحيات */
+        .badge-perm { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 11px; margin: 2px; }
+        .filter-bar { background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
     </style>
 </head>
 <body>
 
 <div class="container">
 
-    <!-- شاشة تسجيل الدخول -->
+    <!-- 1. تسجيل الدخول -->
     <div id="loginSection">
-        <div class="card" id="loginCard" style="max-width: 400px; margin: 60px auto; text-align: center;">
-            <h2 style="color: var(--primary);">دخول نظام المنار</h2>
+        <div class="card" style="max-width: 400px; margin: 60px auto; text-align: center;">
+            <h2 style="color: var(--primary);">دخول نظام مصنع المنار</h2>
             <form onsubmit="handleLogin(event)">
                 <input type="text" id="usernameInput" placeholder="اسم المستخدم" required style="margin-bottom:10px;">
-                <input type="password" id="loginPassword" placeholder="كلمة المرور" required style="margin-bottom:20px;">
-                <button type="submit" class="btn-submit">تسجيل الدخول</button>
+                <input type="password" id="loginPassword" placeholder="••••••••" required style="margin-bottom:20px;">
+                <button type="submit" class="btn-submit">دخول 🔑</button>
             </form>
+            <div id="loginError" style="color:red; margin-top:10px; display:none;"></div>
         </div>
     </div>
 
-    <!-- الشاشة الرئيسية -->
+    <!-- 2. الشاشة الرئيسية -->
     <div id="appSection" style="display: none;">
+        
         <div class="header">
-            <h3>مصنع المنار - إدارة الجودة</h3>
+            <h1>نظام إدارة الجودة والإنتاج</h1>
             <div>
                 <span id="userNameDisplay"></span> | 
-                <button onclick="auth.signOut()" style="background:transparent; color:white; border:none; cursor:pointer;">خروج 🚪</button>
+                <button onclick="auth.signOut()" style="background:transparent; color:white;">خروج 🚪</button>
             </div>
         </div>
 
         <div class="tabs">
             <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال</button>
-            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير</button>
-            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ الإعدادات</button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 السجلات</button>
             <button class="tab-btn" id="tabStatsBtn" onclick="switchTab('statsTab')">📈 إحصائيات</button>
+            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ الإعدادات</button>
+            <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 المستخدمين</button>
         </div>
 
         <!-- تبويب الإدخال -->
         <div id="entryTab" class="tab-content active">
             <div class="card">
-                <h3>إضافة وردية جديدة</h3>
+                <h3>إضافة بيانات الوردية</h3>
                 <form id="prodForm">
                     <div class="form-row">
                         <div class="form-group-flex"><label>التاريخ</label><input type="date" id="productionDate" required></div>
-                        <div class="form-group-flex"><label>المكبس</label><select id="machineSelect" required></select></div>
-                        <div class="form-group-flex"><label>العامل</label><select id="workerSelect" required></select></div>
+                        <div class="form-group-flex">
+                            <label>الوردية</label>
+                            <select id="shiftSelect">
+                                <option>الوردية 1</option><option>الوردية 2</option><option>الوردية 3</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group-flex"><label>المنتج</label><select id="productSelect" required></select></div>
-                        <div class="form-group-flex"><label>اللون</label><select id="colorSelect" onchange="handleColorChange()"></select></div>
-                        <div class="form-group-flex"><label>الرسمة</label><select id="patternSelect" onchange="handlePatternChange()"></select></div>
+                        <div class="form-group-flex"><label>المكبس</label><select id="machineSelect"></select></div>
+                        <div class="form-group-flex"><label>العامل</label><select id="workerSelect"></select></div>
+                        <div class="form-group-flex"><label>المنتج</label><select id="productSelect"></select></div>
                     </div>
                     <div class="form-row">
                         <div class="form-group-flex"><label>فرز 1</label><input type="number" id="g1" value="0"></div>
@@ -105,275 +118,43 @@
                         <div class="form-group-flex"><label>فرز 3</label><input type="number" id="g3" value="0"></div>
                         <div class="form-group-flex"><label>تالف</label><input type="number" id="waste" value="0"></div>
                     </div>
-                    <button type="button" class="btn-submit" onclick="showConfirmModal()">مراجعة وحفظ الوردية 💾</button>
+                    <button type="button" class="btn-submit" onclick="showConfirmModal()">مراجعة وتثبيت 💾</button>
                 </form>
             </div>
         </div>
 
-        <!-- تبويب التقارير -->
+        <!-- تبويب السجلات والفلترة -->
         <div id="historyTab" class="tab-content">
             <div class="filter-bar">
-                <div class="form-group-flex"><label>فلترة بالمكبس:</label><select id="filterMachine" onchange="applyFilters()"></select></div>
-                <div class="form-group-flex"><label>فلترة بالتاريخ:</label><input type="date" id="filterDate" onchange="applyFilters()"></div>
-                <button class="btn-del" style="background:#64748b" onclick="resetFilters()">إعادة ضبط</button>
-                <button class="btn-submit" style="width:auto; padding: 10px;" onclick="exportToExcel()">تصدير Excel 📊</button>
+                <div class="form-group-flex"><label>بحث بالمكبس:</label><select id="filterMachine" onchange="applyFilters()"></select></div>
+                <div class="form-group-flex"><label>بحث بالتاريخ:</label><input type="date" id="filterDate" onchange="applyFilters()"></div>
+                <button class="btn-submit" style="width:auto; padding: 10px;" onclick="exportToExcel()">إكسيل 📊</button>
             </div>
             <div class="card" style="overflow-x:auto;">
                 <table>
                     <thead>
-                        <tr><th>التاريخ</th><th>المكبس</th><th>العامل</th><th>المنتج</th><th>1</th><th>2</th><th>3</th><th>تالف</th><th>% العيوب</th><th>إجراء</th></tr>
+                        <tr><th>التاريخ</th><th>المكبس</th><th>العامل</th><th>فرز 1</th><th>فرز 2</th><th>تالف</th><th>% العيوب</th><th>إجراء</th></tr>
                     </thead>
                     <tbody id="historyBody"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- تبويب الإعدادات -->
-        <div id="masterTab" class="tab-content">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <div class="card"><h4>العمال</h4><div class="form-row"><input id="newWorker"><button class="btn-add" onclick="addMasterItem('workers','newWorker')">+</button></div><div id="workersList"></div></div>
-                <div class="card"><h4>المنتجات</h4><div class="form-row"><input id="newProduct"><button class="btn-add" onclick="addMasterItem('products','newProduct')">+</button></div><div id="productsList"></div></div>
-                <div class="card"><h4>المكابس</h4><div class="form-row"><input id="mName"><button class="btn-add" onclick="addMasterItem('machines','mName')">+</button></div><div id="machinesList"></div></div>
-            </div>
-        </div>
-
         <!-- تبويب الإحصائيات -->
         <div id="statsTab" class="tab-content">
             <div class="card">
-                <h3>إجمالي الإنتاج آخر 7 أيام</h3>
-                <canvas id="productionChart" height="100"></canvas>
+                <h3>نظرة عامة على إنتاج الأسبوع</h3>
+                <canvas id="productionChart" height="120"></canvas>
             </div>
         </div>
 
-    </div>
-</div>
-
-<!-- Modal تأكيد البيانات -->
-<div id="confirmModal" class="modal">
-    <div class="modal-content">
-        <h3>تأكيد البيانات 🔍</h3>
-        <p id="confirmText"></p>
-        <div style="display:flex; gap:10px;">
-            <button class="btn-submit" onclick="finalizeProduction()">تأكيد الحفظ ✅</button>
-            <button class="btn-del" onclick="closeModal('confirmModal')">تعديل ❌</button>
+        <!-- تبويب الإعدادات (Masters) -->
+        <div id="masterTab" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div class="card"><h4>العمال</h4><div class="form-row"><input id="nw"><button onclick="addMasterItem('workers','nw')">+</button></div><div id="workersList"></div></div>
+                <div class="card"><h4>المنتجات</h4><div class="form-row"><input id="np"><button onclick="addMasterItem('products','np')">+</button></div><div id="productsList"></div></div>
+                <div class="card"><h4>المكابس</h4><div class="form-row"><input id="nm"><button onclick="addMasterItem('machines','nm')">+</button></div><div id="machinesList"></div></div>
+            </div>
         </div>
-    </div>
-</div>
 
-<!-- Modal تعديل البيانات -->
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <h3>تعديل وردية قديمة ✏️</h3>
-        <input type="hidden" id="editDocId">
-        <label>فرز 1:</label><input type="number" id="editG1" style="margin-bottom:10px;">
-        <label>تالف:</label><input type="number" id="editWaste" style="margin-bottom:10px;">
-        <button class="btn-submit" onclick="saveEdit()">حفظ التعديلات</button>
-        <button onclick="closeModal('editModal')" style="margin-top:10px; border:none; background:none; cursor:pointer;">إلغاء</button>
-    </div>
-</div>
-
-<script>
-    // --- تفعيل Firebase ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
-      authDomain: "almanar-industry.firebaseapp.com",
-      projectId: "almanar-industry",
-      storageBucket: "almanar-industry.firebasestorage.app",
-      messagingSenderId: "113518445928",
-      appId: "1:113518445928:web:d9d3e645cdbd157ea8c2dd"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    let masterData = { workers: [], products: [], colors: [], patterns: [], machines: [] };
-    let allRecords = [];
-    let currentTempRecord = null;
-    let productionChart = null;
-
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('appSection').style.display = 'block';
-            document.getElementById('userNameDisplay').innerText = user.email.split('@')[0];
-            setupMasterListeners();
-            listenToRecords();
-        } else {
-            document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('appSection').style.display = 'none';
-        }
-    });
-
-    // --- نظام المزامنة الأساسي ---
-    function setupMasterListeners() {
-        const types = ['workers', 'products', 'colors', 'patterns', 'machines'];
-        types.forEach(cat => {
-            db.collection("master_" + cat).onSnapshot(snap => {
-                masterData[cat] = [];
-                snap.forEach(doc => masterData[cat].push({ id: doc.id, val: doc.data().name }));
-                renderMasterUI(cat);
-                updateDropdowns();
-            });
-        });
-    }
-
-    function renderMasterUI(cat) {
-        const container = document.getElementById(cat + 'List');
-        if (!container) return;
-        container.innerHTML = masterData[cat].map(item => `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f8fafc; padding:5px; border-radius:5px;">
-                <span>${item.val}</span>
-                <button class="btn-del" style="padding:2px 6px;" onclick="deleteMasterItem('${cat}', '${item.id}')">x</button>
-            </div>`).join('');
-    }
-
-    function updateDropdowns() {
-        populateSelect('workerSelect', masterData.workers);
-        populateSelect('productSelect', masterData.products);
-        populateSelect('machineSelect', masterData.machines);
-        populateSelect('filterMachine', masterData.machines, true);
-    }
-
-    function populateSelect(id, items, hasEmpty=false) {
-        const s = document.getElementById(id);
-        if(!s) return;
-        s.innerHTML = (hasEmpty ? '<option value="">الكل</option>' : '') + items.map(i => `<option value="${i.val}">${i.val}</option>`).join('');
-    }
-
-    // --- إدارة الإنتاج ---
-    function showConfirmModal() {
-        const g1 = Number(document.getElementById('g1').value);
-        const g2 = Number(document.getElementById('g2').value);
-        const g3 = Number(document.getElementById('g3').value);
-        const waste = Number(document.getElementById('waste').value);
-        const totalDefects = g2 + g3 + waste;
-        const rate = g1 > 0 ? ((totalDefects / g1) * 100).toFixed(2) : 0;
-
-        currentTempRecord = {
-            date: document.getElementById('productionDate').value,
-            machine: document.getElementById('machineSelect').value,
-            worker: document.getElementById('workerSelect').value,
-            product: document.getElementById('productSelect').value,
-            g1, g2, g3, waste, defectRate: rate,
-            isPassed: rate <= 8,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        if(!currentTempRecord.date) return alert("اختر التاريخ!");
-
-        document.getElementById('confirmText').innerHTML = `
-            <b>التاريخ:</b> ${currentTempRecord.date}<br>
-            <b>المنتج:</b> ${currentTempRecord.product}<br>
-            <b>فرز 1:</b> ${g1} | <b>تالف:</b> ${waste}<br>
-            <b>نسبة العيوب:</b> <span style="color:${rate>8?'red':'green'}">${rate}%</span>
-        `;
-        document.getElementById('confirmModal').style.display = 'flex';
-    }
-
-    function finalizeProduction() {
-        db.collection("melamine_production").add(currentTempRecord).then(() => {
-            closeModal('confirmModal');
-            alert("تم الحفظ بنجاح!");
-            document.getElementById('prodForm').reset();
-        });
-    }
-
-    function listenToRecords() {
-        db.collection("melamine_production").orderBy("timestamp", "desc").limit(100).onSnapshot(snap => {
-            allRecords = [];
-            snap.forEach(doc => allRecords.push({ id: doc.id, ...doc.data() }));
-            applyFilters();
-            updateStatsChart();
-        });
-    }
-
-    function applyFilters() {
-        const fMachine = document.getElementById('filterMachine').value;
-        const fDate = document.getElementById('filterDate').value;
-        
-        let filtered = allRecords.filter(r => {
-            return (!fMachine || r.machine === fMachine) && (!fDate || r.date === fDate);
-        });
-
-        renderHistory(filtered);
-    }
-
-    function renderHistory(data) {
-        const tbody = document.getElementById('historyBody');
-        tbody.innerHTML = data.map(r => `
-            <tr>
-                <td>${r.date}</td>
-                <td>${r.machine}</td>
-                <td>${r.worker}</td>
-                <td>${r.product}</td>
-                <td>${r.g1}</td><td>${r.g2}</td><td>${r.g3}</td><td>${r.waste}</td>
-                <td style="color:${r.isPassed?'green':'red'}"><b>${r.defectRate}%</b></td>
-                <td>
-                    <button class="btn-edit" onclick="openEditModal('${r.id}', ${r.g1}, ${r.waste})">✏️</button>
-                    <button class="btn-del" onclick="deleteDoc('melamine_production','${r.id}')">🗑️</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    // --- إحصائيات ---
-    function updateStatsChart() {
-        const last7Days = {};
-        allRecords.slice(0, 50).forEach(r => {
-            last7Days[r.date] = (last7Days[r.date] || 0) + (r.g1 || 0);
-        });
-
-        const ctx = document.getElementById('productionChart').getContext('2d');
-        if (productionChart) productionChart.destroy();
-        productionChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(last7Days).reverse(),
-                datasets: [{ label: 'إجمالي فرز أول', data: Object.values(last7Days).reverse(), backgroundColor: '#1e3a8a' }]
-            }
-        });
-    }
-
-    // --- التعديل والحذف ---
-    function openEditModal(id, g1, waste) {
-        document.getElementById('editDocId').value = id;
-        document.getElementById('editG1').value = g1;
-        document.getElementById('editWaste').value = waste;
-        document.getElementById('editModal').style.display = 'flex';
-    }
-
-    function saveEdit() {
-        const id = document.getElementById('editDocId').value;
-        const g1 = Number(document.getElementById('editG1').value);
-        const waste = Number(document.getElementById('editWaste').value);
-        const rate = g1 > 0 ? ((waste / g1) * 100).toFixed(2) : 0;
-
-        db.collection("melamine_production").doc(id).update({
-            g1, waste, defectRate: rate, isPassed: rate <= 8
-        }).then(() => { closeModal('editModal'); alert("تم التحديث!"); });
-    }
-
-    // --- مساعدات ---
-    function addMasterItem(cat, inputId) {
-        const name = document.getElementById(inputId).value;
-        if(name) db.collection("master_"+cat).add({ name }).then(() => document.getElementById(inputId).value = '');
-    }
-    function deleteMasterItem(cat, id) { if(confirm("حذف؟")) db.collection("master_"+cat).doc(id).delete(); }
-    function deleteDoc(coll, id) { if(confirm("هل تريد مسح هذا السجل نهائياً؟")) db.collection(coll).doc(id).delete(); }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function resetFilters() { document.getElementById('filterMachine').value = ''; document.getElementById('filterDate').value = ''; applyFilters(); }
-    function handleLogin(e) { e.preventDefault(); auth.signInWithEmailAndPassword(document.getElementById('usernameInput').value+'@almanar.factory', document.getElementById('loginPassword').value); }
-    function switchTab(t) { document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(t).classList.add('active'); event.target.classList.add('active'); }
-    function handleColorChange() { document.getElementById('patternSelect').disabled = document.getElementById('colorSelect').value !== ''; }
-    function handlePatternChange() { document.getElementById('colorSelect').disabled = document.getElementById('patternSelect').value !== ''; }
-    function exportToExcel() {
-        const worksheet = XLSX.utils.json_to_sheet(allRecords);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Production");
-        XLSX.writeFile(workbook, "AlManar_Report.xlsx");
-    }
-</script>
-
-</body>
-</html>
+        <!-- تبويب المستخدمين والصلاحيات
