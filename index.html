@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام المنار - حل مشكلة الدخول</title>
+    <title>نظام إدارة المنار - النسخة الكاملة</title>
     
+    <!-- المكتبات -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -12,56 +13,151 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        :root { --primary: #1e3a8a; --bg: #f8fafc; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); direction: rtl; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; text-align: center; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .error-msg { color: red; background: #fee2e2; padding: 10px; border-radius: 5px; margin-top: 10px; display: none; font-size: 13px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
-        .tab-btn { padding: 10px; background: #e2e8f0; border-radius: 8px; border: none; cursor: pointer; display: none; }
-        .tab-content { display: none; background: white; padding: 20px; border-radius: 12px; }
-        .active { display: block !important; }
+        :root {
+            --primary: #1e3a8a; --secondary: #0284c7; --success: #16a34a;
+            --danger: #dc2626; --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b;
+        }
+
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; direction: rtl; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 6px; border-radius: 10px; overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: bold; cursor: pointer; border-radius: 8px; white-space: nowrap; font-size: 13px; display: none; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
+        th { background: #f1f5f9; }
+
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+        .form-group-flex { flex: 1; min-width: 130px; }
+        
+        button { cursor: pointer; font-weight: bold; border-radius: 8px; border: none; }
+        .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; }
+        .btn-del { background: var(--danger); color: white; padding: 5px 10px; }
+        .btn-add { background: var(--success); color: white; padding: 10px; }
+
+        /* مودال التأكيد */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; text-align: center; }
+
+        .filter-bar { background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        .error-msg { color: red; background: #fee2e2; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
 
-<div id="loginSection" class="card">
-    <h2>تسجيل الدخول</h2>
-    <input type="text" id="userInput" placeholder="اسم المستخدم (مثال: admin)">
-    <input type="password" id="passInput" placeholder="كلمة المرور">
-    <button onclick="handleLogin()">دخول 🔑</button>
-    <div id="loginError" class="error-msg"></div>
+<div class="container">
+
+    <!-- 1. تسجيل الدخول -->
+    <div id="loginSection">
+        <div class="card" style="max-width: 400px; margin: 60px auto; text-align: center;">
+            <h2 style="color: var(--primary);">دخول نظام المنار</h2>
+            <div id="loginError" class="error-msg"></div>
+            <input type="text" id="userInput" placeholder="اسم المستخدم" style="margin-bottom:10px;">
+            <input type="password" id="passInput" placeholder="كلمة المرور" style="margin-bottom:20px;">
+            <button class="btn-submit" onclick="handleLogin()">دخول 🔑</button>
+        </div>
+    </div>
+
+    <!-- 2. الشاشة الرئيسية -->
+    <div id="appSection" style="display: none;">
+        
+        <div class="header">
+            <h1 id="welcomeMsg">نظام المنار</h1>
+            <button onclick="auth.signOut()" style="background:red; color:white; padding:5px 15px;">خروج 🚪</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال</button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 السجلات</button>
+            <button class="tab-btn" id="tabStatsBtn" onclick="switchTab('statsTab')">📈 إحصائيات</button>
+            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ الإعدادات</button>
+            <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 الصلاحيات</button>
+        </div>
+
+        <!-- تبويب الإدخال -->
+        <div id="entryTab" class="tab-content active">
+            <div class="card">
+                <h3>تسجيل وردية مكبس</h3>
+                <form id="prodForm">
+                    <div class="form-row">
+                        <div class="form-group-flex"><label>التاريخ</label><input type="date" id="productionDate" required></div>
+                        <div class="form-group-flex"><label>المكبس</label><select id="machineSelect"></select></div>
+                        <div class="form-group-flex"><label>العامل</label><select id="workerSelect"></select></div>
+                        <div class="form-group-flex"><label>المنتج</label><select id="productSelect"></select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-flex"><label>فرز 1</label><input type="number" id="g1" value="0"></div>
+                        <div class="form-group-flex"><label>فرز 2</label><input type="number" id="g2" value="0"></div>
+                        <div class="form-group-flex"><label>تالف</label><input type="number" id="waste" value="0"></div>
+                    </div>
+                    <button type="button" class="btn-submit" onclick="showConfirmModal()">مراجعة وحفظ 💾</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- تبويب السجلات -->
+        <div id="historyTab" class="tab-content">
+            <div class="filter-bar">
+                <div class="form-group-flex"><label>بالمكبس:</label><select id="filterMachine" onchange="applyFilters()"></select></div>
+                <div class="form-group-flex"><label>بالتاريخ:</label><input type="date" id="filterDate" onchange="applyFilters()"></div>
+                <button class="btn-submit" style="width:auto; padding: 10px;" onclick="exportToExcel()">إكسيل 📊</button>
+            </div>
+            <div class="card" style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr><th>التاريخ</th><th>المكبس</th><th>العامل</th><th>فرز 1</th><th>تالف</th><th>% العيوب</th><th>إجراء</th></tr>
+                    </thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- تبويب الإحصائيات -->
+        <div id="statsTab" class="tab-content">
+            <div class="card">
+                <canvas id="productionChart" height="120"></canvas>
+            </div>
+        </div>
+
+        <!-- تبويب الإعدادات -->
+        <div id="masterTab" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div class="card"><h4>العمال</h4><div class="form-row"><input id="nw"><button class="btn-add" onclick="addMasterItem('workers','nw')">+</button></div><div id="workersList"></div></div>
+                <div class="card"><h4>المنتجات</h4><div class="form-row"><input id="np"><button class="btn-add" onclick="addMasterItem('products','np')">+</button></div><div id="productsList"></div></div>
+                <div class="card"><h4>المكابس</h4><div class="form-row"><input id="nm"><button class="btn-add" onclick="addMasterItem('machines','nm')">+</button></div><div id="machinesList"></div></div>
+            </div>
+        </div>
+
+        <!-- تبويب الصلاحيات -->
+        <div id="usersTab" class="tab-content">
+            <div class="card">
+                <h3>المستخدمين</h3>
+                <div id="usersListTable"></div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
-<div id="appSection" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h3 id="welcomeMsg">مرحباً</h3>
-        <button onclick="auth.signOut()" style="width:auto; padding:5px 15px; background:red;">خروج</button>
-    </div>
-
-    <div class="tabs">
-        <button id="tabEntry" class="tab-btn" onclick="showTab('entry')">📝 إدخال</button>
-        <button id="tabHistory" class="tab-btn" onclick="showTab('history')">📊 سجلات</button>
-        <button id="tabUsers" class="tab-btn" onclick="showTab('users')">👥 صلاحيات</button>
-    </div>
-
-    <div id="entry" class="tab-content">
-        <h3>صفحة الإدخال</h3>
-        <p>تم تسجيل الدخول بنجاح! يمكنك البدء بالعمل.</p>
-    </div>
-    
-    <div id="history" class="tab-content">
-        <h3>السجلات</h3>
-    </div>
-
-    <div id="users" class="tab-content">
-        <h3>إدارة المستخدمين</h3>
+<!-- مودال التأكيد -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h3>تأكيد البيانات 🔍</h3>
+        <p id="confirmText"></p>
+        <button class="btn-submit" onclick="finalizeProduction()">تأكيد نهائي ✅</button>
+        <button onclick="closeModal('confirmModal')" style="margin-top:10px; border:none; background:none; cursor:pointer;">إلغاء</button>
     </div>
 </div>
 
 <script>
-    // ضع الـ Config الخاص بك هنا (تأكد أنه مطابق تماماً لبيانات Firebase لديك)
+    // --- بيانات Firebase ---
     const firebaseConfig = {
       apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
       authDomain: "almanar-industry.firebaseapp.com",
@@ -75,61 +171,151 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // دالة تسجيل الدخول المحسنة
+    let masterData = { workers: [], products: [], machines: [] };
+    let allRecords = [];
+    let prodChart = null;
+
+    // --- نظام الدخول ---
     async function handleLogin() {
-        const user = document.getElementById('userInput').value.trim().toLowerCase();
-        const pass = document.getElementById('passInput').value;
-        const errDiv = document.getElementById('loginError');
-
-        errDiv.style.display = 'none';
-
-        if(!user || !pass) {
-            errDiv.innerText = "يرجى كتابة الاسم وكلمة المرور";
-            errDiv.style.display = 'block';
-            return;
-        }
-
+        const u = document.getElementById('userInput').value.trim().toLowerCase();
+        const p = document.getElementById('passInput').value;
         try {
-            // محاولة تسجيل الدخول بإضافة الدومين تلقائياً
-            const email = user + "@almanar.factory";
-            await auth.signInWithEmailAndPassword(email, pass);
-        } catch (error) {
-            console.error(error);
-            errDiv.style.display = 'block';
-            // ترجمة الأخطاء لكي تفهم المشكلة
-            if (error.code === 'auth/user-not-found') errDiv.innerText = "اسم المستخدم غير موجود";
-            else if (error.code === 'auth/wrong-password') errDiv.innerText = "كلمة المرور خطأ";
-            else if (error.code === 'auth/network-request-failed') errDiv.innerText = "خطأ في الاتصال بالإنترنت";
-            else errDiv.innerText = "خطأ: " + error.message;
-        }
+            await auth.signInWithEmailAndPassword(u + "@almanar.factory", p);
+        } catch (e) { document.getElementById('loginError').innerText = "بيانات غير صحيحة"; document.getElementById('loginError').style.display='block'; }
     }
 
-    // مراقبة حالة المستخدم
     auth.onAuthStateChanged((user) => {
         if (user) {
-            const userName = user.email.split('@')[0];
+            const userEmail = user.email.split('@')[0];
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
-            document.getElementById('welcomeMsg').innerText = "مرحباً: " + userName;
+            document.getElementById('welcomeMsg').innerText = "مرحباً: " + userEmail;
             
-            // تفعيل الصلاحيات
-            if(userName === 'admin') {
+            // تفعيل الصلاحيات بناءً على الاسم (حالياً Admin يرى الكل)
+            if(userEmail === 'admin') {
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display = 'block');
-                showTab('entry');
+                switchTab('entryTab');
             } else {
-                // للمستخدمين العاديين، تظهر صفحة الإدخال فقط كمثال
-                document.getElementById('tabEntry').style.display = 'block';
-                showTab('entry');
+                document.getElementById('tabEntryBtn').style.display = 'block';
+                switchTab('entryTab');
             }
+            
+            setupMasterSync();
+            listenToRecords();
         } else {
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('appSection').style.display = 'none';
         }
     });
 
-    function showTab(id) {
+    // --- مزامنة القوائم ---
+    function setupMasterSync() {
+        ['workers','products','machines'].forEach(cat => {
+            db.collection("master_"+cat).onSnapshot(snap => {
+                masterData[cat] = [];
+                snap.forEach(doc => masterData[cat].push({id: doc.id, val: doc.data().name}));
+                renderMasterUI(cat);
+                updateDropdowns();
+            });
+        });
+    }
+
+    function renderMasterUI(cat) {
+        const div = document.getElementById(cat+'List');
+        if(!div) return;
+        div.innerHTML = masterData[cat].map(i => `
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f1f5f9; padding:5px; border-radius:5px;">
+                <span>${i.val}</span>
+                <button style="color:red; background:none;" onclick="deleteMasterItem('${cat}','${i.id}')">x</button>
+            </div>`).join('');
+    }
+
+    function updateDropdowns() {
+        populate('machineSelect', masterData.machines);
+        populate('workerSelect', masterData.workers);
+        populate('productSelect', masterData.products);
+        populate('filterMachine', masterData.machines, true);
+    }
+
+    function populate(id, list, empty=false) {
+        const s = document.getElementById(id);
+        if(!s) return;
+        s.innerHTML = (empty ? '<option value="">الكل</option>' : '') + list.map(i => `<option value="${i.val}">${i.val}</option>`).join('');
+    }
+
+    // --- الإنتاج والسجلات ---
+    let tempRecord = null;
+    function showConfirmModal() {
+        const g1 = Number(document.getElementById('g1').value);
+        const waste = Number(document.getElementById('waste').value);
+        const rate = g1 > 0 ? ((waste / g1) * 100).toFixed(2) : 0;
+        
+        tempRecord = {
+            date: document.getElementById('productionDate').value,
+            machine: document.getElementById('machineSelect').value,
+            worker: document.getElementById('workerSelect').value,
+            product: document.getElementById('productSelect').value,
+            g1, g2: Number(document.getElementById('g2').value), waste,
+            defectRate: rate, isPassed: rate <= 8,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if(!tempRecord.date) return alert("اختر التاريخ");
+        document.getElementById('confirmText').innerHTML = `إجمالي فرز أول: ${g1}<br>الهالك: ${waste}<br>النسبة: ${rate}%`;
+        document.getElementById('confirmModal').style.display='flex';
+    }
+
+    function finalizeProduction() {
+        db.collection("melamine_production").add(tempRecord).then(() => {
+            closeModal('confirmModal');
+            document.getElementById('prodForm').reset();
+        });
+    }
+
+    function listenToRecords() {
+        db.collection("melamine_production").orderBy("timestamp", "desc").limit(50).onSnapshot(snap => {
+            allRecords = [];
+            snap.forEach(doc => allRecords.push({id: doc.id, ...doc.data()}));
+            applyFilters();
+            drawChart();
+        });
+    }
+
+    function applyFilters() {
+        const fm = document.getElementById('filterMachine').value;
+        const fd = document.getElementById('filterDate').value;
+        const data = allRecords.filter(r => (!fm || r.machine === fm) && (!fd || r.date === fd));
+        document.getElementById('historyBody').innerHTML = data.map(r => `
+            <tr>
+                <td>${r.date}</td><td>${r.machine}</td><td>${r.worker}</td>
+                <td>${r.g1}</td><td>${r.waste}</td>
+                <td style="color:${r.isPassed?'green':'red'}">${r.defectRate}%</td>
+                <td><button class="btn-del" onclick="deleteDoc('melamine_production','${r.id}')">🗑️</button></td>
+            </tr>`).join('');
+    }
+
+    // --- خدمات عامة ---
+    function switchTab(id) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+        document.getElementById('tab'+id.charAt(0).toUpperCase()+id.slice(1)+'Btn').classList.add('active');
+    }
+    function addMasterItem(c, id) { const val = document.getElementById(id).value; if(val) db.collection("master_"+c).add({name: val}).then(()=>document.getElementById(id).value=''); }
+    function deleteMasterItem(c, id) { if(confirm("حذف؟")) db.collection("master_"+c).doc(id).delete(); }
+    function deleteDoc(coll, id) { if(confirm("حذف نهائي؟")) db.collection(coll).doc(id).delete(); }
+    function closeModal(id) { document.getElementById(id).style.display='none'; }
+    function drawChart() {
+        const ctx = document.getElementById('productionChart').getContext('2d');
+        const counts = {}; allRecords.slice(0,10).forEach(r => counts[r.date] = (counts[r.date] || 0) + r.g1);
+        if(prodChart) prodChart.destroy();
+        prodChart = new Chart(ctx, { type:'bar', data:{ labels:Object.keys(counts).reverse(), datasets:[{label:'الإنتاج', data:Object.values(counts).reverse(), backgroundColor:'#1e3a8a'}]}});
+    }
+    function exportToExcel() {
+        const ws = XLSX.utils.json_to_sheet(allRecords);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Reports");
+        XLSX.writeFile(wb, "Report.xlsx");
     }
 </script>
 </body>
