@@ -19,7 +19,6 @@
             --secondary: #0284c7;
             --success: #16a34a;
             --danger: #dc2626;
-            --warning: #d97706;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text: #1e293b;
@@ -35,7 +34,7 @@
         }
 
         .container {
-            max-width: 1050px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -150,13 +149,6 @@
             border-radius: 8px;
             box-sizing: border-box;
             font-size: 14px;
-        }
-
-        select:disabled {
-            background-color: #e2e8f0;
-            color: #94a3b8;
-            cursor: not-allowed;
-            border-color: #cbd5e1;
         }
 
         .num-input {
@@ -283,14 +275,29 @@
             font-weight: bold;
         }
 
-        .badge-role {
-            background: #fef08a;
-            color: #854d0e;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
+        .perm-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
         }
+
+        .perm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .perm-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .perm-item input { width: auto; }
     </style>
 </head>
 <body>
@@ -323,20 +330,19 @@
             <h1>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
             <div class="user-info-bar">
                 <span id="userNameDisplay"></span>
-                <span id="userRoleBadge" class="badge-role"></span>
                 <button class="btn-logout" onclick="handleLogout()">خروج 🚪</button>
             </div>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال الإنتاج اليومي</button>
-            <button class="tab-btn role-has-history" id="tabHistoryBtn" onclick="switchTab('historyTab')" style="display:none;">📊 السجل والتقارير</button>
-            <button class="tab-btn role-has-master" id="tabMasterBtn" onclick="switchTab('masterTab')" style="display:none;">⚙️ إدارة البيانات الأساسية</button>
-            <button class="tab-btn role-has-users" id="tabUsersBtn" onclick="switchTab('usersTab')" style="display:none;">👥 إدارة المستخدمين والصلاحيات</button>
+            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')" style="display:none;">📝 إدخال الإنتاج اليومي</button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')" style="display:none;">📊 السجل والتقارير</button>
+            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')" style="display:none;">⚙️ إدارة البيانات الأساسية</button>
+            <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')" style="display:none;">👥 إدارة المستخدمين والصلاحيات</button>
         </div>
 
-        <!-- التبويب الأول: الإدخال اليومي (متاح للجميع) -->
-        <div id="entryTab" class="tab-content active">
+        <!-- التبويب الأول: الإدخال اليومي -->
+        <div id="entryTab" class="tab-content">
             <div class="card">
                 <h3>تسجيل بيانات وردية الميلامين</h3>
                 <form id="prodForm">
@@ -421,7 +427,7 @@
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>سجل إنتاج الميلامين المحفوظ (السحابي)</h3>
-                    <button class="btn-excel role-has-excel" onclick="exportToExcel()" style="display:none;">تصدير لـ Excel (XLSX) 📊</button>
+                    <button class="btn-excel" id="excelBtn" onclick="exportToExcel()" style="display:none;">تصدير لـ Excel (XLSX) 📊</button>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
@@ -497,10 +503,10 @@
             </div>
         </div>
 
-        <!-- التبويب الرابع: إدارة المستخدمين والصلاحيات (الإداريين فقط) -->
+        <!-- التبويب الرابع: إدارة المستخدمين والأذونات التفصيلية -->
         <div id="usersTab" class="tab-content">
             <div class="card">
-                <h3>إضافة مستخدم جديد للنظام ➕</h3>
+                <h3>إضافة مستخدم جديد وتحديد الصلاحيات 🛠️</h3>
                 <form onsubmit="handleAddNewUser(event)">
                     <div class="form-row">
                         <div class="form-group-flex">
@@ -511,29 +517,37 @@
                             <label>كلمة المرور الأولية:</label>
                             <input type="text" id="newUserPass" placeholder="••••••••" required>
                         </div>
-                        <div class="form-group-flex">
-                            <label>مستوى الصلاحية (الدور):</label>
-                            <select id="newUserRole" required>
-                                <option value="worker">عامل (إدخال الوردية فقط)</option>
-                                <option value="supervisor">مشرف (إدخال + رؤية السجل)</option>
-                                <option value="manager">مسؤول إنتاج (إدخال + سجل + ذكاء اصطناعي + إكسيل)</option>
-                                <option value="admin">إداري (صلاحيات كاملة + إدارة المستخدمين)</option>
-                            </select>
+                    </div>
+
+                    <div class="perm-box">
+                        <label style="color: var(--primary);">حدد أذونات هذا المستخدم بالتفصيل:</label>
+                        <div class="perm-grid">
+                            <label class="perm-item"><input type="checkbox" id="p_entry" checked> 📝 إدخال وردية إنتاج</label>
+                            <label class="perm-item"><input type="checkbox" id="p_history"> 📊 رؤية السجل والتقارير</label>
+                            <label class="perm-item"><input type="checkbox" id="p_ai"> 💡 طلب تحليل الذكاء الاصطناعي</label>
+                            <label class="perm-item"><input type="checkbox" id="p_excel"> 📈 تصدير شيتات الإكسيل</label>
+                            <label class="perm-item"><input type="checkbox" id="p_master"> ⚙️ تعديل البيانات الأساسية</label>
+                            <label class="perm-item"><input type="checkbox" id="p_users"> 👥 إدارة المستخدمين والصلاحيات</label>
                         </div>
                     </div>
-                    <button type="submit" class="btn-submit" style="background-color: var(--success);">إنشاء الحساب وتحديد الصلاحية 💾</button>
+
+                    <button type="submit" class="btn-submit" style="background-color: var(--success); margin-top: 15px;">إنشاء الحساب وحفظ الصلاحيات 💾</button>
                 </form>
             </div>
 
             <div class="card">
-                <h3>قائمة المستخدمين وتعديل الصلاحيات 🛡️</h3>
+                <h3>جدول التحكم المباشر في أذونات المستخدمين 🛡️</h3>
                 <div style="overflow-x:auto;">
                     <table>
                         <thead>
                             <tr>
-                                <th>اسم المستخدم</th>
-                                <th>الصلاحية الحالية</th>
-                                <th>تغيير الصلاحية</th>
+                                <th>المستخدم</th>
+                                <th>إدخال وردية</th>
+                                <th>التقارير</th>
+                                <th>الذكاء الاصطناعي</th>
+                                <th>إكسيل</th>
+                                <th>البيانات الأساسية</th>
+                                <th>إدارة المستخدمين</th>
                                 <th>إجراءات</th>
                             </tr>
                         </thead>
@@ -548,7 +562,6 @@
 </div>
 
 <script>
-    // 1. إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
       authDomain: "almanar-industry.firebaseapp.com",
@@ -578,9 +591,8 @@
     let masterData = JSON.parse(localStorage.getItem('melamine_master_data')) || defaultMasterData;
     let currentRecord = null;
     let currentUsername = "";
-    let currentUserRole = "worker";
+    let userPermissions = {};
 
-    // متابعة تسجيل الدخول وفحص الصلاحيات من Firestore
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('loginSection').style.display = 'none';
@@ -589,18 +601,18 @@
             currentUsername = user.email.split('@')[0];
             document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
 
-            // الحساب الأول الافتراضي admin يعتبر إداري تلقائياً
             if (currentUsername.toLowerCase() === "admin") {
-                applyPermissions("admin");
+                applyPermissions({
+                    entry: true, history: true, ai: true, excel: true, master: true, users: true
+                });
             } else {
-                // جلب صلاحية المستخدم من قاعدة البيانات
                 db.collection("users_permissions").doc(currentUsername).get().then((doc) => {
-                    if (doc.exists) {
-                        applyPermissions(doc.data().role);
+                    if (doc.exists && doc.data().perms) {
+                        applyPermissions(doc.data().perms);
                     } else {
-                        applyPermissions("worker"); // الافتراضي عامل
+                        applyPermissions({ entry: true, history: false, ai: false, excel: false, master: false, users: false });
                     }
-                }).catch(() => applyPermissions("worker"));
+                }).catch(() => applyPermissions({ entry: true }));
             }
 
             renderMasterData();
@@ -612,34 +624,28 @@
         }
     });
 
-    // دالة تطبيق الصلاحيات للأدوار الأربعة
-    function applyPermissions(role) {
-        currentUserRole = role;
+    // تطبيق الأذونات الفردية وتفعيل/إخفاء عناصر الشاشة
+    function applyPermissions(p) {
+        userPermissions = p;
+
+        // إخفاء كافة الأزرار والتبويبات أولاً
+        document.getElementById('tabEntryBtn').style.display = p.entry ? 'inline-block' : 'none';
+        document.getElementById('tabHistoryBtn').style.display = p.history ? 'inline-block' : 'none';
+        document.getElementById('tabMasterBtn').style.display = p.master ? 'inline-block' : 'none';
+        document.getElementById('tabUsersBtn').style.display = p.users ? 'inline-block' : 'none';
         
-        // إخفاء كافة التبويبات الثانوية أولاً
-        document.querySelectorAll('.role-has-history, .role-has-master, .role-has-users, .role-has-excel').forEach(el => el.style.display = 'none');
-        document.getElementById('aiSection').style.display = 'none';
+        document.getElementById('aiSection').style.display = p.ai ? 'block' : 'none';
+        document.getElementById('excelBtn').style.display = p.excel ? 'inline-block' : 'none';
 
-        const badge = document.getElementById('userRoleBadge');
+        // فتح أول تبويب متاح للمستخدم تلقائياً
+        if (p.entry) switchTab('entryTab');
+        else if (p.history) switchTab('historyTab');
+        else if (p.master) switchTab('masterTab');
+        else if (p.users) switchTab('usersTab');
 
-        if (role === 'admin') {
-            badge.innerText = "إداري (Admin)";
-            document.querySelectorAll('.role-has-history, .role-has-master, .role-has-users, .role-has-excel').forEach(el => el.style.display = 'inline-block');
-            document.getElementById('aiSection').style.display = 'block';
-            loadUsersTable();
-        } else if (role === 'manager') {
-            badge.innerText = "مسؤول إنتاج";
-            document.querySelectorAll('.role-has-history, .role-has-master, .role-has-excel').forEach(el => el.style.display = 'inline-block');
-            document.getElementById('aiSection').style.display = 'block';
-        } else if (role === 'supervisor') {
-            badge.innerText = "مشرف وردية";
-            document.querySelectorAll('.role-has-history').forEach(el => el.style.display = 'inline-block');
-        } else {
-            badge.innerText = "عامل";
-        }
+        if (p.users) loadUsersTable();
     }
 
-    // تسجيل الدخول
     function handleLogin(e) {
         e.preventDefault();
         const rawUsername = document.getElementById('usernameInput').value.trim().toLowerCase();
@@ -650,86 +656,81 @@
 
         auth.signInWithEmailAndPassword(formattedEmail, pass)
         .catch((error) => {
-            // السماح بتسجيل الحساب الأول الافتراضي admin تلقائياً
             if (rawUsername === "admin" && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
                 auth.createUserWithEmailAndPassword(formattedEmail, pass)
                 .then(() => {
-                    db.collection("users_permissions").doc("admin").set({ role: "admin", username: "admin" });
+                    db.collection("users_permissions").doc("admin").set({
+                        username: "admin",
+                        perms: { entry: true, history: true, ai: true, excel: true, master: true, users: true }
+                    });
                 });
             } else {
-                errDiv.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة! (يجب إضافتك أولاً من الإداري)";
+                errDiv.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة! (أو لم يتم منحك صلاحيات حتى الآن)";
                 errDiv.style.display = 'block';
             }
         });
     }
 
-    // إضافة مستخدم جديد (للإداريين فقط)
     function handleAddNewUser(e) {
         e.preventDefault();
         const username = document.getElementById('newUsername').value.trim().toLowerCase();
         const pass = document.getElementById('newUserPass').value;
-        const role = document.getElementById('newUserRole').value;
 
         if(!username || !pass) return;
 
-        const formattedEmail = `${username}@almanar.factory`;
+        const perms = {
+            entry: document.getElementById('p_entry').checked,
+            history: document.getElementById('p_history').checked,
+            ai: document.getElementById('p_ai').checked,
+            excel: document.getElementById('p_excel').checked,
+            master: document.getElementById('p_master').checked,
+            users: document.getElementById('p_users').checked
+        };
 
-        // إضافة الحساب لقاعدة Firebase
         db.collection("users_permissions").doc(username).set({
             username: username,
-            role: role,
+            perms: perms,
             createdAt: new Date().toLocaleString('ar-EG')
         }).then(() => {
-            alert(`تم إضافة المستخدم ${username} بنجاح بصلاحية (${role})!`);
+            alert(`تم إنشاء حساب (${username}) وحفظ أذوناته بنجاح!`);
             document.getElementById('newUsername').value = '';
             document.getElementById('newUserPass').value = '';
             loadUsersTable();
         }).catch((err) => alert("حدث خطأ: " + err.message));
     }
 
-    // تحميل جدول المستخدمين
     function loadUsersTable() {
         db.collection("users_permissions").get().then((snapshot) => {
             const tbody = document.getElementById('usersTableBody');
             tbody.innerHTML = '';
 
             snapshot.forEach((doc) => {
-                const user = doc.data();
+                const u = doc.data();
+                const p = u.perms || {};
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><b>${user.username}</b></td>
-                    <td><span class="badge-role">${getRoleText(user.role)}</span></td>
-                    <td>
-                        <select onchange="updateUserRole('${user.username}', this.value)">
-                            <option value="worker" ${user.role==='worker'?'selected':''}>عامل</option>
-                            <option value="supervisor" ${user.role==='supervisor'?'selected':''}>مشرف</option>
-                            <option value="manager" ${user.role==='manager'?'selected':''}>مسؤول إنتاج</option>
-                            <option value="admin" ${user.role==='admin'?'selected':''}>إداري</option>
-                        </select>
-                    </td>
-                    <td>
-                        <button class="btn-del" onclick="deleteUserDoc('${user.username}')">حذف</button>
-                    </td>
+                    <td><b>${u.username}</b></td>
+                    <td><input type="checkbox" ${p.entry?'checked':''} onchange="togglePerm('${u.username}', 'entry', this.checked)"></td>
+                    <td><input type="checkbox" ${p.history?'checked':''} onchange="togglePerm('${u.username}', 'history', this.checked)"></td>
+                    <td><input type="checkbox" ${p.ai?'checked':''} onchange="togglePerm('${u.username}', 'ai', this.checked)"></td>
+                    <td><input type="checkbox" ${p.excel?'checked':''} onchange="togglePerm('${u.username}', 'excel', this.checked)"></td>
+                    <td><input type="checkbox" ${p.master?'checked':''} onchange="togglePerm('${u.username}', 'master', this.checked)"></td>
+                    <td><input type="checkbox" ${p.users?'checked':''} onchange="togglePerm('${u.username}', 'users', this.checked)"></td>
+                    <td><button class="btn-del" onclick="deleteUserDoc('${u.username}')">حذف</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         });
     }
 
-    function getRoleText(role) {
-        if (role === 'admin') return 'إداري';
-        if (role === 'manager') return 'مسؤول إنتاج';
-        if (role === 'supervisor') return 'مشرف';
-        return 'عامل';
-    }
-
-    function updateUserRole(username, newRole) {
-        db.collection("users_permissions").doc(username).update({ role: newRole })
-        .then(() => alert(`تم تحديث صلاحية ${username} إلى (${getRoleText(newRole)}) بنجاح!`));
+    function togglePerm(username, key, value) {
+        db.collection("users_permissions").doc(username).update({
+            [`perms.${key}`]: value
+        }).then(() => console.log("تم التحديث"));
     }
 
     function deleteUserDoc(username) {
-        if(confirm(`هل أنت تأكد من حذف المستخدم ${username}؟`)) {
+        if(confirm(`هل أنت تأكد من حذف حساب ${username}؟`)) {
             db.collection("users_permissions").doc(username).delete()
             .then(() => loadUsersTable());
         }
@@ -743,7 +744,8 @@
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         
-        event.target.classList.add('active');
+        const btn = document.getElementById('tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1) + 'Btn');
+        if (btn) btn.classList.add('active');
         document.getElementById(tabId).classList.add('active');
     }
 
@@ -895,7 +897,6 @@
         }
 
         document.getElementById('resultCard').style.display = 'block';
-        document.getElementById('aiOutput').style.display = 'none';
 
         saveRecordToFirebase(currentRecord);
     }
