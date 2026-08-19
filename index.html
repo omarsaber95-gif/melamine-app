@@ -19,6 +19,7 @@
             --secondary: #0284c7;
             --success: #16a34a;
             --danger: #dc2626;
+            --warning: #d97706;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text: #1e293b;
@@ -34,11 +35,10 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1050px;
             margin: 0 auto;
         }
 
-        /* شاشة تسجيل الدخول */
         #loginCard {
             max-width: 400px;
             margin: 60px auto;
@@ -56,6 +56,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .header h1 { margin: 0; font-size: 18px; }
@@ -83,11 +85,12 @@
 
         .tabs {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 20px;
             background: #e2e8f0;
             padding: 6px;
             border-radius: 10px;
+            overflow-x: auto;
         }
 
         .tab-btn {
@@ -96,11 +99,12 @@
             border: none;
             background: transparent;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             color: #475569;
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .tab-btn.active {
@@ -293,14 +297,14 @@
 
 <div class="container">
 
-    <!-- 1. شاشة تسجيل الدخول باختيار اسم المستخدم -->
+    <!-- 1. شاشة تسجيل الدخول -->
     <div id="loginSection">
         <div class="card" id="loginCard">
             <h2 style="color: var(--primary); margin-bottom: 20px;">دخول نظام إنتاج المنار</h2>
             <form onsubmit="handleLogin(event)">
                 <div style="margin-bottom: 15px; text-align: right;">
                     <label>اسم المستخدم (Username):</label>
-                    <input type="text" id="usernameInput" placeholder="أدخل اسم المستخدم (مثال: admin أو amr)" required>
+                    <input type="text" id="usernameInput" placeholder="أدخل اسم المستخدم" required>
                 </div>
                 <div style="margin-bottom: 20px; text-align: right;">
                     <label>كلمة المرور:</label>
@@ -325,18 +329,17 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('entryTab')">📝 إدخال الإنتاج اليومي</button>
-            <button class="tab-btn admin-only" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ إدارة البيانات الأساسية</button>
-            <button class="tab-btn admin-only" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 السجل والتقارير</button>
+            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال الإنتاج اليومي</button>
+            <button class="tab-btn role-has-history" id="tabHistoryBtn" onclick="switchTab('historyTab')" style="display:none;">📊 السجل والتقارير</button>
+            <button class="tab-btn role-has-master" id="tabMasterBtn" onclick="switchTab('masterTab')" style="display:none;">⚙️ إدارة البيانات الأساسية</button>
+            <button class="tab-btn role-has-users" id="tabUsersBtn" onclick="switchTab('usersTab')" style="display:none;">👥 إدارة المستخدمين والصلاحيات</button>
         </div>
 
-        <!-- التبويب الأول: الإدخال اليومي -->
+        <!-- التبويب الأول: الإدخال اليومي (متاح للجميع) -->
         <div id="entryTab" class="tab-content active">
             <div class="card">
                 <h3>تسجيل بيانات وردية الميلامين</h3>
                 <form id="prodForm">
-                    
-                    <!-- الصف الأول: المعدات والمسؤولين والمنتج -->
                     <div class="form-row">
                         <div class="form-group-flex">
                             <label>اختر المكبس / الماكينة:</label>
@@ -352,7 +355,6 @@
                         </div>
                     </div>
 
-                    <!-- الصف الثاني: المظهر -->
                     <div class="form-row">
                         <div class="form-group-flex">
                             <label>اللون (للطبق السادة):</label>
@@ -364,7 +366,6 @@
                         </div>
                     </div>
 
-                    <!-- الصف الثالث: كميات الفرز والتالف -->
                     <div class="form-row">
                         <div class="form-group-flex">
                             <label>الفرز الأول:</label>
@@ -391,7 +392,6 @@
             <!-- بطاقة النتائج -->
             <div class="card" id="resultCard" style="display:none;">
                 <h3>مؤشرات أداء الوردية الحالية</h3>
-                
                 <div class="kpi-container">
                     <div class="kpi-box">
                         <div>إجمالي الإنتاج</div>
@@ -409,74 +409,19 @@
 
                 <div id="qualityAlert" class="alert-box"></div>
 
-                <div id="aiSection" style="margin-top:20px;">
+                <div id="aiSection" style="margin-top:20px; display:none;">
                     <button type="button" class="btn-submit" style="background-color:var(--secondary);" onclick="getAIAnalysis()">💡 تحليل أسباب العيوب وتوصيات الذكاء الاصطناعي</button>
                     <div id="aiOutput" class="ai-box" style="display:none;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- التبويب الثاني: إدارة البيانات الأساسية (للأدمن فقط) -->
-        <div id="masterTab" class="tab-content">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-                <!-- الماكينات -->
-                <div class="card">
-                    <h3>المكابس / الماكينات</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newMachine" placeholder="ماكينة جديدة">
-                        <button class="btn-add" onclick="addMasterItem('machines', 'newMachine')">إضافة</button>
-                    </div>
-                    <div id="machinesList"></div>
-                </div>
-
-                <!-- العمال -->
-                <div class="card">
-                    <h3>قائمة العمال</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newWorker" placeholder="عامل جديد">
-                        <button class="btn-add" onclick="addMasterItem('workers', 'newWorker')">إضافة</button>
-                    </div>
-                    <div id="workersList"></div>
-                </div>
-
-                <!-- المنتجات -->
-                <div class="card">
-                    <h3>أنواع الأطباق/المنتجات</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newProduct" placeholder="منتج جديد">
-                        <button class="btn-add" onclick="addMasterItem('products', 'newProduct')">إضافة</button>
-                    </div>
-                    <div id="productsList"></div>
-                </div>
-
-                <!-- الألوان -->
-                <div class="card">
-                    <h3>ألوان الميلامين السادة</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newColor" placeholder="لون جديد">
-                        <button class="btn-add" onclick="addMasterItem('colors', 'newColor')">إضافة</button>
-                    </div>
-                    <div id="colorsList"></div>
-                </div>
-
-                <!-- الرسومات والورق -->
-                <div class="card">
-                    <h3>الرسومات / التصاميم (المطبوع)</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newPattern" placeholder="رسمة جديدة">
-                        <button class="btn-add" onclick="addMasterItem('patterns', 'newPattern')">إضافة</button>
-                    </div>
-                    <div id="patternsList"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- التبويب الثالث: التقارير (للأدمن فقط) -->
+        <!-- التبويب الثاني: التقارير والسجل -->
         <div id="historyTab" class="tab-content">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>سجل إنتاج الميلامين المحفوظ (السحابي)</h3>
-                    <button class="btn-excel" onclick="exportToExcel()">تصدير لـ Excel (XLSX) 📊</button>
+                    <button class="btn-excel role-has-excel" onclick="exportToExcel()" style="display:none;">تصدير لـ Excel (XLSX) 📊</button>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
@@ -501,12 +446,109 @@
                 </div>
             </div>
         </div>
+
+        <!-- التبويب الثالث: إدارة البيانات الأساسية -->
+        <div id="masterTab" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                <div class="card">
+                    <h3>المكابس / الماكينات</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newMachine" placeholder="ماكينة جديدة">
+                        <button class="btn-add" onclick="addMasterItem('machines', 'newMachine')">إضافة</button>
+                    </div>
+                    <div id="machinesList"></div>
+                </div>
+
+                <div class="card">
+                    <h3>قائمة العمال</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newWorker" placeholder="عامل جديد">
+                        <button class="btn-add" onclick="addMasterItem('workers', 'newWorker')">إضافة</button>
+                    </div>
+                    <div id="workersList"></div>
+                </div>
+
+                <div class="card">
+                    <h3>أنواع الأطباق/المنتجات</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newProduct" placeholder="منتج جديد">
+                        <button class="btn-add" onclick="addMasterItem('products', 'newProduct')">إضافة</button>
+                    </div>
+                    <div id="productsList"></div>
+                </div>
+
+                <div class="card">
+                    <h3>ألوان الميلامين السادة</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newColor" placeholder="لون جديد">
+                        <button class="btn-add" onclick="addMasterItem('colors', 'newColor')">إضافة</button>
+                    </div>
+                    <div id="colorsList"></div>
+                </div>
+
+                <div class="card">
+                    <h3>الرسومات / التصاميم (المطبوع)</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newPattern" placeholder="رسمة جديدة">
+                        <button class="btn-add" onclick="addMasterItem('patterns', 'newPattern')">إضافة</button>
+                    </div>
+                    <div id="patternsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- التبويب الرابع: إدارة المستخدمين والصلاحيات (الإداريين فقط) -->
+        <div id="usersTab" class="tab-content">
+            <div class="card">
+                <h3>إضافة مستخدم جديد للنظام ➕</h3>
+                <form onsubmit="handleAddNewUser(event)">
+                    <div class="form-row">
+                        <div class="form-group-flex">
+                            <label>اسم المستخدم (Username):</label>
+                            <input type="text" id="newUsername" placeholder="مثال: ahmed_qc" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>كلمة المرور الأولية:</label>
+                            <input type="text" id="newUserPass" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>مستوى الصلاحية (الدور):</label>
+                            <select id="newUserRole" required>
+                                <option value="worker">عامل (إدخال الوردية فقط)</option>
+                                <option value="supervisor">مشرف (إدخال + رؤية السجل)</option>
+                                <option value="manager">مسؤول إنتاج (إدخال + سجل + ذكاء اصطناعي + إكسيل)</option>
+                                <option value="admin">إداري (صلاحيات كاملة + إدارة المستخدمين)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit" style="background-color: var(--success);">إنشاء الحساب وتحديد الصلاحية 💾</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>قائمة المستخدمين وتعديل الصلاحيات 🛡️</h3>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>اسم المستخدم</th>
+                                <th>الصلاحية الحالية</th>
+                                <th>تغيير الصلاحية</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
 
 <script>
-    // 1. إعدادات Firebase الخاصة بمصنع المنار
+    // 1. إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
       authDomain: "almanar-industry.firebaseapp.com",
@@ -536,24 +578,29 @@
     let masterData = JSON.parse(localStorage.getItem('melamine_master_data')) || defaultMasterData;
     let currentRecord = null;
     let currentUsername = "";
+    let currentUserRole = "worker";
 
-    // متابعة حالة تسجيل الدخول تلقائياً
+    // متابعة تسجيل الدخول وفحص الصلاحيات من Firestore
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
 
-            // استخراج اسم المستخدم الأصلي من الإيميل الوهمي
             currentUsername = user.email.split('@')[0];
             document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
 
-            // تحديد الصلاحيات بناءً على اسم المستخدم
+            // الحساب الأول الافتراضي admin يعتبر إداري تلقائياً
             if (currentUsername.toLowerCase() === "admin") {
-                document.getElementById('userRoleBadge').innerText = "مدير نظام";
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+                applyPermissions("admin");
             } else {
-                document.getElementById('userRoleBadge').innerText = "مشرف وردية";
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                // جلب صلاحية المستخدم من قاعدة البيانات
+                db.collection("users_permissions").doc(currentUsername).get().then((doc) => {
+                    if (doc.exists) {
+                        applyPermissions(doc.data().role);
+                    } else {
+                        applyPermissions("worker"); // الافتراضي عامل
+                    }
+                }).catch(() => applyPermissions("worker"));
             }
 
             renderMasterData();
@@ -565,30 +612,127 @@
         }
     });
 
-    // دالة تحويل اسم المستخدم إلى إيميل لـ Firebase
+    // دالة تطبيق الصلاحيات للأدوار الأربعة
+    function applyPermissions(role) {
+        currentUserRole = role;
+        
+        // إخفاء كافة التبويبات الثانوية أولاً
+        document.querySelectorAll('.role-has-history, .role-has-master, .role-has-users, .role-has-excel').forEach(el => el.style.display = 'none');
+        document.getElementById('aiSection').style.display = 'none';
+
+        const badge = document.getElementById('userRoleBadge');
+
+        if (role === 'admin') {
+            badge.innerText = "إداري (Admin)";
+            document.querySelectorAll('.role-has-history, .role-has-master, .role-has-users, .role-has-excel').forEach(el => el.style.display = 'inline-block');
+            document.getElementById('aiSection').style.display = 'block';
+            loadUsersTable();
+        } else if (role === 'manager') {
+            badge.innerText = "مسؤول إنتاج";
+            document.querySelectorAll('.role-has-history, .role-has-master, .role-has-excel').forEach(el => el.style.display = 'inline-block');
+            document.getElementById('aiSection').style.display = 'block';
+        } else if (role === 'supervisor') {
+            badge.innerText = "مشرف وردية";
+            document.querySelectorAll('.role-has-history').forEach(el => el.style.display = 'inline-block');
+        } else {
+            badge.innerText = "عامل";
+        }
+    }
+
+    // تسجيل الدخول
     function handleLogin(e) {
         e.preventDefault();
         const rawUsername = document.getElementById('usernameInput').value.trim().toLowerCase();
         const pass = document.getElementById('loginPassword').value;
         const errDiv = document.getElementById('loginError');
 
-        // تحويل اسم المستخدم البسيط إلى صيغة يقبلها Firebase
         const formattedEmail = `${rawUsername}@almanar.factory`;
 
         auth.signInWithEmailAndPassword(formattedEmail, pass)
         .catch((error) => {
-            // إنشاء المستخدم تلقائياً لو أول مرة يدخل
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            // السماح بتسجيل الحساب الأول الافتراضي admin تلقائياً
+            if (rawUsername === "admin" && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
                 auth.createUserWithEmailAndPassword(formattedEmail, pass)
-                .catch((err) => {
-                    errDiv.innerText = "كلمة المرور غير صحيحة لنفس الاسم!";
-                    errDiv.style.display = 'block';
+                .then(() => {
+                    db.collection("users_permissions").doc("admin").set({ role: "admin", username: "admin" });
                 });
             } else {
-                errDiv.innerText = "بيانات الدخول غير صحيحة!";
+                errDiv.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة! (يجب إضافتك أولاً من الإداري)";
                 errDiv.style.display = 'block';
             }
         });
+    }
+
+    // إضافة مستخدم جديد (للإداريين فقط)
+    function handleAddNewUser(e) {
+        e.preventDefault();
+        const username = document.getElementById('newUsername').value.trim().toLowerCase();
+        const pass = document.getElementById('newUserPass').value;
+        const role = document.getElementById('newUserRole').value;
+
+        if(!username || !pass) return;
+
+        const formattedEmail = `${username}@almanar.factory`;
+
+        // إضافة الحساب لقاعدة Firebase
+        db.collection("users_permissions").doc(username).set({
+            username: username,
+            role: role,
+            createdAt: new Date().toLocaleString('ar-EG')
+        }).then(() => {
+            alert(`تم إضافة المستخدم ${username} بنجاح بصلاحية (${role})!`);
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newUserPass').value = '';
+            loadUsersTable();
+        }).catch((err) => alert("حدث خطأ: " + err.message));
+    }
+
+    // تحميل جدول المستخدمين
+    function loadUsersTable() {
+        db.collection("users_permissions").get().then((snapshot) => {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            snapshot.forEach((doc) => {
+                const user = doc.data();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${user.username}</b></td>
+                    <td><span class="badge-role">${getRoleText(user.role)}</span></td>
+                    <td>
+                        <select onchange="updateUserRole('${user.username}', this.value)">
+                            <option value="worker" ${user.role==='worker'?'selected':''}>عامل</option>
+                            <option value="supervisor" ${user.role==='supervisor'?'selected':''}>مشرف</option>
+                            <option value="manager" ${user.role==='manager'?'selected':''}>مسؤول إنتاج</option>
+                            <option value="admin" ${user.role==='admin'?'selected':''}>إداري</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn-del" onclick="deleteUserDoc('${user.username}')">حذف</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    function getRoleText(role) {
+        if (role === 'admin') return 'إداري';
+        if (role === 'manager') return 'مسؤول إنتاج';
+        if (role === 'supervisor') return 'مشرف';
+        return 'عامل';
+    }
+
+    function updateUserRole(username, newRole) {
+        db.collection("users_permissions").doc(username).update({ role: newRole })
+        .then(() => alert(`تم تحديث صلاحية ${username} إلى (${getRoleText(newRole)}) بنجاح!`));
+    }
+
+    function deleteUserDoc(username) {
+        if(confirm(`هل أنت تأكد من حذف المستخدم ${username}؟`)) {
+            db.collection("users_permissions").doc(username).delete()
+            .then(() => loadUsersTable());
+        }
     }
 
     function handleLogout() {
@@ -758,12 +902,8 @@
 
     function saveRecordToFirebase(record) {
         db.collection("melamine_production").add(record)
-        .then(() => {
-            console.log("تم الحفظ في الداتابيز السحابية بنجاح!");
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء الحفظ في السيرفر: " + error.message);
-        });
+        .then(() => console.log("تم الحفظ بنجاح!"))
+        .catch((error) => alert("حدث خطأ أثناء الحفظ: " + error.message));
     }
 
     function listenToFirebaseHistory() {
