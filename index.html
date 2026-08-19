@@ -211,8 +211,8 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال إنتاج الصالة (الورديات)</button>
-            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير والسجلات اليومية</button>
+            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال إنتاج الصالة</button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير والسجلات</button>
             <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ السجل الفني والبيانات</button>
             <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 الصلاحيات</button>
             <button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profileTab')">👤 ملفي</button>
@@ -545,7 +545,6 @@
     let userPermissions = {};
 
     document.addEventListener('DOMContentLoaded', () => {
-        // تعيين تاريخ اليوم افتراضياً في شاشة الإدخال
         const todayStr = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById('productionDate');
         if(dateInput) dateInput.value = todayStr;
