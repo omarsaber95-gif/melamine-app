@@ -187,7 +187,6 @@
             display: flex;
             gap: 10px;
             margin-bottom: 12px;
-            flex-wrap: wrap;
         }
 
         .btn-add {
@@ -359,15 +358,15 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')" style="display:none;">📝 إدخال الإنتاج اليومي</button>
-            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')" style="display:none;">📊 السجل والتقارير</button>
-            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')" style="display:none;">⚙️ سجل الماكينات والبيانات</button>
-            <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')" style="display:none;">👥 إدارة المستخدمين والصلاحيات</button>
-            <button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profileTab')">👤 الملف الشخصي</button>
+            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال الإنتاج</button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير</button>
+            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ إدارة البيانات الأساسية</button>
+            <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 الصلاحيات</button>
+            <button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profileTab')">👤 ملفي</button>
         </div>
 
         <!-- التبويب الأول: الإدخال اليومي -->
-        <div id="entryTab" class="tab-content">
+        <div id="entryTab" class="tab-content active">
             <div class="card">
                 <h3>تسجيل بيانات وردية الميلامين</h3>
                 <form id="prodForm">
@@ -478,35 +477,35 @@
             </div>
         </div>
 
-        <!-- التبويب الثالث: سجل الماكينات التفصيلي والبيانات الأساسية -->
+        <!-- التبويب الثالث: إدارة البيانات الأساسية (بما فيها السجل الفني للماكينات) -->
         <div id="masterTab" class="tab-content">
             
-            <!-- قسم سجل الماكينات والمكابس المفصل -->
+            <!-- 1. السجل الفني للماكينات والمكابس -->
             <div class="card">
-                <h3 style="color: var(--primary);">⚙️ السجل الفني للماكينات والمكابس (للصيانة)</h3>
+                <h3 style="color: var(--primary);">⚙️ السجل الفني والمواصفات الهندسية للمكابس والماكينات (للصيانة)</h3>
                 <div class="form-row">
-                    <input type="text" id="mName" placeholder="اسم الماكينة أو المكبس">
-                    <input type="text" id="mType" placeholder="النوع (مثال: مكبس هيدروليكي)">
+                    <input type="text" id="mName" placeholder="اسم الماكينة / المكبس (مثال: مكبس هيدروليكي 1)">
+                    <input type="text" id="mType" placeholder="النوع (مثال: مكبس حراري)">
                     <input type="text" id="mPower" placeholder="قوة الضغط (طن)">
                 </div>
                 <div class="form-row">
                     <input type="number" id="mLen" placeholder="الطول (سم)">
                     <input type="number" id="mWidth" placeholder="العرض (سم)">
                     <input type="number" id="mHeight" placeholder="الارتفاع (سم)">
-                    <input type="number" id="mTemp" placeholder="الحرارة المثالية (°C)">
+                    <input type="number" id="mTemp" placeholder="درجة الحرارة المثالية (°C)">
                     <input type="date" id="mService" placeholder="تاريخ آخر صيانة">
                 </div>
                 <button class="btn-submit" style="background-color: var(--success);" onclick="addDetailedMachine()">إضافة الماكينة للسجل الفني 🛠️</button>
 
-                <div style="overflow-x:auto; margin-top: 15px;">
+                <div style="overflow-x:auto; margin-top: 20px;">
                     <table>
                         <thead>
                             <tr>
-                                <th>الاسم</th>
+                                <th>اسم الماكينة</th>
                                 <th>النوع</th>
-                                <th>القوة</th>
+                                <th>قوة الضغط</th>
                                 <th>الأبعاد (ط×ع×ا سم)</th>
-                                <th>الحرارة</th>
+                                <th>الحرارة المثالية</th>
                                 <th>آخر صيانة</th>
                                 <th>إجراءات</th>
                             </tr>
@@ -516,7 +515,7 @@
                 </div>
             </div>
 
-            <!-- بقية البيانات الأساسية (العمال، المنتجات، الألوان، التصاميم) -->
+            <!-- 2. باقي البيانات الأساسية (عمال، منتجات، ألوان، تصاميم) -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                 <div class="card">
                     <h3>قائمة العمال</h3>
@@ -579,7 +578,7 @@
                             <label class="perm-item"><input type="checkbox" id="p_history"> 📊 رؤية السجل والتقارير</label>
                             <label class="perm-item"><input type="checkbox" id="p_ai"> 💡 طلب تحليل الذكاء الاصطناعي</label>
                             <label class="perm-item"><input type="checkbox" id="p_excel"> 📈 تصدير شيتات الإكسيل</label>
-                            <label class="perm-item"><input type="checkbox" id="p_master"> ⚙️ سجل الماكينات والبيانات</label>
+                            <label class="perm-item"><input type="checkbox" id="p_master"> ⚙️ إدارة البيانات الأساسية</label>
                             <label class="perm-item"><input type="checkbox" id="p_users"> 👥 إدارة المستخدمين والصلاحيات</label>
                         </div>
                     </div>
@@ -599,7 +598,7 @@
                                 <th>التقارير</th>
                                 <th>الذكاء الاصطناعي</th>
                                 <th>إكسيل</th>
-                                <th>الماكينات والبيانات</th>
+                                <th>البيانات الأساسية</th>
                                 <th>إدارة المستخدمين</th>
                                 <th>إجراءات</th>
                             </tr>
@@ -720,11 +719,11 @@
         const badgesContainer = document.getElementById('profPermsBadges');
         badgesContainer.innerHTML = '';
         if(p.entry) badgesContainer.innerHTML += '<span class="badge-perm">📝 إدخال وردية</span>';
-        if(p.history) badgesContainer.innerHTML += '<span class="badge-perm">📊 السجل والتقارير</span>';
-        if(p.ai) badgesContainer.innerHTML += '<span class="badge-perm">💡 تحليل الذكاء الاصطناعي</span>';
+        if(p.history) badgesContainer.innerHTML += '<span class="badge-perm">📊 التقارير</span>';
+        if(p.ai) badgesContainer.innerHTML += '<span class="badge-perm">💡 الذكاء الاصطناعي</span>';
         if(p.excel) badgesContainer.innerHTML += '<span class="badge-perm">📈 تصدير إكسيل</span>';
-        if(p.master) badgesContainer.innerHTML += '<span class="badge-perm">⚙️ سجل الماكينات والبيانات</span>';
-        if(p.users) badgesContainer.innerHTML += '<span class="badge-perm">👥 إدارة المستخدمين</span>';
+        if(p.master) badgesContainer.innerHTML += '<span class="badge-perm">⚙️ البيانات الأساسية</span>';
+        if(p.users) badgesContainer.innerHTML += '<span class="badge-perm">👥 الصلاحيات</span>';
 
         if (p.entry) switchTab('entryTab');
         else if (p.history) switchTab('historyTab');
@@ -885,7 +884,7 @@
         db.collection("machines_detailed_specs").onSnapshot((snapshot) => {
             const tbody = document.getElementById('machinesTableBody');
             const select = document.getElementById('machineSelect');
-            tbody.innerHTML = '';
+            if(tbody) tbody.innerHTML = '';
             if(select) select.innerHTML = '';
 
             let machineNamesList = [];
@@ -894,33 +893,38 @@
                 const m = doc.data();
                 machineNamesList.push(m.name);
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${m.name}</b></td>
-                        <td>${m.type || '-'}</td>
-                        <td>${m.power ? m.power + ' طن' : '-'}</td>
-                        <td>${m.dimensions}</td>
-                        <td>${m.temp ? m.temp + '°C' : '-'}</td>
-                        <td>${m.service || '-'}</td>
-                        <td><button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button></td>
-                    </tr>
-                `;
+                if(tbody) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${m.name}</b></td>
+                            <td>${m.type || '-'}</td>
+                            <td>${m.power ? m.power + ' طن' : '-'}</td>
+                            <td>${m.dimensions}</td>
+                            <td>${m.temp ? m.temp + '°C' : '-'}</td>
+                            <td>${m.service || '-'}</td>
+                            <td><button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button></td>
+                        </tr>
+                    `;
+                }
             });
 
-            // تحديث قائمة الماكينات في صفحة الإدخال اليومي تلقائياً
             if(select) {
-                machineNamesList.forEach(name => {
-                    const opt = document.createElement('option');
-                    opt.value = name;
-                    opt.innerText = name;
-                    select.appendChild(opt);
-                });
+                if(machineNamesList.length === 0) {
+                    select.innerHTML = '<option value="">لا توجد مكابس مضافة في البيانات الأساسية</option>';
+                } else {
+                    machineNamesList.forEach(name => {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.innerText = name;
+                        select.appendChild(opt);
+                    });
+                }
             }
         });
     }
 
     function deleteMachineDoc(id) {
-        if(confirm("هل تريد حذف هذه الماكينة من السجل؟")) {
+        if(confirm("هل تريد حذف هذه الماكينة من السجل الفني؟")) {
             db.collection("machines_detailed_specs").doc(id).delete();
         }
     }
@@ -983,15 +987,14 @@
     function populateSelect(selectId, items, includeNone) {
         const select = document.getElementById(selectId);
         if (!select) return;
-        select.innerHTML = '';
         
+        select.innerHTML = '';
         if (includeNone) {
             const optNone = document.createElement('option');
             optNone.value = NONE_OPTION;
             optNone.innerText = NONE_OPTION;
             select.appendChild(optNone);
         }
-
         items.forEach(item => {
             const opt = document.createElement('option');
             opt.value = item;
@@ -1078,47 +1081,46 @@
 
         if (currentRecord.isPassed) {
             alertBox.className = 'alert-box alert-success';
-            alertBox.innerHTML = `✅ الوردية مقبولة: نسبة العيوب الهالك (${defectRate}%) ضمن الحدود المسموح بها (أقل من أو تساوي 8% من الفرز الأول).`;
+            alertBox.innerHTML = `✅ الوردية مقبولة: نسبة العيوب (${defectRate}%) ضمن الحدود المسموح بها.`;
         } else {
             alertBox.className = 'alert-box alert-danger';
-            alertBox.innerHTML = `⚠️ تحذير جودة خطير: نسبة العيوب الهالك (${defectRate}%) تجاوزت الحد المسموح به (8% من الفرز الأول)! يرجى فحص المكبس أو حرارة الفرن.`;
+            alertBox.innerHTML = `⚠️ تحذير جودة خطير: نسبة العيوب (${defectRate}%) تجاوزت الحد المسموح (8%)!`;
         }
 
         document.getElementById('resultCard').style.display = 'block';
-
         saveRecordToFirebase(currentRecord);
     }
 
     function saveRecordToFirebase(record) {
         db.collection("melamine_production").add(record)
-        .then(() => console.log("تم الحفظ بنجاح!"))
-        .catch((error) => alert("حدث خطأ أثناء الحفظ: " + error.message));
+        .then(() => console.log("تم حفظ الإنتاج"));
     }
 
     function listenToFirebaseHistory() {
         db.collection("melamine_production").orderBy("timestamp", "desc")
         .onSnapshot((snapshot) => {
             const tbody = document.getElementById('historyBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
 
             snapshot.forEach((doc) => {
                 const item = doc.data();
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${item.date || ''}</td>
-                    <td><b>${item.entryBy || 'عام'}</b></td>
-                    <td>${item.machine || ''}</td>
-                    <td>${item.worker || ''}</td>
-                    <td>${item.product || ''}</td>
-                    <td><b>${item.appearance || ''}</b></td>
-                    <td>${item.g1 || 0}</td>
-                    <td>${item.g2 || 0}</td>
-                    <td>${item.g3 || 0}</td>
-                    <td>${item.waste || 0}</td>
-                    <td><b>${item.defectRate || 0}%</b></td>
-                    <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.date || ''}</td>
+                        <td><b>${item.entryBy || ''}</b></td>
+                        <td>${item.machine || ''}</td>
+                        <td>${item.worker || ''}</td>
+                        <td>${item.product || ''}</td>
+                        <td><b>${item.appearance || ''}</b></td>
+                        <td>${item.g1 || 0}</td>
+                        <td>${item.g2 || 0}</td>
+                        <td>${item.g3 || 0}</td>
+                        <td>${item.waste || 0}</td>
+                        <td><b>${item.defectRate || 0}%</b></td>
+                        <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
             });
         });
     }
@@ -1128,25 +1130,7 @@
         aiOutput.style.display = 'block';
         aiOutput.innerText = "جاري تحليل البيانات بواسطة Gemini...";
 
-        const promptText = `
-أنت مهندس جودة وتشغيل خبير في كبس وتصنيع أطباق الميلامين.
-حلل بيانات الإنتاج التالية للوردية:
-- المكبس/الماكينة: ${currentRecord.machine}
-- العامل: ${currentRecord.worker}
-- المنتج: ${currentRecord.product}
-- مظهر الطبق: ${currentRecord.appearance}
-- الفرز الأول: ${currentRecord.g1}
-- الفرز الثاني: ${currentRecord.g2}
-- الفرز الثالث: ${currentRecord.g3}
-- التالف: ${currentRecord.waste}
-- نسبة العيوب مقارنة بالفرز الأول: ${currentRecord.defectRate}%
-- الحد المسموح: 8%
-
-قدم تحليلاً مختصراً:
-1. تقييم أداء الوردية.
-2. إذا تجاوزت العيوب 8%، ما الأسباب المتوقعة في كبس الميلامين (سواء كان مطبوعاً بالديكور أو سادة) وكيف نعالجها؟
-`;
-
+        const promptText = `أنت مهندس جودة وتشغيل خبير في كبس وتصنيع أطباق الميلامين. حلل البيانات: مكبس ${currentRecord.machine}، عامل ${currentRecord.worker}، منتج ${currentRecord.product}، نسبة العيوب ${currentRecord.defectRate}%، الحد 8%. اعط تقييم وأسباب وعلاج للعيوب.`;
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_GEMINI_KEY}`;
 
         try {
@@ -1155,50 +1139,34 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
             });
-
             const data = await response.json();
-            if (response.ok && data.candidates && data.candidates.length > 0) {
+            if (response.ok && data.candidates) {
                 aiOutput.innerText = data.candidates[0].content.parts[0].text;
             } else {
-                aiOutput.innerText = "تعذر الحصول على التحليل حالياً.";
+                aiOutput.innerText = "تعذر الحصول على التحليل.";
             }
         } catch (e) {
-            aiOutput.innerText = "تعذر الاتصال بخدمة الذكاء الاصطناعي.";
+            aiOutput.innerText = "خطأ في الاتصال بالذكاء الاصطناعي.";
         }
     }
 
     function exportToExcel() {
         db.collection("melamine_production").get().then((querySnapshot) => {
             let reportsData = [];
-            
             querySnapshot.forEach((doc) => {
                 let data = doc.data();
                 reportsData.push({
-                    "التاريخ": data.date,
-                    "المسجل": data.entryBy || 'غير معروف',
-                    "المكبس": data.machine,
-                    "العامل": data.worker,
-                    "المنتج": data.product,
-                    "المظهر": data.appearance,
-                    "فرز أول": data.g1,
-                    "فرز ثاني": data.g2,
-                    "فرز ثالث": data.g3,
-                    "التالف": data.waste,
-                    "نسبة العيوب": data.defectRate + '%',
-                    "الحالة": data.isPassed ? 'مقبول' : 'مرفوض'
+                    "التاريخ": data.date, "المسجل": data.entryBy, "المكبس": data.machine,
+                    "العامل": data.worker, "المنتج": data.product, "المظهر": data.appearance,
+                    "فرز أول": data.g1, "فرز ثاني": data.g2, "فرز ثالث": data.g3,
+                    "التالف": data.waste, "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض'
                 });
             });
-
-            if(reportsData.length === 0) {
-                alert("لا توجد بيانات مخزنة حالياً لتصديرها.");
-                return;
-            }
-
+            if(reportsData.length === 0) { alert("لا توجد بيانات."); return; }
             const worksheet = XLSX.utils.json_to_sheet(reportsData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير_إنتاج_الميلامين");
-
-            XLSX.writeFile(workbook, `تقارير_ميلامين_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.utils.book_append_sheet(workbook, worksheet, "التقرير");
+            XLSX.writeFile(workbook, `تقارير_الميلامين_${new Date().toISOString().slice(0,10)}.xlsx`);
         });
     }
 </script>
