@@ -1,138 +1,723 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام جودة المنار للميلامين</title>
-  
-  <!-- مكتبات Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  
-  <!-- مكتبة تحويل البيانات لإكسيل -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة إنتاج أطباق الميلامين</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #0284c7;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
 
-  <style>
-    body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; background: #f4f6f8; direction: rtl; margin: 0; }
-    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 450px; margin: 20px auto; }
-    h2 { color: #1e293b; text-align: center; margin-top: 0; margin-bottom: 20px; }
-    label { font-weight: bold; color: #334155; display: block; margin-top: 12px; margin-bottom: 4px; }
-    input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; }
-    button { width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .save-btn { background: #2563eb; color: white; }
-    .save-btn:hover { background: #1d4ed8; }
-    .excel-btn { background: #16a34a; color: white; }
-    .excel-btn:hover { background: #15803d; }
-    .status { text-align: center; font-weight: bold; margin-top: 15px; color: #16a34a; font-size: 14px; }
-  </style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #e2e8f0;
+            padding: 6px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            font-size: 15px;
+            color: #475569;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group-flex {
+            flex: 1;
+            min-width: 130px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        select:disabled {
+            background-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+            border-color: #cbd5e1;
+        }
+
+        .num-input {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        button.btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        button.btn-submit:hover { opacity: 0.9; }
+
+        .list-add-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .btn-add {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .master-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .btn-del {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .kpi-box {
+            padding: 15px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            text-align: center;
+        }
+
+        .kpi-box .val {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .alert-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .alert-success { background: #dcfce7; color: var(--success); border: 1px solid #86efac; }
+        .alert-danger { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
+
+        .ai-box {
+            background: #f0f9ff;
+            border-right: 4px solid var(--secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th { background: #f1f5f9; }
+
+        .btn-excel {
+            background: #15803d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>تطبيق جودة المنار للميلامين</h2>
-    
-    <label>اسم المشرف:</label>
-    <input type="text" id="inspectorName" placeholder="أدخل اسمك">
-    
-    <label>رقم الشفت / الماكينة:</label>
-    <input type="text" id="shiftNo" placeholder="مثال: شفت أ - ماكينة 3">
-    
-    <label>حالة الجودة:</label>
-    <select id="qualityStatus">
-      <option value="مقبول">مطابق للمواصفات (مقبول)</option>
-      <option value="هالك / مرفوض">هالك / مرفوض</option>
-      <option value="يحتاج إعادة تشغيل">يحتاج إعادة تشغيل</option>
-    </select>
-    
-    <label>ملاحظات:</label>
-    <input type="text" id="notes" placeholder="أي ملاحظات إضافية">
-    
-    <button class="save-btn" onclick="saveData()">تسجيل التقرير في الداتابيز 💾</button>
-    <button class="excel-btn" onclick="exportToExcel()">تحميل شيت إكسيل (Excel) 📊</button>
-    
-    <div id="statusMsg" class="status"></div>
-  </div>
+<div class="container">
+    <div class="header">
+        <h1 style="margin:0; font-size:20px;">نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
+    </div>
 
-  <script>
-    // 1. إعدادات Firebase الخاصة بمصنع المنار
-    const firebaseConfig = {
-      apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
-      authDomain: "almanar-industry.firebaseapp.com",
-      projectId: "almanar-industry",
-      storageBucket: "almanar-industry.firebasestorage.app",
-      messagingSenderId: "113518445928",
-      appId: "1:113518445928:web:d9d3e645cdbd157ea8c2dd",
-      measurementId: "G-LL2P27RD7X"
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('entryTab')">📝 إدخال الإنتاج اليومي</button>
+        <button class="tab-btn" onclick="switchTab('masterTab')">⚙️ إدارة البيانات الأساسية</button>
+        <button class="tab-btn" onclick="switchTab('historyTab')">📊 السجل والتقارير</button>
+    </div>
+
+    <!-- التبويب الأول: الإدخال اليومي -->
+    <div id="entryTab" class="tab-content active">
+        <div class="card">
+            <h3>تسجيل بيانات وردية الميلامين</h3>
+            <form id="prodForm">
+                <div style="margin-bottom: 12px;">
+                    <label>مفتاح API Key (Google AI Studio):</label>
+                    <input type="password" id="apiKey" placeholder="ضع المفتاح هنا لمرة واحدة فقط">
+                </div>
+
+                <!-- الصف الأول: المعدات والمسؤولين والمنتج -->
+                <div class="form-row">
+                    <div class="form-group-flex">
+                        <label>اختر المكبس / الماكينة:</label>
+                        <select id="machineSelect" required></select>
+                    </div>
+                    <div class="form-group-flex">
+                        <label>اختر العامل:</label>
+                        <select id="workerSelect" required></select>
+                    </div>
+                    <div class="form-group-flex">
+                        <label>اختر المنتج (نوع الطبق):</label>
+                        <select id="productSelect" required></select>
+                    </div>
+                </div>
+
+                <!-- الصف الثاني: المظهر (لون سادة أو رسمة مع تعطيل التبادل) -->
+                <div class="form-row">
+                    <div class="form-group-flex">
+                        <label>اللون (للطبق السادة):</label>
+                        <select id="colorSelect" onchange="handleColorChange()"></select>
+                    </div>
+                    <div class="form-group-flex">
+                        <label>الرسمة / التصميم (للطبق المطبوع):</label>
+                        <select id="patternSelect" onchange="handlePatternChange()"></select>
+                    </div>
+                </div>
+
+                <!-- الصف الثالث: كميات الفرز والتالف -->
+                <div class="form-row">
+                    <div class="form-group-flex">
+                        <label>الفرز الأول:</label>
+                        <input type="number" id="g1" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                    </div>
+                    <div class="form-group-flex">
+                        <label>الفرز الثاني:</label>
+                        <input type="number" id="g2" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                    </div>
+                    <div class="form-group-flex">
+                        <label>الفرز الثالث:</label>
+                        <input type="number" id="g3" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                    </div>
+                    <div class="form-group-flex">
+                        <label>التالف / الهالك:</label>
+                        <input type="number" id="waste" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-submit" onclick="processProduction()">حساب النتائج وتدقيق الجودة</button>
+            </form>
+        </div>
+
+        <!-- بطاقة النتائج -->
+        <div class="card" id="resultCard" style="display:none;">
+            <h3>مؤشرات أداء الوردية الحالية</h3>
+            
+            <div class="kpi-container">
+                <div class="kpi-box">
+                    <div>إجمالي الإنتاج</div>
+                    <div class="val" id="kpiTotal">0</div>
+                </div>
+                <div class="kpi-box">
+                    <div>إجمالي العيوب والفرز 2/3</div>
+                    <div class="val" id="kpiDefects">0</div>
+                </div>
+                <div class="kpi-box">
+                    <div>نسبة العيوب (للأول)</div>
+                    <div class="val" id="kpiDefectRate">0%</div>
+                </div>
+            </div>
+
+            <div id="qualityAlert" class="alert-box"></div>
+
+            <div id="aiSection" style="margin-top:20px;">
+                <button type="button" class="btn-submit" style="background-color:var(--secondary);" onclick="getAIAnalysis()">💡 تحليل أسباب العيوب وتوصيات الذكاء الاصطناعي</button>
+                <div id="aiOutput" class="ai-box" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- التبويب الثاني: إدارة البيانات الأساسية -->
+    <div id="masterTab" class="tab-content">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+            <!-- الماكينات -->
+            <div class="card">
+                <h3>المكابس / الماكينات</h3>
+                <div class="list-add-box">
+                    <input type="text" id="newMachine" placeholder="ماكينة جديدة">
+                    <button class="btn-add" onclick="addMasterItem('machines', 'newMachine')">إضافة</button>
+                </div>
+                <div id="machinesList"></div>
+            </div>
+
+            <!-- العمال -->
+            <div class="card">
+                <h3>قائمة العمال</h3>
+                <div class="list-add-box">
+                    <input type="text" id="newWorker" placeholder="عامل جديد">
+                    <button class="btn-add" onclick="addMasterItem('workers', 'newWorker')">إضافة</button>
+                </div>
+                <div id="workersList"></div>
+            </div>
+
+            <!-- المنتجات -->
+            <div class="card">
+                <h3>أنواع الأطباق/المنتجات</h3>
+                <div class="list-add-box">
+                    <input type="text" id="newProduct" placeholder="منتج جديد">
+                    <button class="btn-add" onclick="addMasterItem('products', 'newProduct')">إضافة</button>
+                </div>
+                <div id="productsList"></div>
+            </div>
+
+            <!-- الألوان -->
+            <div class="card">
+                <h3>ألوان الميلامين السادة</h3>
+                <div class="list-add-box">
+                    <input type="text" id="newColor" placeholder="لون جديد">
+                    <button class="btn-add" onclick="addMasterItem('colors', 'newColor')">إضافة</button>
+                </div>
+                <div id="colorsList"></div>
+            </div>
+
+            <!-- الرسومات والورق -->
+            <div class="card">
+                <h3>الرسومات / التصاميم (المطبوع)</h3>
+                <div class="list-add-box">
+                    <input type="text" id="newPattern" placeholder="رسمة جديدة">
+                    <button class="btn-add" onclick="addMasterItem('patterns', 'newPattern')">إضافة</button>
+                </div>
+                <div id="patternsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- التبويب الثالث: التقارير -->
+    <div id="historyTab" class="tab-content">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>سجل إنتاج الميلامين المحفوظ</h3>
+                <button class="btn-excel" onclick="exportToExcel()">تصدير لـ Excel (CSV)</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>المكبس</th>
+                            <th>العامل</th>
+                            <th>المنتج</th>
+                            <th>المظهر (لون / رسمة)</th>
+                            <th>فرز 1</th>
+                            <th>فرز 2</th>
+                            <th>فرز 3</th>
+                            <th>تالف</th>
+                            <th>نسبة العيوب</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const NONE_OPTION = "--- اختر الخيار ---";
+
+    const defaultMasterData = {
+        machines: ["مكبس 1", "مكبس 2", "مكبس 3"],
+        workers: ["أحمد محمود", "محمد علي", "محمود إبراهيم"],
+        products: ["طبق غويط 9 بوصة", "طبق مسطح 10 بوصة", "سرفيس بيضاوي"],
+        colors: ["أبيض ناصع", "أسود ملكي", "بيج كلاسيك"],
+        patterns: ["زهور كلاسيك", "رخامي مودرن", "فواكه مشكلة"]
     };
 
-    // 2. تهيئة الداتابيز
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    let masterData = JSON.parse(localStorage.getItem('melamine_master_data')) || defaultMasterData;
+    let currentRecord = null;
 
-    // 3. دالة حفظ البيانات
-    function saveData() {
-      const inspector = document.getElementById('inspectorName').value;
-      const shift = document.getElementById('shiftNo').value;
-      const status = document.getElementById('qualityStatus').value;
-      const notes = document.getElementById('notes').value;
-      const statusMsg = document.getElementById('statusMsg');
+    document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('gemini_api_key')) {
+            document.getElementById('apiKey').value = localStorage.getItem('gemini_api_key');
+        }
+        renderMasterData();
+        updateFormDropdowns();
+        renderHistory();
+    });
 
-      if (!inspector || !shift) {
-        alert('برجاء كتابة اسم المشرف ورقم الشفت/الماكينة');
-        return;
-      }
-
-      db.collection("qc_reports").add({
-        inspectorName: inspector,
-        shiftNo: shift,
-        qualityStatus: status,
-        notes: notes,
-        createdAt: new Date().toLocaleString('ar-EG')
-      })
-      .then(() => {
-        statusMsg.innerText = "تم حفظ التقرير بنجاح في الداتابيز! ✅";
-        document.getElementById('notes').value = '';
-        setTimeout(() => { statusMsg.innerText = ''; }, 3000);
-      })
-      .catch((error) => {
-        alert("حدث خطأ أثناء الحفظ: " + error.message);
-      });
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        event.target.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
     }
 
-    // 4. دالة تصدير الإكسيل
-    function exportToExcel() {
-      const statusMsg = document.getElementById('statusMsg');
-      statusMsg.innerText = "جاري تحضير ملف الإكسيل... ⏳";
-
-      db.collection("qc_reports").get().then((querySnapshot) => {
-        let reportsData = [];
-        
-        querySnapshot.forEach((doc) => {
-          let data = doc.data();
-          reportsData.push({
-            "التاريخ والوقت": data.createdAt,
-            "اسم المشرف": data.inspectorName,
-            "الشفت / الماكينة": data.shiftNo,
-            "حالة الجودة": data.qualityStatus,
-            "الملاحظات": data.notes
-          });
+    function renderMasterData() {
+        ['machines', 'workers', 'products', 'colors', 'patterns'].forEach(key => {
+            const container = document.getElementById(key + 'List');
+            if (container) {
+                container.innerHTML = '';
+                masterData[key].forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'master-list-item';
+                    div.innerHTML = `
+                        <span>${item}</span>
+                        <button class="btn-del" onclick="deleteMasterItem('${key}', ${index})">حذف</button>
+                    `;
+                    container.appendChild(div);
+                });
+            }
         });
+        localStorage.setItem('melamine_master_data', JSON.stringify(masterData));
+        updateFormDropdowns();
+    }
 
-        if(reportsData.length === 0) {
-          alert("لا توجد تقارير مخزنة حتى الآن لتصديرها.");
-          statusMsg.innerText = "";
-          return;
+    function addMasterItem(type, inputId) {
+        const val = document.getElementById(inputId).value.trim();
+        if (val) {
+            masterData[type].push(val);
+            document.getElementById(inputId).value = '';
+            renderMasterData();
+        }
+    }
+
+    function deleteMasterItem(type, index) {
+        masterData[type].splice(index, 1);
+        renderMasterData();
+    }
+
+    function updateFormDropdowns() {
+        populateSelect('machineSelect', masterData.machines, false);
+        populateSelect('workerSelect', masterData.workers, false);
+        populateSelect('productSelect', masterData.products, false);
+        
+        populateSelect('colorSelect', masterData.colors, true);
+        populateSelect('patternSelect', masterData.patterns, true);
+    }
+
+    function populateSelect(selectId, items, includeNone) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '';
+        
+        if (includeNone) {
+            const optNone = document.createElement('option');
+            optNone.value = NONE_OPTION;
+            optNone.innerText = NONE_OPTION;
+            select.appendChild(optNone);
         }
 
-        const worksheet = XLSX.utils.json_to_sheet(reportsData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "تقارير الجودة");
-
-        XLSX.writeFile(workbook, "تقارير_جودة_المنار.xlsx");
-        statusMsg.innerText = "تم تحميل ملف الإكسيل بنجاح! 📊";
-        setTimeout(() => { statusMsg.innerText = ''; }, 3000);
-      });
+        items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.innerText = item;
+            select.appendChild(opt);
+        });
     }
-  </script>
+
+    // منطق التعطيل الإجباري الذكي (Disable Logic)
+    function handleColorChange() {
+        const colorSelect = document.getElementById('colorSelect');
+        const patternSelect = document.getElementById('patternSelect');
+
+        if (colorSelect.value !== NONE_OPTION) {
+            patternSelect.value = NONE_OPTION;
+            patternSelect.disabled = true; // إلغاء تفعيل التصميمات
+        } else {
+            patternSelect.disabled = false; // إعادة التفعيل
+        }
+    }
+
+    function handlePatternChange() {
+        const colorSelect = document.getElementById('colorSelect');
+        const patternSelect = document.getElementById('patternSelect');
+
+        if (patternSelect.value !== NONE_OPTION) {
+            colorSelect.value = NONE_OPTION;
+            colorSelect.disabled = true; // إلغاء تفعيل الألوان
+        } else {
+            colorSelect.disabled = false; // إعادة التفعيل
+        }
+    }
+
+    function processProduction() {
+        const apiKey = document.getElementById('apiKey').value.trim();
+        if (apiKey) localStorage.setItem('gemini_api_key', apiKey);
+
+        const machine = document.getElementById('machineSelect').value;
+        const worker = document.getElementById('workerSelect').value;
+        const product = document.getElementById('productSelect').value;
+        const color = document.getElementById('colorSelect').value;
+        const pattern = document.getElementById('patternSelect').value;
+
+        if (!machine || !worker || !product) {
+            alert("يرجى اختيار المكبس، العامل، والمنتج!");
+            return;
+        }
+
+        if (color === NONE_OPTION && pattern === NONE_OPTION) {
+            alert("خطأ: يجب اختيار إما (لون سادة) أو (رسمة/تصميم) للطبق!");
+            return;
+        }
+
+        const appearance = color !== NONE_OPTION ? `سادة (${color})` : `مطبوع (${pattern})`;
+
+        const g1 = Number(document.getElementById('g1').value);
+        const g2 = Number(document.getElementById('g2').value);
+        const g3 = Number(document.getElementById('g3').value);
+        const waste = Number(document.getElementById('waste').value);
+
+        if (g1 <= 0 && (g2 > 0 || g3 > 0 || waste > 0)) {
+            alert("خطأ: لا يمكن حساب نسبة العيوب والفرز الأول يساوي 0!");
+            return;
+        }
+
+        const totalDefects = g2 + g3 + waste;
+        const totalProduction = g1 + totalDefects;
+        const defectRate = g1 > 0 ? ((totalDefects / g1) * 100).toFixed(2) : 0;
+
+        currentRecord = {
+            date: new Date().toLocaleString('ar-EG'),
+            machine, worker, product, appearance,
+            g1, g2, g3, waste,
+            totalProduction,
+            totalDefects,
+            defectRate,
+            isPassed: defectRate <= 8
+        };
+
+        document.getElementById('kpiTotal').innerText = totalProduction;
+        document.getElementById('kpiDefects').innerText = totalDefects;
+        document.getElementById('kpiDefectRate').innerText = defectRate + '%';
+
+        const alertBox = document.getElementById('qualityAlert');
+        alertBox.style.display = 'block';
+
+        if (currentRecord.isPassed) {
+            alertBox.className = 'alert-box alert-success';
+            alertBox.innerHTML = `✅ الوردية مقبولة: نسبة العيوب الهالك (${defectRate}%) ضمن الحدود المسموح بها (أقل من أو تساوي 8% من الفرز الأول).`;
+        } else {
+            alertBox.className = 'alert-box alert-danger';
+            alertBox.innerHTML = `⚠️ تحذير جودة خطير: نسبة العيوب الهالك (${defectRate}%) تجاوزت الحد المسموح به (8% من الفرز الأول)! يرجى فحص المكبس أو حرارة الفرن.`;
+        }
+
+        document.getElementById('resultCard').style.display = 'block';
+        document.getElementById('aiOutput').style.display = 'none';
+
+        saveRecord(currentRecord);
+    }
+
+    function saveRecord(record) {
+        let history = JSON.parse(localStorage.getItem('melamine_prod_history') || '[]');
+        history.unshift(record);
+        localStorage.setItem('melamine_prod_history', JSON.stringify(history));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        let history = JSON.parse(localStorage.getItem('melamine_prod_history') || '[]');
+        const tbody = document.getElementById('historyBody');
+        tbody.innerHTML = '';
+
+        history.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.date}</td>
+                <td>${item.machine}</td>
+                <td>${item.worker}</td>
+                <td>${item.product}</td>
+                <td><b>${item.appearance}</b></td>
+                <td>${item.g1}</td>
+                <td>${item.g2}</td>
+                <td>${item.g3}</td>
+                <td>${item.waste}</td>
+                <td><b>${item.defectRate}%</b></td>
+                <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function getAIAnalysis() {
+        const apiKey = document.getElementById('apiKey').value.trim();
+        if (!apiKey) {
+            alert("يرجى إدخال مفتاح API Key أولاً!");
+            return;
+        }
+
+        const aiOutput = document.getElementById('aiOutput');
+        aiOutput.style.display = 'block';
+        aiOutput.innerText = "جاري تحليل البيانات بواسطة Gemini...";
+
+        const promptText = `
+أنت مهندس جودة وتشغيل خبير في كبس وتصنيع أطباق الميلامين.
+حلل بيانات الإنتاج التالية للوردية:
+- المكبس/الماكينة: ${currentRecord.machine}
+- العامل: ${currentRecord.worker}
+- المنتج: ${currentRecord.product}
+- مظهر الطبق: ${currentRecord.appearance}
+- الفرز الأول: ${currentRecord.g1}
+- الفرز الثاني: ${currentRecord.g2}
+- الفرز الثالث: ${currentRecord.g3}
+- التالف: ${currentRecord.waste}
+- نسبة العيوب مقارنة بالفرز الأول: ${currentRecord.defectRate}%
+- الحد المسموح: 8%
+
+قدم تحليلاً مختصراً:
+1. تقييم أداء الوردية.
+2. إذا تجاوزت العيوب 8%، ما الأسباب المتوقعة في كبس الميلامين (سواء كان مطبوعاً بالديكور أو سادة) وكيف نعالجها؟
+`;
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.candidates && data.candidates.length > 0) {
+                aiOutput.innerText = data.candidates[0].content.parts[0].text;
+            } else {
+                aiOutput.innerText = "حدث خطأ من جوجل: " + (data.error ? data.error.message : "يرجى مراجعة API Key");
+            }
+        } catch (e) {
+            aiOutput.innerText = "تعذر الاتصال بخدمة الذكاء الاصطناعي.";
+        }
+    }
+
+    function exportToExcel() {
+        let history = JSON.parse(localStorage.getItem('melamine_prod_history') || '[]');
+        if (history.length === 0) {
+            alert("لا توجد بيانات محفوظة للتصدير!");
+            return;
+        }
+
+        let csv = '\uFEFFالتاريخ,المكبس,العامل,المنتج,المظهر,فرز اول,فرز ثاني,فرز ثالث,تالف,نسبة العيوب,الحالة\n';
+        history.forEach(row => {
+            csv += `"${row.date}","${row.machine}","${row.worker}","${row.product}","${row.appearance}",${row.g1},${row.g2},${row.g3},${row.waste},"${row.defectRate}%","${row.isPassed ? 'مقبول' : 'مرفوض'}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `تقارير_ميلامين_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+    }
+</script>
+
 </body>
 </html>
