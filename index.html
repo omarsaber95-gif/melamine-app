@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين - المنار</title>
+    <title>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين والحوافز</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -193,7 +193,7 @@
                 <div class="scrollable-container">
                     <table>
                         <thead>
-                            <tr><th>المكبس</th><th>المشرف</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف</th><th>إجراء</th></tr>
+                            <tr><th>المكبس</th><th>المشرف</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف والحوافز</th><th>إجراء</th></tr>
                         </thead>
                         <tbody id="stagingBody"></tbody>
                     </table>
@@ -228,7 +228,7 @@
                 <div class="scrollable-container">
                     <table>
                         <thead>
-                            <tr><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>حافز العامل 💰</th></tr>
+                            <tr><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>إجمالي الحافز 💰</th></tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
                     </table>
@@ -260,19 +260,23 @@
                 </div>
             </div>
 
-            <!-- إعدادات المنتجات بالتفصيل والحوافز -->
+            <!-- إعدادات المنتجات ومعايير الحوافز الجديدة -->
             <div class="card">
-                <h3 style="color: var(--primary); margin-bottom: 10px;">📦 المنتجات ومعايير الإنتاج والحوافز</h3>
+                <h3 style="color: var(--primary); margin-bottom: 10px;">📦 المنتجات ومعايير الإنتاج وحوافز الجودة</h3>
                 <div class="form-row">
-                    <div class="form-group-flex"><input type="text" id="newProdName" placeholder="اسم المنتج (مثال: طبق غويط 9 بوصة)"></div>
-                    <div class="form-group-flex"><input type="number" id="newProdTarget" placeholder="الهدف المطلوب (عدد)"></div>
-                    <div class="form-group-flex"><input type="number" id="newProdWaste" placeholder="نسبة العادم المسموحة %"></div>
-                    <div class="form-group-flex"><input type="number" id="newProdIncentive" placeholder="حافز القطعة الزائدة (ج.م)"></div>
+                    <div class="form-group-flex"><input type="text" id="newProdName" placeholder="اسم المنتج"></div>
+                    <div class="form-group-flex"><input type="number" id="newProdTarget" placeholder="معدل الإنتاج"></div>
+                    <div class="form-group-flex"><input type="number" id="newProdWaste" placeholder="أقصى نسبة للعوادم %"></div>
+                    <div class="form-group-flex"><input type="number" id="newProdIncentive" placeholder="حافز القطعة الزائدة"></div>
                 </div>
-                <button class="btn-submit" style="background-color: var(--success);" onclick="addDetailedProduct()">إضافة المنتج بالمعايير ➕</button>
+                <div class="form-row">
+                    <div class="form-group-flex"><input type="number" step="0.1" id="newQualityLowWaste" placeholder="نسبة عوادم ممتازة % (مثال: 2)"></div>
+                    <div class="form-group-flex"><input type="number" id="newQualityBonus" placeholder="مبلغ حافز الجودة الأساسي"></div>
+                </div>
+                <button class="btn-submit" style="background-color: var(--success);" onclick="addDetailedProduct()">إضافة المنتج بالمعايير والحوافز ➕</button>
                 <div class="scrollable-container" style="max-height: 220px;">
                     <table>
-                        <thead><tr><th>اسم المنتج</th><th>الهدف المطلوب</th><th>عادم مسموح</th><th>حافز القطعة</th><th>إجراء</th></tr></thead>
+                        <thead><tr><th>اسم المنتج</th><th>معدل الإنتاج</th><th>أقصى عوادم</th><th>حافز القطعة</th><th>نسبة عوادم ممتازة</th><th>حافز الجودة الأساسي (الضعف لنصف النسبة)</th><th>إجراء</th></tr></thead>
                         <tbody id="productsTableBody"></tbody>
                     </table>
                 </div>
@@ -632,8 +636,7 @@
             } else {
                 globalMasterData = {
                     products: [
-                        { name: "طبق غويط 9 بوصة", target: 500, maxWaste: 5, incentiveValue: 0.5 },
-                        { name: "طبق مسطح 10 بوصة", target: 450, maxWaste: 6, incentiveValue: 0.6 }
+                        { name: "طبق غويط 9 بوصة", target: 500, maxWaste: 5, incentiveValue: 0.5, qualityLowWaste: 2, qualityBonus: 10 }
                     ],
                     colors: ["أبيض ناصع", "أسود ملكي", "بيج كلاسيك"],
                     patterns: ["زهور كلاسيك", "رخامي مودرن", "فواكه مشكلة"]
@@ -645,25 +648,25 @@
     }
 
     function renderMasterDataUI() {
-        // إدارة المنتجات (أوبجكتات بالحوافز والمعايير)
         const prodTbody = document.getElementById('productsTableBody');
         if(prodTbody) {
             prodTbody.innerHTML = '';
             (globalMasterData.products || []).forEach((item, index) => {
-                let pObj = typeof item === 'string' ? { name: item, target: 0, maxWaste: 0, incentiveValue: 0 } : item;
+                let pObj = typeof item === 'string' ? { name: item, target: 0, maxWaste: 0, incentiveValue: 0, qualityLowWaste: 0, qualityBonus: 0 } : item;
                 prodTbody.innerHTML += `
                     <tr>
                         <td><b>${pObj.name}</b></td>
                         <td>${pObj.target || 0}</td>
                         <td>${pObj.maxWaste || 0}%</td>
                         <td>${pObj.incentiveValue || 0} ج.م</td>
+                        <td>${pObj.qualityLowWaste || 0}%</td>
+                        <td>${pObj.qualityBonus || 0} ج.م (يُضاعف لنصف النسبة)</td>
                         <td><button class="btn-del" onclick="deleteProductFirestore(${index})">حذف</button></td>
                     </tr>
                 `;
             });
         }
 
-        // الألوان والتصاميم
         ['colors', 'patterns'].forEach(key => {
             const container = document.getElementById(key + 'List');
             if (container) {
@@ -681,18 +684,22 @@
         const target = Number(document.getElementById('newProdTarget').value);
         const maxWaste = Number(document.getElementById('newProdWaste').value);
         const incentiveValue = Number(document.getElementById('newProdIncentive').value);
+        const qualityLowWaste = Number(document.getElementById('newQualityLowWaste').value);
+        const qualityBonus = Number(document.getElementById('newQualityBonus').value);
 
-        if (!name || target <= 0) { alert("يرجى إدخال اسم المنتج والهدف المطلوب بشكل صحيح!"); return; }
+        if (!name || target <= 0) { alert("يرجى إدخال اسم المنتج ومعدل الإنتاج بشكل صحيح!"); return; }
 
         if (!globalMasterData.products) globalMasterData.products = [];
-        globalMasterData.products.push({ name, target, maxWaste, incentiveValue });
+        globalMasterData.products.push({ name, target, maxWaste, incentiveValue, qualityLowWaste, qualityBonus });
 
         db.collection("factory_settings").doc("master_data").set(globalMasterData).then(() => {
-            alert("✅ تم إضافة المنتج ومعايير الحوافز بنجاح!");
+            alert("✅ تم إضافة المنتج ومعايير الإنتاج وحوافز الجودة بنجاح!");
             document.getElementById('newProdName').value = '';
             document.getElementById('newProdTarget').value = '';
             document.getElementById('newProdWaste').value = '';
             document.getElementById('newProdIncentive').value = '';
+            document.getElementById('newQualityLowWaste').value = '';
+            document.getElementById('newQualityBonus').value = '';
         });
     }
 
@@ -874,20 +881,38 @@
     function deleteMachineDoc(id) { if(confirm("حذف الماكينة؟")) db.collection("machines_detailed_specs").doc(id).delete(); }
     function handleLogout() { auth.signOut(); }
 
-    // حساب الحافز الذكي بناءً على المعدل ونسبة العادم
-    function calculateIncentive(productName, g1, defectRate) {
+    // حساب الحوافز المتطورة (حافز كمية الإنتاج + حافز الجودة التدرجي)
+    function calculateTotalIncentive(productName, g1, defectRate) {
         const productSpec = (globalMasterData.products || []).find(p => (typeof p === 'string' ? p === productName : p.name === productName));
         
-        if (!productSpec || typeof productSpec === 'string') return 0; // إذا لم يُعَرَّف المنتج بالتفصيل
+        if (!productSpec || typeof productSpec === 'string') return { quantityIncentive: 0, qualityIncentive: 0, total: 0 };
 
-        // الشروط: 1- عدم تجاوز نسبة العادم المسموحة. 2- تحقيق إنتاج أعلى من المستهدف.
+        let quantityIncentive = 0;
+        let qualityIncentive = 0;
+
+        // 1. حساب حافز الكمية (إذا لم نتجاوز أقصى نسبة للعوادم وحققنا أعلى من معدل الإنتاج)
         if (defectRate <= productSpec.maxWaste) {
             const extraPieces = g1 - productSpec.target;
             if (extraPieces > 0) {
-                return Number((extraPieces * productSpec.incentiveValue).toFixed(2));
+                quantityIncentive = extraPieces * (productSpec.incentiveValue || 0);
             }
         }
-        return 0;
+
+        // 2. حساب حافز الجودة التدرجي
+        const lowWasteLimit = productSpec.qualityLowWaste || 0;
+        const baseBonus = productSpec.qualityBonus || 0;
+
+        if (lowWasteLimit > 0 && baseBonus > 0) {
+            const halfWasteLimit = lowWasteLimit / 2;
+            if (defectRate <= halfWasteLimit) {
+                qualityIncentive = baseBonus * 2; // ضعف المبلغ إذا حقق نصف النسبة الممتازة
+            } else if (defectRate <= lowWasteLimit) {
+                qualityIncentive = baseBonus; // المبلغ الأساسي إذا حقق النسبة الممتازة
+            }
+        }
+
+        const total = Number((quantityIncentive + qualityIncentive).toFixed(2));
+        return { quantityIncentive, qualityIncentive, total };
     }
 
     function addToStagingCart() {
@@ -923,12 +948,16 @@
         const totalDefects = g2 + g3 + waste;
         const defectRate = g1 > 0 ? Number(((totalDefects / g1) * 100).toFixed(2)) : 0;
         const isPassed = defectRate <= 8;
-        const incentive = calculateIncentive(product, g1, defectRate);
+        
+        const incentives = calculateTotalIncentive(product, g1, defectRate);
 
         const recordItem = {
             date, shift, supervisor, entryBy: document.getElementById('userNameDisplay').innerText.replace("المستخدم: ", ""),
             machine, worker, product, appearance, g1, g2, g3, waste,
-            totalDefects, defectRate, isPassed, incentive,
+            totalDefects, defectRate, isPassed, 
+            incentive: incentives.total,
+            quantityIncentive: incentives.quantityIncentive,
+            qualityIncentive: incentives.qualityIncentive,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -953,7 +982,7 @@
                     <td>${item.worker}</td>
                     <td><b>${item.product}</b><br><span style="color:#555;">${item.appearance}</span></td>
                     <td>${item.g1}</td>
-                    <td>${item.totalDefects} (عيوب: ${item.defectRate}%) | الحافز: <b style="color:var(--success);">${item.incentive} ج.م</b></td>
+                    <td>عيوب: ${item.defectRate}% | إجمالي الحافز: <b style="color:var(--success);">${item.incentive} ج.م</b> (كمية: ${item.quantityIncentive} + جودة: ${item.qualityIncentive})</td>
                     <td><button class="btn-del" onclick="removeFromStaging(${index})">حذف</button></td>
                 </tr>
             `;
@@ -976,7 +1005,8 @@
                 <div style="background:#f8fafc; padding:10px; border-radius:6px; margin-bottom:8px; border-right:4px solid ${item.isPassed?'var(--success)':'var(--danger)'};">
                     <b>#${idx+1} - المكبس:</b> ${item.machine} | <b>العامل:</b> ${item.worker}<br>
                     <b>المنتج:</b> ${item.product} (${item.appearance})<br>
-                    <b>فرز أول:</b> ${item.g1} | <b>العيوب:</b> ${item.totalDefects} (${item.defectRate}%) | <b>حافز العامل:</b> <span style="color:var(--success); font-weight:bold;">${item.incentive} ج.م</span>
+                    <b>فرز أول:</b> ${item.g1} | <b>العيوب:</b> ${item.totalDefects} (${item.defectRate}%)<br>
+                    <b>إجمالي حافز العامل:</b> <span style="color:var(--success); font-weight:bold;">${item.incentive} ج.م</span> (حافز كمية: ${item.quantityIncentive} | حافز جودة: ${item.qualityIncentive})
                 </div>
             `;
         });
@@ -1072,7 +1102,9 @@
                 "المكبس": data.machine, "العامل": data.worker, "المنتج": data.product,
                 "المظهر": data.appearance, "فرز أول": data.g1, "إجمالي العيوب والتالف": data.totalDefects,
                 "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض',
-                "حافز العامل (ج.م)": data.incentive || 0
+                "حافز الكمية": data.quantityIncentive || 0,
+                "حافز الجودة": data.qualityIncentive || 0,
+                "إجمالي الحافز (ج.م)": data.incentive || 0
             });
         });
 
