@@ -3,320 +3,984 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة المنار - النسخة الكاملة</title>
+    <title>نظام إدارة إنتاج أطباق الميلامين - المنار</title>
     
-    <!-- المكتبات -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
-            --primary: #1e3a8a; --secondary: #0284c7; --success: #16a34a;
-            --danger: #dc2626; --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b;
+            --primary: #1e3a8a;
+            --secondary: #0284c7;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
         }
 
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; direction: rtl; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 6px; border-radius: 10px; overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: bold; cursor: pointer; border-radius: 8px; white-space: nowrap; font-size: 13px; display: none; }
-        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            direction: rtl;
+        }
+
+        .container { max-width: 1150px; margin: 0 auto; }
+        #loginCard { max-width: 400px; margin: 60px auto; text-align: center; }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .header h1 { margin: 0; font-size: 18px; }
+
+        .user-info-bar {
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-profile-top {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #e2e8f0;
+            padding: 6px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group-flex { flex: 1; min-width: 130px; }
+
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .num-input { text-align: center; font-weight: bold; font-size: 16px; }
+
+        button.btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        button.btn-submit:hover { opacity: 0.9; }
+
+        .list-add-box { display: flex; gap: 10px; margin-bottom: 12px; }
+        .btn-add { background: var(--success); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; }
+        .master-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f1f5f9; border-radius: 6px; margin-bottom: 6px; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
+        .kpi-box { padding: 15px; border-radius: 8px; background: #f1f5f9; text-align: center; }
+        .kpi-box .val { font-size: 22px; font-weight: bold; margin-top: 5px; }
+
+        .alert-box { padding: 15px; border-radius: 8px; margin-top: 15px; font-weight: bold; display: none; }
+        .alert-success { background: #dcfce7; color: var(--success); border: 1px solid #86efac; }
+        .alert-danger { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
+
+        .ai-box { background: #f0f9ff; border-right: 4px solid var(--secondary); padding: 15px; border-radius: 8px; margin-top: 15px; white-space: pre-wrap; line-height: 1.6; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; }
         th { background: #f1f5f9; }
 
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
-        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-        .form-group-flex { flex: 1; min-width: 130px; }
-        
-        button { cursor: pointer; font-weight: bold; border-radius: 8px; border: none; }
-        .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; }
-        .btn-del { background: var(--danger); color: white; padding: 5px 10px; }
-        .btn-add { background: var(--success); color: white; padding: 10px; }
-
-        /* مودال التأكيد */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; text-align: center; }
-
-        .filter-bar { background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
-        .error-msg { color: red; background: #fee2e2; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: none; }
+        .btn-excel { background: #15803d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .perm-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-top: 10px; }
+        .perm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 8px; }
+        .perm-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .perm-item input { width: auto; }
+        .badge-perm { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin: 3px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
 
-    <!-- 1. تسجيل الدخول -->
+    <!-- 1. شاشة تسجيل الدخول -->
     <div id="loginSection">
-        <div class="card" style="max-width: 400px; margin: 60px auto; text-align: center;">
-            <h2 style="color: var(--primary);">دخول نظام المنار</h2>
-            <div id="loginError" class="error-msg"></div>
-            <input type="text" id="userInput" placeholder="اسم المستخدم" style="margin-bottom:10px;">
-            <input type="password" id="passInput" placeholder="كلمة المرور" style="margin-bottom:20px;">
-            <button class="btn-submit" onclick="handleLogin()">دخول 🔑</button>
+        <div class="card" id="loginCard">
+            <h2 style="color: var(--primary); margin-bottom: 20px;">دخول نظام إنتاج المنار</h2>
+            <form onsubmit="handleLogin(event)">
+                <div style="margin-bottom: 15px; text-align: right;">
+                    <label>اسم المستخدم (Username):</label>
+                    <input type="text" id="usernameInput" placeholder="أدخل اسم المستخدم" required>
+                </div>
+                <div style="margin-bottom: 20px; text-align: right;">
+                    <label>كلمة المرور:</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-submit">تسجيل الدخول 🔑</button>
+            </form>
+            <div id="loginError" style="color: red; margin-top: 10px; font-weight: bold; display: none;"></div>
         </div>
     </div>
 
-    <!-- 2. الشاشة الرئيسية -->
+    <!-- 2. الشاشة الرئيسية للتطبيق -->
     <div id="appSection" style="display: none;">
         
         <div class="header">
-            <h1 id="welcomeMsg">نظام المنار</h1>
-            <button onclick="auth.signOut()" style="background:red; color:white; padding:5px 15px;">خروج 🚪</button>
+            <h1>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
+            <div class="user-info-bar">
+                <span id="userNameDisplay"></span>
+                <button class="btn-profile-top" onclick="switchTab('profileTab')">👤 ملفي الشخصي</button>
+                <button class="btn-logout" onclick="handleLogout()">خروج 🚪</button>
+            </div>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال</button>
-            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 السجلات</button>
-            <button class="tab-btn" id="tabStatsBtn" onclick="switchTab('statsTab')">📈 إحصائيات</button>
-            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ الإعدادات</button>
+            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال إنتاج الصالة</button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير والسجلات</button>
+            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ السجل الفني والبيانات</button>
             <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 الصلاحيات</button>
+            <button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profileTab')">👤 ملفي</button>
         </div>
 
-        <!-- تبويب الإدخال -->
+        <!-- التبويب الأول: إدخال إنتاج صالة المكابس والورديات -->
         <div id="entryTab" class="tab-content active">
             <div class="card">
-                <h3>تسجيل وردية مكبس</h3>
+                <h3>تسجيل ورديات مكابس المصنع (على مدار 24 ساعة)</h3>
                 <form id="prodForm">
+                    
+                    <!-- الصف الأول: التاريخ والوردية -->
                     <div class="form-row">
-                        <div class="form-group-flex"><label>التاريخ</label><input type="date" id="productionDate" required></div>
-                        <div class="form-group-flex"><label>المكبس</label><select id="machineSelect"></select></div>
-                        <div class="form-group-flex"><label>العامل</label><select id="workerSelect"></select></div>
-                        <div class="form-group-flex"><label>المنتج</label><select id="productSelect"></select></div>
+                        <div class="form-group-flex">
+                            <label>تاريخ الإنتاج:</label>
+                            <input type="date" id="productionDate" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>اختر الوردية:</label>
+                            <select id="shiftSelect" required>
+                                <option value="الوردية الأولى (الصباحية)">الوردية الأولى (الصباحية - 8 ساعات)</option>
+                                <option value="الوردية الثانية (المسائية)">الوردية الثانية (المسائية - 8 ساعات)</option>
+                                <option value="الوردية الثالثة (الليلية)">الوردية الثالثة (الليلية - 8 ساعات)</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <!-- الصف الثاني: المكبس والعامل والمنتج -->
                     <div class="form-row">
-                        <div class="form-group-flex"><label>فرز 1</label><input type="number" id="g1" value="0"></div>
-                        <div class="form-group-flex"><label>فرز 2</label><input type="number" id="g2" value="0"></div>
-                        <div class="form-group-flex"><label>تالف</label><input type="number" id="waste" value="0"></div>
+                        <div class="form-group-flex">
+                            <label>اختر المكبس / الماكينة:</label>
+                            <select id="machineSelect" required></select>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>اختر العامل المسؤول:</label>
+                            <select id="workerSelect" required></select>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>اختر المنتج (نوع الطبق):</label>
+                            <select id="productSelect" required></select>
+                        </div>
                     </div>
-                    <button type="button" class="btn-submit" onclick="showConfirmModal()">مراجعة وحفظ 💾</button>
+
+                    <!-- الصف الثالث: المظهر (لون أو رسمة) -->
+                    <div class="form-row">
+                        <div class="form-group-flex">
+                            <label>اللون (للطبق السادة):</label>
+                            <select id="colorSelect" onchange="handleColorChange()"></select>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>الرسمة / التصميم (للطبق المطبوع):</label>
+                            <select id="patternSelect" onchange="handlePatternChange()"></select>
+                        </div>
+                    </div>
+
+                    <!-- الصف الرابع: كميات الفرز والتالف -->
+                    <div class="form-row">
+                        <div class="form-group-flex">
+                            <label>الفرز الأول:</label>
+                            <input type="number" id="g1" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>الفرز الثاني:</label>
+                            <input type="number" id="g2" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>الفرز الثالث:</label>
+                            <input type="number" id="g3" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>التالف / الهالك:</label>
+                            <input type="number" id="waste" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-submit" onclick="processProduction()">تسجيل وتثبيت سطر المكبس في الوردية 💾</button>
                 </form>
             </div>
+
+            <!-- بطاقة النتائج المؤقتة للوردية -->
+            <div class="card" id="resultCard" style="display:none;">
+                <h3>مؤشرات أداء المكبس في الوردية الحالية</h3>
+                <div class="kpi-container">
+                    <div class="kpi-box">
+                        <div>إجمالي الإنتاج</div>
+                        <div class="val" id="kpiTotal">0</div>
+                    </div>
+                    <div class="kpi-box">
+                        <div>إجمالي العيوب (2/3 والتالف)</div>
+                        <div class="val" id="kpiDefects">0</div>
+                    </div>
+                    <div class="kpi-box">
+                        <div>نسبة العيوب</div>
+                        <div class="val" id="kpiDefectRate">0%</div>
+                    </div>
+                </div>
+
+                <div id="qualityAlert" class="alert-box"></div>
+
+                <div id="aiSection" style="margin-top:20px; display:none;">
+                    <button type="button" class="btn-submit" style="background-color:var(--secondary);" onclick="getAIAnalysis()">💡 تحليل أسباب العيوب وتوصيات الذكاء الاصطناعي</button>
+                    <div id="aiOutput" class="ai-box" style="display:none;"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- تبويب السجلات -->
+        <!-- التبويب الثاني: التقارير والسجلات اليومية -->
         <div id="historyTab" class="tab-content">
-            <div class="filter-bar">
-                <div class="form-group-flex"><label>بالمكبس:</label><select id="filterMachine" onchange="applyFilters()"></select></div>
-                <div class="form-group-flex"><label>بالتاريخ:</label><input type="date" id="filterDate" onchange="applyFilters()"></div>
-                <button class="btn-submit" style="width:auto; padding: 10px;" onclick="exportToExcel()">إكسيل 📊</button>
-            </div>
-            <div class="card" style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr><th>التاريخ</th><th>المكبس</th><th>العامل</th><th>فرز 1</th><th>تالف</th><th>% العيوب</th><th>إجراء</th></tr>
-                    </thead>
-                    <tbody id="historyBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- تبويب الإحصائيات -->
-        <div id="statsTab" class="tab-content">
             <div class="card">
-                <canvas id="productionChart" height="120"></canvas>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <h3>سجل إنتاج مكابس المصنع مرتب حسب الأيام والورديات</h3>
+                    <button class="btn-excel" id="excelBtn" onclick="exportToExcel()" style="display:none;">تصدير التقارير لـ Excel (XLSX) 📊</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>الوردية</th>
+                                <th>المسجل</th>
+                                <th>المكبس</th>
+                                <th>العامل</th>
+                                <th>المنتج والمظهر</th>
+                                <th>فرز 1</th>
+                                <th>فرز 2</th>
+                                <th>فرز 3</th>
+                                <th>تالف</th>
+                                <th>نسبة العيوب</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- تبويب الإعدادات -->
+        <!-- التبويب الثالث: السجل الفني والبيانات الأساسية -->
         <div id="masterTab" class="tab-content">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <div class="card"><h4>العمال</h4><div class="form-row"><input id="nw"><button class="btn-add" onclick="addMasterItem('workers','nw')">+</button></div><div id="workersList"></div></div>
-                <div class="card"><h4>المنتجات</h4><div class="form-row"><input id="np"><button class="btn-add" onclick="addMasterItem('products','np')">+</button></div><div id="productsList"></div></div>
-                <div class="card"><h4>المكابس</h4><div class="form-row"><input id="nm"><button class="btn-add" onclick="addMasterItem('machines','nm')">+</button></div><div id="machinesList"></div></div>
+            <div class="card">
+                <h3 style="color: var(--primary);">⚙️ السجل الفني للمكابس والماكينات (للصيانة)</h3>
+                <div class="form-row">
+                    <input type="text" id="mName" placeholder="اسم الماكينة / المكبس (مثال: مكبس هيدروليكي 1)">
+                    <input type="text" id="mType" placeholder="النوع (مثال: مكبس حراري)">
+                    <input type="text" id="mPower" placeholder="قوة الضغط (طن)">
+                </div>
+                <div class="form-row">
+                    <input type="number" id="mLen" placeholder="الطول (سم)">
+                    <input type="number" id="mWidth" placeholder="العرض (سم)">
+                    <input type="number" id="mHeight" placeholder="الارتفاع (سم)">
+                    <input type="number" id="mTemp" placeholder="درجة الحرارة (°C)">
+                    <input type="date" id="mService" placeholder="تاريخ آخر صيانة">
+                </div>
+                <button class="btn-submit" style="background-color: var(--success);" onclick="addDetailedMachine()">إضافة الماكينة للسجل الفني 🛠️</button>
+
+                <div style="overflow-x:auto; margin-top: 20px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>النوع</th>
+                                <th>القوة</th>
+                                <th>الأبعاد (ط×ع×ا سم)</th>
+                                <th>الحرارة</th>
+                                <th>آخر صيانة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="machinesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- بقية البيانات الأساسية -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                <div class="card">
+                    <h3>قائمة العمال</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newWorker" placeholder="عامل جديد">
+                        <button class="btn-add" onclick="addMasterItem('workers', 'newWorker')">إضافة</button>
+                    </div>
+                    <div id="workersList"></div>
+                </div>
+
+                <div class="card">
+                    <h3>أنواع الأطباق/المنتجات</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newProduct" placeholder="منتج جديد">
+                        <button class="btn-add" onclick="addMasterItem('products', 'newProduct')">إضافة</button>
+                    </div>
+                    <div id="productsList"></div>
+                </div>
+
+                <div class="card">
+                    <h3>ألوان الميلامين السادة</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newColor" placeholder="لون جديد">
+                        <button class="btn-add" onclick="addMasterItem('colors', 'newColor')">إضافة</button>
+                    </div>
+                    <div id="colorsList"></div>
+                </div>
+
+                <div class="card">
+                    <h3>الرسومات / التصاميم (المطبوع)</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newPattern" placeholder="رسمة جديدة">
+                        <button class="btn-add" onclick="addMasterItem('patterns', 'newPattern')">إضافة</button>
+                    </div>
+                    <div id="patternsList"></div>
+                </div>
             </div>
         </div>
 
-        <!-- تبويب الصلاحيات -->
+        <!-- التبويب الرابع: إدارة المستخدمين والأذونات -->
         <div id="usersTab" class="tab-content">
             <div class="card">
-                <h3>المستخدمين</h3>
-                <div id="usersListTable"></div>
+                <h3>إضافة مستخدم جديد وتحديد الصلاحيات 🛠️</h3>
+                <form onsubmit="handleAddNewUser(event)">
+                    <div class="form-row">
+                        <div class="form-group-flex">
+                            <label>اسم المستخدم (Username):</label>
+                            <input type="text" id="newUsername" placeholder="مثال: ahmed_qc" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>كلمة المرور الأولية:</label>
+                            <input type="text" id="newUserPass" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <div class="perm-box">
+                        <label style="color: var(--primary);">حدد أذونات هذا المستخدم بالتفصيل:</label>
+                        <div class="perm-grid">
+                            <label class="perm-item"><input type="checkbox" id="p_entry" checked> 📝 إدخال إنتاج الصالة</label>
+                            <label class="perm-item"><input type="checkbox" id="p_history"> 📊 السجلات والتقارير</label>
+                            <label class="perm-item"><input type="checkbox" id="p_ai"> 💡 الذكاء الاصطناعي</label>
+                            <label class="perm-item"><input type="checkbox" id="p_excel"> 📈 تصدير إكسيل</label>
+                            <label class="perm-item"><input type="checkbox" id="p_master"> ⚙️ السجل الفني والبيانات</label>
+                            <label class="perm-item"><input type="checkbox" id="p_users"> 👥 الصلاحيات</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" style="background-color: var(--success); margin-top: 15px;">إنشاء وحفظ 💾</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>التحكم في أذونات المستخدمين 🛡️</h3>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المستخدم</th>
+                                <th>إدخال الصالة</th>
+                                <th>التقارير</th>
+                                <th>الذكاء الاصطناعي</th>
+                                <th>إكسيل</th>
+                                <th>السجل الفني</th>
+                                <th>الصلاحيات</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- التبويب الخامس: الملف الشخصي وتغيير كلمة السر -->
+        <div id="profileTab" class="tab-content">
+            <div class="card" style="max-width: 550px; margin: 0 auto;">
+                <h3 style="color: var(--primary); text-align: center;">👤 ملفك الشخصي</h3>
+                
+                <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin: 5px 0;"><b>اسم المستخدم:</b> <span id="profUsername" style="color:var(--secondary); font-size: 16px;"></span></p>
+                    <p style="margin: 10px 0 5px 0;"><b>الصلاحيات:</b></p>
+                    <div id="profPermsBadges"></div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+                <h4 style="color: var(--primary); margin-bottom: 12px;">🔒 تغيير كلمة المرور</h4>
+                <form onsubmit="handleChangePassword(event)">
+                    <div style="margin-bottom: 15px;">
+                        <label>كلمة المرور الجديدة:</label>
+                        <input type="password" id="newPass1" placeholder="أدخل كلمة المرور الجديدة" required minlength="6">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label>تأكيد كلمة المرور الجديدة:</label>
+                        <input type="password" id="newPass2" placeholder="أعد كلمة المرور" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn-submit" style="background-color: var(--secondary);">تحديث 🔐</button>
+                </form>
+                <div id="passMsg" style="text-align: center; margin-top: 12px; font-weight: bold;"></div>
             </div>
         </div>
 
     </div>
-</div>
 
-<!-- مودال التأكيد -->
-<div id="confirmModal" class="modal">
-    <div class="modal-content">
-        <h3>تأكيد البيانات 🔍</h3>
-        <p id="confirmText"></p>
-        <button class="btn-submit" onclick="finalizeProduction()">تأكيد نهائي ✅</button>
-        <button onclick="closeModal('confirmModal')" style="margin-top:10px; border:none; background:none; cursor:pointer;">إلغاء</button>
-    </div>
 </div>
 
 <script>
-    // --- بيانات Firebase ---
     const firebaseConfig = {
       apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
       authDomain: "almanar-industry.firebaseapp.com",
       projectId: "almanar-industry",
       storageBucket: "almanar-industry.firebasestorage.app",
       messagingSenderId: "113518445928",
-      appId: "1:113518445928:web:d9d3e645cdbd157ea8c2dd"
+      appId: "1:113518445928:web:d9d3e645cdbd157ea8c2dd",
+      measurementId: "G-LL2P27RD7X"
     };
 
+    const EMBEDDED_GEMINI_KEY = "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk"; 
+
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    let masterData = { workers: [], products: [], machines: [] };
-    let allRecords = [];
-    let prodChart = null;
+    const NONE_OPTION = "--- اختر الخيار ---";
 
-    // --- نظام الدخول ---
-    async function handleLogin() {
-        const u = document.getElementById('userInput').value.trim().toLowerCase();
-        const p = document.getElementById('passInput').value;
-        try {
-            await auth.signInWithEmailAndPassword(u + "@almanar.factory", p);
-        } catch (e) { document.getElementById('loginError').innerText = "بيانات غير صحيحة"; document.getElementById('loginError').style.display='block'; }
-    }
+    const defaultMasterData = {
+        workers: ["أحمد محمود", "محمد علي", "محمود إبراهيم"],
+        products: ["طبق غويط 9 بوصة", "طبق مسطح 10 بوصة", "سرفيس بيضاوي"],
+        colors: ["أبيض ناصع", "أسود ملكي", "بيج كلاسيك"],
+        patterns: ["زهور كلاسيك", "رخامي مودرن", "فواكه مشكلة"]
+    };
+
+    let masterData = JSON.parse(localStorage.getItem('melamine_master_data')) || defaultMasterData;
+    let currentRecord = null;
+    let currentUsername = "";
+    let userPermissions = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('productionDate');
+        if(dateInput) dateInput.value = todayStr;
+    });
 
     auth.onAuthStateChanged((user) => {
         if (user) {
-            const userEmail = user.email.split('@')[0];
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
-            document.getElementById('welcomeMsg').innerText = "مرحباً: " + userEmail;
-            
-            // تفعيل الصلاحيات بناءً على الاسم (حالياً Admin يرى الكل)
-            if(userEmail === 'admin') {
-                document.querySelectorAll('.tab-btn').forEach(b => b.style.display = 'block');
-                switchTab('entryTab');
+
+            currentUsername = user.email.split('@')[0];
+            document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
+            document.getElementById('profUsername').innerText = currentUsername;
+
+            if (currentUsername.toLowerCase() === "admin") {
+                applyPermissions({ entry: true, history: true, ai: true, excel: true, master: true, users: true });
             } else {
-                document.getElementById('tabEntryBtn').style.display = 'block';
-                switchTab('entryTab');
+                db.collection("users_permissions").doc(currentUsername).get().then((doc) => {
+                    if (doc.exists && doc.data().perms) {
+                        applyPermissions(doc.data().perms);
+                    } else {
+                        applyPermissions({ entry: true, history: false, ai: false, excel: false, master: false, users: false });
+                    }
+                }).catch(() => applyPermissions({ entry: true }));
             }
-            
-            setupMasterSync();
-            listenToRecords();
+
+            renderMasterData();
+            loadMachinesTable();
+            listenToFirebaseHistory();
         } else {
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('appSection').style.display = 'none';
         }
     });
 
-    // --- مزامنة القوائم ---
-    function setupMasterSync() {
-        ['workers','products','machines'].forEach(cat => {
-            db.collection("master_"+cat).onSnapshot(snap => {
-                masterData[cat] = [];
-                snap.forEach(doc => masterData[cat].push({id: doc.id, val: doc.data().name}));
-                renderMasterUI(cat);
-                updateDropdowns();
+    function applyPermissions(p) {
+        userPermissions = p;
+        document.getElementById('tabEntryBtn').style.display = p.entry ? 'inline-block' : 'none';
+        document.getElementById('tabHistoryBtn').style.display = p.history ? 'inline-block' : 'none';
+        document.getElementById('tabMasterBtn').style.display = p.master ? 'inline-block' : 'none';
+        document.getElementById('tabUsersBtn').style.display = p.users ? 'inline-block' : 'none';
+        
+        document.getElementById('aiSection').style.display = p.ai ? 'block' : 'none';
+        document.getElementById('excelBtn').style.display = p.excel ? 'inline-block' : 'none';
+
+        const badgesContainer = document.getElementById('profPermsBadges');
+        badgesContainer.innerHTML = '';
+        if(p.entry) badgesContainer.innerHTML += '<span class="badge-perm">📝 إدخال إنتاج</span>';
+        if(p.history) badgesContainer.innerHTML += '<span class="badge-perm">📊 السجلات</span>';
+        if(p.ai) badgesContainer.innerHTML += '<span class="badge-perm">💡 الذكاء الاصطناعي</span>';
+        if(p.excel) badgesContainer.innerHTML += '<span class="badge-perm">📈 إكسيل</span>';
+        if(p.master) badgesContainer.innerHTML += '<span class="badge-perm">⚙️ السجل الفني</span>';
+        if(p.users) badgesContainer.innerHTML += '<span class="badge-perm">👥 الصلاحيات</span>';
+
+        if (p.entry) switchTab('entryTab');
+        else if (p.history) switchTab('historyTab');
+        else if (p.master) switchTab('masterTab');
+        else if (p.users) switchTab('usersTab');
+        else switchTab('profileTab');
+
+        if (p.users) loadUsersTable();
+    }
+
+    function handleLogin(e) {
+        e.preventDefault();
+        const rawUsername = document.getElementById('usernameInput').value.trim().toLowerCase();
+        const pass = document.getElementById('loginPassword').value;
+        const errDiv = document.getElementById('loginError');
+        const formattedEmail = `${rawUsername}@almanar.factory`;
+
+        auth.signInWithEmailAndPassword(formattedEmail, pass)
+        .catch((error) => {
+            if (rawUsername === "admin" && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
+                auth.createUserWithEmailAndPassword(formattedEmail, pass)
+                .then(() => {
+                    db.collection("users_permissions").doc("admin").set({
+                        username: "admin",
+                        perms: { entry: true, history: true, ai: true, excel: true, master: true, users: true }
+                    });
+                });
+            } else {
+                errDiv.innerText = "خطأ في اسم المستخدم أو كلمة المرور!";
+                errDiv.style.display = 'block';
+            }
+        });
+    }
+
+    function handleChangePassword(e) {
+        e.preventDefault();
+        const p1 = document.getElementById('newPass1').value;
+        const p2 = document.getElementById('newPass2').value;
+        const msg = document.getElementById('passMsg');
+
+        if (p1 !== p2) {
+            msg.style.color = "red";
+            msg.innerText = "كلمتا المرور غير متطابقتين!";
+            return;
+        }
+        auth.currentUser.updatePassword(p1).then(() => {
+            msg.style.color = "green";
+            msg.innerText = "✅ تم تحديث كلمة المرور بنجاح!";
+            document.getElementById('newPass1').value = '';
+            document.getElementById('newPass2').value = '';
+        }).catch(() => {
+            msg.style.color = "red";
+            msg.innerText = "حدث خطأ، سجل الدخول مجدداً وجرب.";
+        });
+    }
+
+    function handleAddNewUser(e) {
+        e.preventDefault();
+        const username = document.getElementById('newUsername').value.trim().toLowerCase();
+        const pass = document.getElementById('newUserPass').value;
+        if(!username || !pass) return;
+
+        const perms = {
+            entry: document.getElementById('p_entry').checked,
+            history: document.getElementById('p_history').checked,
+            ai: document.getElementById('p_ai').checked,
+            excel: document.getElementById('p_excel').checked,
+            master: document.getElementById('p_master').checked,
+            users: document.getElementById('p_users').checked
+        };
+
+        db.collection("users_permissions").doc(username).set({ username, perms }).then(() => {
+            alert(`تم إنشاء الحساب (${username}) بنجاح!`);
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newUserPass').value = '';
+            loadUsersTable();
+        });
+    }
+
+    function loadUsersTable() {
+        db.collection("users_permissions").get().then((snapshot) => {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const u = doc.data();
+                const p = u.perms || {};
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${u.username}</b></td>
+                        <td><input type="checkbox" ${p.entry?'checked':''} onchange="togglePerm('${u.username}', 'entry', this.checked)"></td>
+                        <td><input type="checkbox" ${p.history?'checked':''} onchange="togglePerm('${u.username}', 'history', this.checked)"></td>
+                        <td><input type="checkbox" ${p.ai?'checked':''} onchange="togglePerm('${u.username}', 'ai', this.checked)"></td>
+                        <td><input type="checkbox" ${p.excel?'checked':''} onchange="togglePerm('${u.username}', 'excel', this.checked)"></td>
+                        <td><input type="checkbox" ${p.master?'checked':''} onchange="togglePerm('${u.username}', 'master', this.checked)"></td>
+                        <td><input type="checkbox" ${p.users?'checked':''} onchange="togglePerm('${u.username}', 'users', this.checked)"></td>
+                        <td><button class="btn-del" onclick="deleteUserDoc('${u.username}')">حذف</button></td>
+                    </tr>
+                `;
             });
         });
     }
 
-    function renderMasterUI(cat) {
-        const div = document.getElementById(cat+'List');
-        if(!div) return;
-        div.innerHTML = masterData[cat].map(i => `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f1f5f9; padding:5px; border-radius:5px;">
-                <span>${i.val}</span>
-                <button style="color:red; background:none;" onclick="deleteMasterItem('${cat}','${i.id}')">x</button>
-            </div>`).join('');
+    function togglePerm(username, key, value) {
+        db.collection("users_permissions").doc(username).update({ [`perms.${key}`]: value });
     }
 
-    function updateDropdowns() {
-        populate('machineSelect', masterData.machines);
-        populate('workerSelect', masterData.workers);
-        populate('productSelect', masterData.products);
-        populate('filterMachine', masterData.machines, true);
+    function deleteUserDoc(username) {
+        if(confirm(`حذف حساب ${username}؟`)) {
+            db.collection("users_permissions").doc(username).delete().then(() => loadUsersTable());
+        }
     }
 
-    function populate(id, list, empty=false) {
-        const s = document.getElementById(id);
-        if(!s) return;
-        s.innerHTML = (empty ? '<option value="">الكل</option>' : '') + list.map(i => `<option value="${i.val}">${i.val}</option>`).join('');
+    function addDetailedMachine() {
+        const machine = {
+            name: document.getElementById('mName').value.trim(),
+            type: document.getElementById('mType').value.trim(),
+            power: document.getElementById('mPower').value.trim(),
+            dimensions: `${document.getElementById('mLen').value || 0}×${document.getElementById('mWidth').value || 0}×${document.getElementById('mHeight').value || 0}`,
+            temp: document.getElementById('mTemp').value.trim(),
+            service: document.getElementById('mService').value
+        };
+        if(!machine.name) { alert("اكتب اسم الماكينة!"); return; }
+
+        db.collection("machines_detailed_specs").add(machine).then(() => {
+            alert("تم حفظ الماكينة بنجاح!");
+            document.getElementById('mName').value = '';
+            document.getElementById('mType').value = '';
+            document.getElementById('mPower').value = '';
+            document.getElementById('mLen').value = '';
+            document.getElementById('mWidth').value = '';
+            document.getElementById('mHeight').value = '';
+            document.getElementById('mTemp').value = '';
+            document.getElementById('mService').value = '';
+            loadMachinesTable();
+        });
     }
 
-    // --- الإنتاج والسجلات ---
-    let tempRecord = null;
-    function showConfirmModal() {
+    function loadMachinesTable() {
+        db.collection("machines_detailed_specs").onSnapshot((snapshot) => {
+            const tbody = document.getElementById('machinesTableBody');
+            const select = document.getElementById('machineSelect');
+            if(tbody) tbody.innerHTML = '';
+            if(select) select.innerHTML = '';
+            let machineNamesList = [];
+
+            snapshot.forEach((doc) => {
+                const m = doc.data();
+                machineNamesList.push(m.name);
+                if(tbody) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${m.name}</b></td>
+                            <td>${m.type || '-'}</td>
+                            <td>${m.power ? m.power + ' طن' : '-'}</td>
+                            <td>${m.dimensions}</td>
+                            <td>${m.temp ? m.temp + '°C' : '-'}</td>
+                            <td>${m.service || '-'}</td>
+                            <td><button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button></td>
+                        </tr>
+                    `;
+                }
+            });
+
+            if(select) {
+                if(machineNamesList.length === 0) {
+                    select.innerHTML = '<option value="">أضف مكابس من السجل الفني أولاً</option>';
+                } else {
+                    machineNamesList.forEach(name => {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.innerText = name;
+                        select.appendChild(opt);
+                    });
+                }
+            }
+        });
+    }
+
+    function deleteMachineDoc(id) {
+        if(confirm("حذف الماكينة؟")) db.collection("machines_detailed_specs").doc(id).delete();
+    }
+
+    function handleLogout() { auth.signOut(); }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        const btn = document.getElementById('tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1) + 'Btn');
+        if (btn) btn.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    function renderMasterData() {
+        ['workers', 'products', 'colors', 'patterns'].forEach(key => {
+            const container = document.getElementById(key + 'List');
+            if (container) {
+                container.innerHTML = '';
+                masterData[key].forEach((item, index) => {
+                    container.innerHTML += `
+                        <div class="master-list-item">
+                            <span>${item}</span>
+                            <button class="btn-del" onclick="deleteMasterItem('${key}', ${index})">حذف</button>
+                        </div>
+                    `;
+                });
+            }
+        });
+        localStorage.setItem('melamine_master_data', JSON.stringify(masterData));
+        updateFormDropdowns();
+    }
+
+    function addMasterItem(type, inputId) {
+        const val = document.getElementById(inputId).value.trim();
+        if (val) { masterData[type].push(val); document.getElementById(inputId).value = ''; renderMasterData(); }
+    }
+
+    function deleteMasterItem(type, index) { masterData[type].splice(index, 1); renderMasterData(); }
+
+    function updateFormDropdowns() {
+        populateSelect('workerSelect', masterData.workers, false);
+        populateSelect('productSelect', masterData.products, false);
+        populateSelect('colorSelect', masterData.colors, true);
+        populateSelect('patternSelect', masterData.patterns, true);
+    }
+
+    function populateSelect(selectId, items, includeNone) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '';
+        if (includeNone) {
+            const optNone = document.createElement('option');
+            optNone.value = NONE_OPTION;
+            optNone.innerText = NONE_OPTION;
+            select.appendChild(optNone);
+        }
+        items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.innerText = item;
+            select.appendChild(opt);
+        });
+    }
+
+    function handleColorChange() {
+        const c = document.getElementById('colorSelect'), p = document.getElementById('patternSelect');
+        if (c.value !== NONE_OPTION) { p.value = NONE_OPTION; p.disabled = true; } else { p.disabled = false; }
+    }
+
+    function handlePatternChange() {
+        const c = document.getElementById('colorSelect'), p = document.getElementById('patternSelect');
+        if (p.value !== NONE_OPTION) { c.value = NONE_OPTION; c.disabled = true; } else { c.disabled = false; }
+    }
+
+    function processProduction() {
+        const date = document.getElementById('productionDate').value;
+        const shift = document.getElementById('shiftSelect').value;
+        const machine = document.getElementById('machineSelect').value;
+        const worker = document.getElementById('workerSelect').value;
+        const product = document.getElementById('productSelect').value;
+        const color = document.getElementById('colorSelect').value;
+        const pattern = document.getElementById('patternSelect').value;
+
+        if (!date || !shift || !machine || !worker || !product) {
+            alert("يرجى اختيار التاريخ، الوردية، المكبس، العامل، والمنتج!");
+            return;
+        }
+
+        if (color === NONE_OPTION && pattern === NONE_OPTION) {
+            alert("اختر لون سادة أو تصميم مطبوع!");
+            return;
+        }
+
+        const appearance = color !== NONE_OPTION ? `سادة (${color})` : `مطبوع (${pattern})`;
         const g1 = Number(document.getElementById('g1').value);
+        const g2 = Number(document.getElementById('g2').value);
+        const g3 = Number(document.getElementById('g3').value);
         const waste = Number(document.getElementById('waste').value);
-        const rate = g1 > 0 ? ((waste / g1) * 100).toFixed(2) : 0;
-        
-        tempRecord = {
-            date: document.getElementById('productionDate').value,
-            machine: document.getElementById('machineSelect').value,
-            worker: document.getElementById('workerSelect').value,
-            product: document.getElementById('productSelect').value,
-            g1, g2: Number(document.getElementById('g2').value), waste,
-            defectRate: rate, isPassed: rate <= 8,
+
+        if (g1 <= 0 && (g2 > 0 || g3 > 0 || waste > 0)) {
+            alert("خطأ: الفرز الأول لا يمكن أن يكون صفراً مع وجود عيوب!");
+            return;
+        }
+
+        const totalDefects = g2 + g3 + waste;
+        const totalProduction = g1 + totalDefects;
+        const defectRate = g1 > 0 ? ((totalDefects / g1) * 100).toFixed(2) : 0;
+
+        currentRecord = {
+            date, shift,
+            entryBy: currentUsername,
+            machine, worker, product, appearance,
+            g1, g2, g3, waste,
+            totalProduction, totalDefects, defectRate,
+            isPassed: defectRate <= 8,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        if(!tempRecord.date) return alert("اختر التاريخ");
-        document.getElementById('confirmText').innerHTML = `إجمالي فرز أول: ${g1}<br>الهالك: ${waste}<br>النسبة: ${rate}%`;
-        document.getElementById('confirmModal').style.display='flex';
+        document.getElementById('kpiTotal').innerText = totalProduction;
+        document.getElementById('kpiDefects').innerText = totalDefects;
+        document.getElementById('kpiDefectRate').innerText = defectRate + '%';
+
+        const alertBox = document.getElementById('qualityAlert');
+        alertBox.style.display = 'block';
+        if (currentRecord.isPassed) {
+            alertBox.className = 'alert-box alert-success';
+            alertBox.innerHTML = `✅ تم تثبيت الوردية بنجاح: نسبة العيوب (${defectRate}%) مقبولة.`;
+        } else {
+            alertBox.className = 'alert-box alert-danger';
+            alertBox.innerHTML = `⚠️ تحذير: نسبة العيوب (${defectRate}%) تتجاوز الحد المسموح (8%)!`;
+        }
+
+        document.getElementById('resultCard').style.display = 'block';
+        db.collection("melamine_production").add(currentRecord).then(() => console.log("تم حفظ سطر الإنتاج"));
     }
 
-    function finalizeProduction() {
-        db.collection("melamine_production").add(tempRecord).then(() => {
-            closeModal('confirmModal');
-            document.getElementById('prodForm').reset();
+    function listenToFirebaseHistory() {
+        db.collection("melamine_production").orderBy("timestamp", "desc")
+        .onSnapshot((snapshot) => {
+            const tbody = document.getElementById('historyBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${item.date || ''}</b></td>
+                        <td style="color:var(--primary); font-weight:bold;">${item.shift || ''}</td>
+                        <td>${item.entryBy || ''}</td>
+                        <td>${item.machine || ''}</td>
+                        <td>${item.worker || ''}</td>
+                        <td><b>${item.product}</b><br><span style="font-size:11px; color:#555;">${item.appearance}</span></td>
+                        <td>${item.g1 || 0}</td>
+                        <td>${item.g2 || 0}</td>
+                        <td>${item.g3 || 0}</td>
+                        <td>${item.waste || 0}</td>
+                        <td><b>${item.defectRate || 0}%</b></td>
+                        <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
+                    </tr>
+                `;
+            });
         });
     }
 
-    function listenToRecords() {
-        db.collection("melamine_production").orderBy("timestamp", "desc").limit(50).onSnapshot(snap => {
-            allRecords = [];
-            snap.forEach(doc => allRecords.push({id: doc.id, ...doc.data()}));
-            applyFilters();
-            drawChart();
-        });
+    async function getAIAnalysis() {
+        const aiOutput = document.getElementById('aiOutput');
+        aiOutput.style.display = 'block';
+        aiOutput.innerText = "جاري التحليل الفني...";
+        const promptText = `أنت مهندس جودة خبير في مكابس الميلامين. حلل وردية المكبس ${currentRecord.machine} في ${currentRecord.shift} بتاريخ ${currentRecord.date}: المنتج ${currentRecord.product}، نسبة العيوب ${currentRecord.defectRate}%. أعط أسباب وعلاج.`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_GEMINI_KEY}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+            });
+            const data = await response.json();
+            if (response.ok && data.candidates) {
+                aiOutput.innerText = data.candidates[0].content.parts[0].text;
+            } else { aiOutput.innerText = "تعذر التحليل."; }
+        } catch (e) { aiOutput.innerText = "خطأ في الاتصال بالذكاء الاصطناعي."; }
     }
 
-    function applyFilters() {
-        const fm = document.getElementById('filterMachine').value;
-        const fd = document.getElementById('filterDate').value;
-        const data = allRecords.filter(r => (!fm || r.machine === fm) && (!fd || r.date === fd));
-        document.getElementById('historyBody').innerHTML = data.map(r => `
-            <tr>
-                <td>${r.date}</td><td>${r.machine}</td><td>${r.worker}</td>
-                <td>${r.g1}</td><td>${r.waste}</td>
-                <td style="color:${r.isPassed?'green':'red'}">${r.defectRate}%</td>
-                <td><button class="btn-del" onclick="deleteDoc('melamine_production','${r.id}')">🗑️</button></td>
-            </tr>`).join('');
-    }
-
-    // --- خدمات عامة ---
-    function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('tab'+id.charAt(0).toUpperCase()+id.slice(1)+'Btn').classList.add('active');
-    }
-    function addMasterItem(c, id) { const val = document.getElementById(id).value; if(val) db.collection("master_"+c).add({name: val}).then(()=>document.getElementById(id).value=''); }
-    function deleteMasterItem(c, id) { if(confirm("حذف؟")) db.collection("master_"+c).doc(id).delete(); }
-    function deleteDoc(coll, id) { if(confirm("حذف نهائي؟")) db.collection(coll).doc(id).delete(); }
-    function closeModal(id) { document.getElementById(id).style.display='none'; }
-    function drawChart() {
-        const ctx = document.getElementById('productionChart').getContext('2d');
-        const counts = {}; allRecords.slice(0,10).forEach(r => counts[r.date] = (counts[r.date] || 0) + r.g1);
-        if(prodChart) prodChart.destroy();
-        prodChart = new Chart(ctx, { type:'bar', data:{ labels:Object.keys(counts).reverse(), datasets:[{label:'الإنتاج', data:Object.values(counts).reverse(), backgroundColor:'#1e3a8a'}]}});
-    }
     function exportToExcel() {
-        const ws = XLSX.utils.json_to_sheet(allRecords);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Reports");
-        XLSX.writeFile(wb, "Report.xlsx");
+        db.collection("melamine_production").get().then((querySnapshot) => {
+            let reportsData = [];
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                reportsData.push({
+                    "التاريخ": data.date, "الوردية": data.shift, "المسجل": data.entryBy,
+                    "المكبس": data.machine, "العامل": data.worker, "المنتج": data.product,
+                    "المظهر": data.appearance, "فرز أول": data.g1, "فرز ثاني": data.g2,
+                    "فرز ثالث": data.g3, "التالف": data.waste, "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض'
+                });
+            });
+            if(reportsData.length === 0) { alert("لا توجد بيانات للتصدير."); return; }
+            const worksheet = XLSX.utils.json_to_sheet(reportsData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير_ورديات_المصنع");
+            XLSX.writeFile(workbook, `تقارير_مصنع_المنار_${new Date().toISOString().slice(0,10)}.xlsx`);
+        });
     }
 </script>
+
 </body>
 </html>
