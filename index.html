@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة إنتاج أطباق الميلامين</title>
+    <title>نظام إدارة إنتاج أطباق الميلامين - المنار</title>
     
-    <!-- مكتبات Firebase السحابية -->
+    <!-- مكتبات Firebase السحابية (App, Auth, Firestore) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <!-- مكتبة تصدير شيتات الإكسيل XLSX -->
@@ -37,6 +38,13 @@
             margin: 0 auto;
         }
 
+        /* شاشة تسجيل الدخول */
+        #loginCard {
+            max-width: 400px;
+            margin: 60px auto;
+            text-align: center;
+        }
+
         .header {
             background: var(--primary);
             color: white;
@@ -45,6 +53,32 @@
             text-align: center;
             margin-bottom: 15px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 { margin: 0; font-size: 18px; }
+
+        .user-info-bar {
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .tabs {
@@ -62,7 +96,7 @@
             border: none;
             background: transparent;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 14px;
             color: #475569;
             cursor: pointer;
             border-radius: 8px;
@@ -75,13 +109,8 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
         .card {
             background: var(--card-bg);
@@ -249,195 +278,230 @@
             cursor: pointer;
             font-weight: bold;
         }
+
+        .badge-role {
+            background: #fef08a;
+            color: #854d0e;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1 style="margin:0; font-size:20px;">نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
-    </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('entryTab')">📝 إدخال الإنتاج اليومي</button>
-        <button class="tab-btn" onclick="switchTab('masterTab')">⚙️ إدارة البيانات الأساسية</button>
-        <button class="tab-btn" onclick="switchTab('historyTab')">📊 السجل والتقارير</button>
-    </div>
-
-    <!-- التبويب الأول: الإدخال اليومي -->
-    <div id="entryTab" class="tab-content active">
-        <div class="card">
-            <h3>تسجيل بيانات وردية الميلامين</h3>
-            <form id="prodForm">
-                <div style="margin-bottom: 12px;">
-                    <label>مفتاح API Key (Google AI Studio):</label>
-                    <input type="password" id="apiKey" placeholder="ضع المفتاح هنا لمرة واحدة فقط">
+    <!-- 1. شاشة تسجيل الدخول -->
+    <div id="loginSection">
+        <div class="card" id="loginCard">
+            <h2 style="color: var(--primary); margin-bottom: 20px;">دخول نظام إنتاج المنار</h2>
+            <form onsubmit="handleLogin(event)">
+                <div style="margin-bottom: 15px; text-align: right;">
+                    <label>البريد الإلكتروني / الحساب:</label>
+                    <input type="email" id="loginEmail" placeholder="admin@almanar.com" required>
                 </div>
-
-                <!-- الصف الأول: المعدات والمسؤولين والمنتج -->
-                <div class="form-row">
-                    <div class="form-group-flex">
-                        <label>اختر المكبس / الماكينة:</label>
-                        <select id="machineSelect" required></select>
-                    </div>
-                    <div class="form-group-flex">
-                        <label>اختر العامل:</label>
-                        <select id="workerSelect" required></select>
-                    </div>
-                    <div class="form-group-flex">
-                        <label>اختر المنتج (نوع الطبق):</label>
-                        <select id="productSelect" required></select>
-                    </div>
+                <div style="margin-bottom: 20px; text-align: right;">
+                    <label>كلمة المرور:</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
                 </div>
-
-                <!-- الصف الثاني: المظهر (لون سادة أو رسمة مع تعطيل التبادل) -->
-                <div class="form-row">
-                    <div class="form-group-flex">
-                        <label>اللون (للطبق السادة):</label>
-                        <select id="colorSelect" onchange="handleColorChange()"></select>
-                    </div>
-                    <div class="form-group-flex">
-                        <label>الرسمة / التصميم (للطبق المطبوع):</label>
-                        <select id="patternSelect" onchange="handlePatternChange()"></select>
-                    </div>
-                </div>
-
-                <!-- الصف الثالث: كميات الفرز والتالف -->
-                <div class="form-row">
-                    <div class="form-group-flex">
-                        <label>الفرز الأول:</label>
-                        <input type="number" id="g1" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
-                    </div>
-                    <div class="form-group-flex">
-                        <label>الفرز الثاني:</label>
-                        <input type="number" id="g2" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
-                    </div>
-                    <div class="form-group-flex">
-                        <label>الفرز الثالث:</label>
-                        <input type="number" id="g3" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
-                    </div>
-                    <div class="form-group-flex">
-                        <label>التالف / الهالك:</label>
-                        <input type="number" id="waste" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
-                    </div>
-                </div>
-
-                <button type="button" class="btn-submit" onclick="processProduction()">حساب النتائج وتدقيق الجودة</button>
+                <button type="submit" class="btn-submit">تسجيل الدخول 🔑</button>
             </form>
+            <div id="loginError" style="color: red; margin-top: 10px; font-weight: bold; display: none;"></div>
+        </div>
+    </div>
+
+    <!-- 2. الشاشة الرئيسية للتطبيق (تظهر بعد تسجيل الدخول) -->
+    <div id="appSection" style="display: none;">
+        
+        <div class="header">
+            <h1>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
+            <div class="user-info-bar">
+                <span id="userEmailDisplay"></span>
+                <span id="userRoleBadge" class="badge-role"></span>
+                <button class="btn-logout" onclick="handleLogout()">خروج 🚪</button>
+            </div>
         </div>
 
-        <!-- بطاقة النتائج -->
-        <div class="card" id="resultCard" style="display:none;">
-            <h3>مؤشرات أداء الوردية الحالية</h3>
-            
-            <div class="kpi-container">
-                <div class="kpi-box">
-                    <div>إجمالي الإنتاج</div>
-                    <div class="val" id="kpiTotal">0</div>
-                </div>
-                <div class="kpi-box">
-                    <div>إجمالي العيوب والفرز 2/3</div>
-                    <div class="val" id="kpiDefects">0</div>
-                </div>
-                <div class="kpi-box">
-                    <div>نسبة العيوب (للأول)</div>
-                    <div class="val" id="kpiDefectRate">0%</div>
-                </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('entryTab')">📝 إدخال الإنتاج اليومي</button>
+            <button class="tab-btn admin-only" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ إدارة البيانات الأساسية</button>
+            <button class="tab-btn admin-only" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 السجل والتقارير</button>
+        </div>
+
+        <!-- التبويب الأول: الإدخال اليومي -->
+        <div id="entryTab" class="tab-content active">
+            <div class="card">
+                <h3>تسجيل بيانات وردية الميلامين</h3>
+                <form id="prodForm">
+                    
+                    <!-- الصف الأول: المعدات والمسؤولين والمنتج -->
+                    <div class="form-row">
+                        <div class="form-group-flex">
+                            <label>اختر المكبس / الماكينة:</label>
+                            <select id="machineSelect" required></select>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>اختر العامل:</label>
+                            <select id="workerSelect" required></select>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>اختر المنتج (نوع الطبق):</label>
+                            <select id="productSelect" required></select>
+                        </div>
+                    </div>
+
+                    <!-- الصف الثاني: المظهر (لون سادة أو رسمة مع تعطيل التبادل) -->
+                    <div class="form-row">
+                        <div class="form-group-flex">
+                            <label>اللون (للطبق السادة):</label>
+                            <select id="colorSelect" onchange="handleColorChange()"></select>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>الرسمة / التصميم (للطبق المطبوع):</label>
+                            <select id="patternSelect" onchange="handlePatternChange()"></select>
+                        </div>
+                    </div>
+
+                    <!-- الصف الثالث: كميات الفرز والتالف -->
+                    <div class="form-row">
+                        <div class="form-group-flex">
+                            <label>الفرز الأول:</label>
+                            <input type="number" id="g1" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>الفرز الثاني:</label>
+                            <input type="number" id="g2" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>الفرز الثالث:</label>
+                            <input type="number" id="g3" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>التالف / الهالك:</label>
+                            <input type="number" id="waste" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-submit" onclick="processProduction()">حساب النتائج وتدقيق الجودة</button>
+                </form>
             </div>
 
-            <div id="qualityAlert" class="alert-box"></div>
+            <!-- بطاقة النتائج -->
+            <div class="card" id="resultCard" style="display:none;">
+                <h3>مؤشرات أداء الوردية الحالية</h3>
+                
+                <div class="kpi-container">
+                    <div class="kpi-box">
+                        <div>إجمالي الإنتاج</div>
+                        <div class="val" id="kpiTotal">0</div>
+                    </div>
+                    <div class="kpi-box">
+                        <div>إجمالي العيوب والفرز 2/3</div>
+                        <div class="val" id="kpiDefects">0</div>
+                    </div>
+                    <div class="kpi-box">
+                        <div>نسبة العيوب (للأول)</div>
+                        <div class="val" id="kpiDefectRate">0%</div>
+                    </div>
+                </div>
 
-            <div id="aiSection" style="margin-top:20px;">
-                <button type="button" class="btn-submit" style="background-color:var(--secondary);" onclick="getAIAnalysis()">💡 تحليل أسباب العيوب وتوصيات الذكاء الاصطناعي</button>
-                <div id="aiOutput" class="ai-box" style="display:none;"></div>
+                <div id="qualityAlert" class="alert-box"></div>
+
+                <div id="aiSection" style="margin-top:20px;">
+                    <button type="button" class="btn-submit" style="background-color:var(--secondary);" onclick="getAIAnalysis()">💡 تحليل أسباب العيوب وتوصيات الذكاء الاصطناعي</button>
+                    <div id="aiOutput" class="ai-box" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- التبويب الثاني: إدارة البيانات الأساسية (للأدمن فقط) -->
+        <div id="masterTab" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                <!-- الماكينات -->
+                <div class="card">
+                    <h3>المكابس / الماكينات</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newMachine" placeholder="ماكينة جديدة">
+                        <button class="btn-add" onclick="addMasterItem('machines', 'newMachine')">إضافة</button>
+                    </div>
+                    <div id="machinesList"></div>
+                </div>
+
+                <!-- العمال -->
+                <div class="card">
+                    <h3>قائمة العمال</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newWorker" placeholder="عامل جديد">
+                        <button class="btn-add" onclick="addMasterItem('workers', 'newWorker')">إضافة</button>
+                    </div>
+                    <div id="workersList"></div>
+                </div>
+
+                <!-- المنتجات -->
+                <div class="card">
+                    <h3>أنواع الأطباق/المنتجات</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newProduct" placeholder="منتج جديد">
+                        <button class="btn-add" onclick="addMasterItem('products', 'newProduct')">إضافة</button>
+                    </div>
+                    <div id="productsList"></div>
+                </div>
+
+                <!-- الألوان -->
+                <div class="card">
+                    <h3>ألوان الميلامين السادة</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newColor" placeholder="لون جديد">
+                        <button class="btn-add" onclick="addMasterItem('colors', 'newColor')">إضافة</button>
+                    </div>
+                    <div id="colorsList"></div>
+                </div>
+
+                <!-- الرسومات والورق -->
+                <div class="card">
+                    <h3>الرسومات / التصاميم (المطبوع)</h3>
+                    <div class="list-add-box">
+                        <input type="text" id="newPattern" placeholder="رسمة جديدة">
+                        <button class="btn-add" onclick="addMasterItem('patterns', 'newPattern')">إضافة</button>
+                    </div>
+                    <div id="patternsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- التبويب الثالث: التقارير (للأدمن فقط) -->
+        <div id="historyTab" class="tab-content">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>سجل إنتاج الميلامين المحفوظ (السحابي)</h3>
+                    <button class="btn-excel" onclick="exportToExcel()">تصدير لـ Excel (XLSX) 📊</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>المكبس</th>
+                                <th>العامل</th>
+                                <th>المنتج</th>
+                                <th>المظهر (لون / رسمة)</th>
+                                <th>فرز 1</th>
+                                <th>فرز 2</th>
+                                <th>فرز 3</th>
+                                <th>تالف</th>
+                                <th>نسبة العيوب</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- التبويب الثاني: إدارة البيانات الأساسية -->
-    <div id="masterTab" class="tab-content">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-            <!-- الماكينات -->
-            <div class="card">
-                <h3>المكابس / الماكينات</h3>
-                <div class="list-add-box">
-                    <input type="text" id="newMachine" placeholder="ماكينة جديدة">
-                    <button class="btn-add" onclick="addMasterItem('machines', 'newMachine')">إضافة</button>
-                </div>
-                <div id="machinesList"></div>
-            </div>
-
-            <!-- العمال -->
-            <div class="card">
-                <h3>قائمة العمال</h3>
-                <div class="list-add-box">
-                    <input type="text" id="newWorker" placeholder="عامل جديد">
-                    <button class="btn-add" onclick="addMasterItem('workers', 'newWorker')">إضافة</button>
-                </div>
-                <div id="workersList"></div>
-            </div>
-
-            <!-- المنتجات -->
-            <div class="card">
-                <h3>أنواع الأطباق/المنتجات</h3>
-                <div class="list-add-box">
-                    <input type="text" id="newProduct" placeholder="منتج جديد">
-                    <button class="btn-add" onclick="addMasterItem('products', 'newProduct')">إضافة</button>
-                </div>
-                <div id="productsList"></div>
-            </div>
-
-            <!-- الألوان -->
-            <div class="card">
-                <h3>ألوان الميلامين السادة</h3>
-                <div class="list-add-box">
-                    <input type="text" id="newColor" placeholder="لون جديد">
-                    <button class="btn-add" onclick="addMasterItem('colors', 'newColor')">إضافة</button>
-                </div>
-                <div id="colorsList"></div>
-            </div>
-
-            <!-- الرسومات والورق -->
-            <div class="card">
-                <h3>الرسومات / التصاميم (المطبوع)</h3>
-                <div class="list-add-box">
-                    <input type="text" id="newPattern" placeholder="رسمة جديدة">
-                    <button class="btn-add" onclick="addMasterItem('patterns', 'newPattern')">إضافة</button>
-                </div>
-                <div id="patternsList"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- التبويب الثالث: التقارير -->
-    <div id="historyTab" class="tab-content">
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>سجل إنتاج الميلامين المحفوظ (السحابي)</h3>
-                <button class="btn-excel" onclick="exportToExcel()">تصدير لـ Excel (XLSX) 📊</button>
-            </div>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>التاريخ</th>
-                            <th>المكبس</th>
-                            <th>العامل</th>
-                            <th>المنتج</th>
-                            <th>المظهر (لون / رسمة)</th>
-                            <th>فرز 1</th>
-                            <th>فرز 2</th>
-                            <th>فرز 3</th>
-                            <th>تالف</th>
-                            <th>نسبة العيوب</th>
-                            <th>الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -452,8 +516,12 @@
       measurementId: "G-LL2P27RD7X"
     };
 
+    // المفتاح المدمج في الخلفية للذكاء الاصطناعي (مخفي عن المستخدمين)
+    const EMBEDDED_GEMINI_KEY = "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk"; 
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
     const NONE_OPTION = "--- اختر الخيار ---";
 
@@ -467,15 +535,62 @@
 
     let masterData = JSON.parse(localStorage.getItem('melamine_master_data')) || defaultMasterData;
     let currentRecord = null;
+    let currentUserRole = "operator"; // الافتراضي: مشرف/عامل
 
-    document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('gemini_api_key')) {
-            document.getElementById('apiKey').value = localStorage.getItem('gemini_api_key');
+    // متابعة حالة تسجيل الدخول تلقائياً
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('appSection').style.display = 'block';
+            document.getElementById('userEmailDisplay').innerText = user.email;
+
+            // تحديد الصلاحيات بناءً على الإيميل (الإيميل اللي فيه admin ياخد كافة الصلاحيات)
+            if (user.email.includes("admin")) {
+                currentUserRole = "admin";
+                document.getElementById('userRoleBadge').innerText = "مدير نظام";
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            } else {
+                currentUserRole = "operator";
+                document.getElementById('userRoleBadge').innerText = "مشرف وردية";
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            }
+
+            renderMasterData();
+            updateFormDropdowns();
+            listenToFirebaseHistory();
+        } else {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('appSection').style.display = 'none';
         }
-        renderMasterData();
-        updateFormDropdowns();
-        listenToFirebaseHistory();
     });
+
+    // دالة تسجيل الدخول
+    function handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPassword').value;
+        const errDiv = document.getElementById('loginError');
+
+        auth.signInWithEmailAndPassword(email, pass)
+        .catch((error) => {
+            // لو الحساب غير موجود يتم إنشاؤه تلقائياً في المرة الأولى!
+            if (error.code === 'auth/user-not-found') {
+                auth.createUserWithEmailAndPassword(email, pass)
+                .catch((err) => {
+                    errDiv.innerText = "خطأ: " + err.message;
+                    errDiv.style.display = 'block';
+                });
+            } else {
+                errDiv.innerText = "بيانات الدخول غير صحيحة!";
+                errDiv.style.display = 'block';
+            }
+        });
+    }
+
+    // تسجيل الخروج
+    function handleLogout() {
+        auth.signOut();
+    }
 
     function switchTab(tabId) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -548,16 +663,15 @@
         });
     }
 
-    // منطق التعطيل الإجباري الذكي (Disable Logic)
     function handleColorChange() {
         const colorSelect = document.getElementById('colorSelect');
         const patternSelect = document.getElementById('patternSelect');
 
         if (colorSelect.value !== NONE_OPTION) {
             patternSelect.value = NONE_OPTION;
-            patternSelect.disabled = true; // إلغاء تفعيل التصميمات
+            patternSelect.disabled = true;
         } else {
-            patternSelect.disabled = false; // إعادة التفعيل
+            patternSelect.disabled = false;
         }
     }
 
@@ -567,16 +681,13 @@
 
         if (patternSelect.value !== NONE_OPTION) {
             colorSelect.value = NONE_OPTION;
-            colorSelect.disabled = true; // إلغاء تفعيل الألوان
+            colorSelect.disabled = true;
         } else {
-            colorSelect.disabled = false; // إعادة التفعيل
+            colorSelect.disabled = false;
         }
     }
 
     function processProduction() {
-        const apiKey = document.getElementById('apiKey').value.trim();
-        if (apiKey) localStorage.setItem('gemini_api_key', apiKey);
-
         const machine = document.getElementById('machineSelect').value;
         const worker = document.getElementById('workerSelect').value;
         const product = document.getElementById('productSelect').value;
@@ -611,6 +722,7 @@
 
         currentRecord = {
             date: new Date().toLocaleString('ar-EG'),
+            entryBy: auth.currentUser ? auth.currentUser.email : 'مجهول',
             machine, worker, product, appearance,
             g1, g2, g3, waste,
             totalProduction,
@@ -641,7 +753,6 @@
         saveRecordToFirebase(currentRecord);
     }
 
-    // حفظ في داتابيز Firebase مباشرة
     function saveRecordToFirebase(record) {
         db.collection("melamine_production").add(record)
         .then(() => {
@@ -652,7 +763,6 @@
         });
     }
 
-    // الاستماع الفوري لقاعدة البيانات وتحديث السجل
     function listenToFirebaseHistory() {
         db.collection("melamine_production").orderBy("timestamp", "desc")
         .onSnapshot((snapshot) => {
@@ -681,12 +791,6 @@
     }
 
     async function getAIAnalysis() {
-        const apiKey = document.getElementById('apiKey').value.trim();
-        if (!apiKey) {
-            alert("يرجى إدخال مفتاح API Key أولاً!");
-            return;
-        }
-
         const aiOutput = document.getElementById('aiOutput');
         aiOutput.style.display = 'block';
         aiOutput.innerText = "جاري تحليل البيانات بواسطة Gemini...";
@@ -710,7 +814,7 @@
 2. إذا تجاوزت العيوب 8%، ما الأسباب المتوقعة في كبس الميلامين (سواء كان مطبوعاً بالديكور أو سادة) وكيف نعالجها؟
 `;
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_GEMINI_KEY}`;
 
         try {
             const response = await fetch(url, {
@@ -723,14 +827,13 @@
             if (response.ok && data.candidates && data.candidates.length > 0) {
                 aiOutput.innerText = data.candidates[0].content.parts[0].text;
             } else {
-                aiOutput.innerText = "حدث خطأ من جوجل: " + (data.error ? data.error.message : "يرجى مراجعة API Key");
+                aiOutput.innerText = "تعذر الحصول على التحليل حالياً.";
             }
         } catch (e) {
             aiOutput.innerText = "تعذر الاتصال بخدمة الذكاء الاصطناعي.";
         }
     }
 
-    // تصدير ملف Excel حقيقي (.xlsx) من بيانات السيرفر مباشرة
     function exportToExcel() {
         db.collection("melamine_production").get().then((querySnapshot) => {
             let reportsData = [];
@@ -739,6 +842,7 @@
                 let data = doc.data();
                 reportsData.push({
                     "التاريخ": data.date,
+                    "المسجل": data.entryBy || 'غير معروف',
                     "المكبس": data.machine,
                     "العامل": data.worker,
                     "المنتج": data.product,
