@@ -58,121 +58,45 @@
             gap: 10px;
         }
 
-        .btn-profile-top {
-            background: rgba(255, 255, 255, 0.25);
-            color: white;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-        }
+        .btn-profile-top { background: rgba(255, 255, 255, 0.25); color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-logout { background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
-        .btn-logout {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            background: #e2e8f0;
-            padding: 6px;
-            border-radius: 10px;
-            overflow-x: auto;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: transparent;
-            font-weight: bold;
-            font-size: 13px;
-            color: #475569;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .tab-btn.active {
-            background: white;
-            color: var(--primary);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        }
-
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 6px; border-radius: 10px; overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: bold; font-size: 13px; color: #475569; cursor: pointer; border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            margin-bottom: 20px;
-        }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+        .form-group-flex { flex: 1; min-width: 120px; }
 
-        .form-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
+        label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 12px; }
+        input, select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
+        .num-input { text-align: center; font-weight: bold; font-size: 15px; }
 
-        .form-group-flex { flex: 1; min-width: 130px; }
-
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        .num-input { text-align: center; font-weight: bold; font-size: 16px; }
-
-        button.btn-submit {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 5px;
-        }
+        button.btn-submit { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         button.btn-submit:hover { opacity: 0.9; }
 
-        .list-add-box { display: flex; gap: 10px; margin-bottom: 12px; }
-        .btn-add { background: var(--success); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; }
-        .master-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f1f5f9; border-radius: 6px; margin-bottom: 6px; }
-        .btn-del { background: var(--danger); color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-
-        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
-        .kpi-box { padding: 15px; border-radius: 8px; background: #f1f5f9; text-align: center; }
-        .kpi-box .val { font-size: 22px; font-weight: bold; margin-top: 5px; }
-
-        .alert-box { padding: 15px; border-radius: 8px; margin-top: 15px; font-weight: bold; display: none; }
-        .alert-success { background: #dcfce7; color: var(--success); border: 1px solid #86efac; }
-        .alert-danger { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
-
-        .ai-box { background: #f0f9ff; border-right: 4px solid var(--secondary); padding: 15px; border-radius: 8px; margin-top: 15px; white-space: pre-wrap; line-height: 1.6; }
+        .list-add-box { display: flex; gap: 8px; margin-bottom: 10px; }
+        .btn-add { background: var(--success); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; white-space: nowrap; }
+        .master-list-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f1f5f9; border-radius: 6px; margin-bottom: 5px; font-size: 13px; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-        th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; }
+        th, td { border: 1px solid #e2e8f0; padding: 7px; text-align: center; }
         th { background: #f1f5f9; }
 
+        .clickable { cursor: pointer; color: var(--secondary); text-decoration: underline; font-weight: bold; }
         .btn-excel { background: #15803d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .perm-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-top: 10px; }
-        .perm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 8px; }
-        .perm-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .perm-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; margin-top: 8px; }
+        .perm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 6px; }
+        .perm-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
         .perm-item input { width: auto; }
-        .badge-perm { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin: 3px; font-weight: bold; }
+        .badge-perm { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-size: 11px; margin: 2px; font-weight: bold; }
+
+        #reviewModal, #machineModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; padding: 10px; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -184,47 +108,39 @@
         <div class="card" id="loginCard">
             <h2 style="color: var(--primary); margin-bottom: 20px;">دخول نظام إنتاج المنار</h2>
             <form onsubmit="handleLogin(event)">
-                <div style="margin-bottom: 15px; text-align: right;">
-                    <label>اسم المستخدم (Username):</label>
-                    <input type="text" id="usernameInput" placeholder="أدخل اسم المستخدم" required>
-                </div>
-                <div style="margin-bottom: 20px; text-align: right;">
-                    <label>كلمة المرور:</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" required>
-                </div>
+                <div style="margin-bottom: 15px; text-align: right;"><label>اسم المستخدم:</label><input type="text" id="usernameInput" required></div>
+                <div style="margin-bottom: 20px; text-align: right;"><label>كلمة المرور:</label><input type="password" id="loginPassword" required></div>
                 <button type="submit" class="btn-submit">تسجيل الدخول 🔑</button>
             </form>
             <div id="loginError" style="color: red; margin-top: 10px; font-weight: bold; display: none;"></div>
         </div>
     </div>
 
-    <!-- 2. الشاشة الرئيسية للتطبيق -->
+    <!-- 2. الشاشة الرئيسية -->
     <div id="appSection" style="display: none;">
         
         <div class="header">
             <h1>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
             <div class="user-info-bar">
                 <span id="userNameDisplay"></span>
-                <button class="btn-profile-top" onclick="switchTab('profileTab')">👤 ملفي الشخصي</button>
+                <button class="btn-profile-top" onclick="switchTab('profileTab')">👤 ملفي</button>
                 <button class="btn-logout" onclick="handleLogout()">خروج 🚪</button>
             </div>
         </div>
 
         <div class="tabs">
             <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال إنتاج الصالة</button>
-            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير والسجلات</button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير والفلترة</button>
             <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ السجل الفني والبيانات</button>
-            <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 الصلاحيات</button>
+            <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 العمال والصلاحيات</button>
             <button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profileTab')">👤 ملفي</button>
         </div>
 
-        <!-- التبويب الأول: إدخال إنتاج صالة المكابس والورديات -->
+        <!-- التبويب الأول: إدخال إنتاج الصالة -->
         <div id="entryTab" class="tab-content active">
             <div class="card">
-                <h3>تسجيل ورديات مكابس المصنع (على مدار 24 ساعة)</h3>
+                <h3>تسجيل ورديات مكابس المصنع</h3>
                 <form id="prodForm">
-                    
-                    <!-- الصف الأول: التاريخ والوردية -->
                     <div class="form-row">
                         <div class="form-group-flex">
                             <label>تاريخ الإنتاج:</label>
@@ -233,116 +149,98 @@
                         <div class="form-group-flex">
                             <label>اختر الوردية:</label>
                             <select id="shiftSelect" required>
-                                <option value="الوردية الأولى (الصباحية)">الوردية الأولى (الصباحية - 8 ساعات)</option>
-                                <option value="الوردية الثانية (المسائية)">الوردية الثانية (المسائية - 8 ساعات)</option>
-                                <option value="الوردية الثالثة (الليلية)">الوردية الثالثة (الليلية - 8 ساعات)</option>
+                                <option value="الوردية الأولى (الصباحية)">الوردية الأولى (الصباحية)</option>
+                                <option value="الوردية الثانية (المسائية)">الوردية الثانية (المسائية)</option>
+                                <option value="الوردية الثالثة (الليلية)">الوردية الثالثة (الليلية)</option>
+                            </select>
+                        </div>
+                        <div class="form-group-flex">
+                            <label>مشرف الوردية المسؤول:</label>
+                            <select id="supervisorSelect" required>
+                                <option value="">--- اختر المشرف ---</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- الصف الثاني: المكبس والعامل والمنتج -->
                     <div class="form-row">
                         <div class="form-group-flex">
-                            <label>اختر المكبس / الماكينة:</label>
+                            <label>اختر المكبس:</label>
                             <select id="machineSelect" required></select>
                         </div>
                         <div class="form-group-flex">
-                            <label>اختر العامل المسؤول:</label>
+                            <label>اختر العامل:</label>
                             <select id="workerSelect" required></select>
                         </div>
                         <div class="form-group-flex">
-                            <label>اختر المنتج (نوع الطبق):</label>
+                            <label>اختر المنتج:</label>
                             <select id="productSelect" required></select>
                         </div>
                     </div>
 
-                    <!-- الصف الثالث: المظهر (لون أو رسمة) -->
                     <div class="form-row">
                         <div class="form-group-flex">
-                            <label>اللون (للطبق السادة):</label>
+                            <label>اللون السادة:</label>
                             <select id="colorSelect" onchange="handleColorChange()"></select>
                         </div>
                         <div class="form-group-flex">
-                            <label>الرسمة / التصميم (للطبق المطبوع):</label>
+                            <label>التصميم المطبوع:</label>
                             <select id="patternSelect" onchange="handlePatternChange()"></select>
                         </div>
                     </div>
 
-                    <!-- الصف الرابع: كميات الفرز والتالف -->
                     <div class="form-row">
-                        <div class="form-group-flex">
-                            <label>الفرز الأول:</label>
-                            <input type="number" id="g1" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
-                        </div>
-                        <div class="form-group-flex">
-                            <label>الفرز الثاني:</label>
-                            <input type="number" id="g2" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
-                        </div>
-                        <div class="form-group-flex">
-                            <label>الفرز الثالث:</label>
-                            <input type="number" id="g3" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
-                        </div>
-                        <div class="form-group-flex">
-                            <label>التالف / الهالك:</label>
-                            <input type="number" id="waste" class="num-input" value="0" min="0" oninput="if(this.value.length>5) this.value=this.value.slice(0,5)" required>
-                        </div>
+                        <div class="form-group-flex"><label>الفرز الأول:</label><input type="number" id="g1" class="num-input" value="0" min="0" required></div>
+                        <div class="form-group-flex"><label>الفرز الثاني:</label><input type="number" id="g2" class="num-input" value="0" min="0" required></div>
+                        <div class="form-group-flex"><label>الفرز الثالث:</label><input type="number" id="g3" class="num-input" value="0" min="0" required></div>
+                        <div class="form-group-flex"><label>التالف / الهالك:</label><input type="number" id="waste" class="num-input" value="0" min="0" required></div>
                     </div>
 
-                    <button type="button" class="btn-submit" onclick="processProduction()">تسجيل وتثبيت سطر المكبس في الوردية 💾</button>
+                    <button type="button" class="btn-submit" onclick="addToStagingCart()" style="background-color: var(--success);">➕ إضافة السطر لقائمة المراجعة الحالية</button>
                 </form>
             </div>
 
-            <!-- بطاقة النتائج المؤقتة للوردية -->
-            <div class="card" id="resultCard" style="display:none;">
-                <h3>مؤشرات أداء المكبس في الوردية الحالية</h3>
-                <div class="kpi-container">
-                    <div class="kpi-box">
-                        <div>إجمالي الإنتاج</div>
-                        <div class="val" id="kpiTotal">0</div>
-                    </div>
-                    <div class="kpi-box">
-                        <div>إجمالي العيوب (2/3 والتالف)</div>
-                        <div class="val" id="kpiDefects">0</div>
-                    </div>
-                    <div class="kpi-box">
-                        <div>نسبة العيوب</div>
-                        <div class="val" id="kpiDefectRate">0%</div>
-                    </div>
-                </div>
-
-                <div id="qualityAlert" class="alert-box"></div>
-
-                <div id="aiSection" style="margin-top:20px; display:none;">
-                    <button type="button" class="btn-submit" style="background-color:var(--secondary);" onclick="getAIAnalysis()">💡 تحليل أسباب العيوب وتوصيات الذكاء الاصطناعي</button>
-                    <div id="aiOutput" class="ai-box" style="display:none;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- التبويب الثاني: التقارير والسجلات اليومية -->
-        <div id="historyTab" class="tab-content">
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                    <h3>سجل إنتاج مكابس المصنع مرتب حسب الأيام والورديات</h3>
-                    <button class="btn-excel" id="excelBtn" onclick="exportToExcel()" style="display:none;">تصدير التقارير لـ Excel (XLSX) 📊</button>
-                </div>
+            <!-- قائمة المراجعة والاستعراض المؤقت للوردية -->
+            <div class="card" id="stagingCard" style="display:none;">
+                <h3 style="color: var(--primary);">📋 قائمة الاستعراض والمراجعة (الوردية الحالية قبل الترحيل)</h3>
                 <div style="overflow-x:auto;">
                     <table>
                         <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>الوردية</th>
-                                <th>المسجل</th>
-                                <th>المكبس</th>
-                                <th>العامل</th>
-                                <th>المنتج والمظهر</th>
-                                <th>فرز 1</th>
-                                <th>فرز 2</th>
-                                <th>فرز 3</th>
-                                <th>تالف</th>
-                                <th>نسبة العيوب</th>
-                                <th>الحالة</th>
-                            </tr>
+                            <tr><th>المكبس</th><th>المشرف</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف</th><th>إجراء</th></tr>
+                        </thead>
+                        <tbody id="stagingBody"></tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn-submit" onclick="openReviewModal()" style="margin-top: 15px;">🔍 استعراض كامل وترحيل للداتابيز 🚀</button>
+            </div>
+        </div>
+
+        <!-- التبويب الثاني: التقارير والفلترة -->
+        <div id="historyTab" class="tab-content">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 15px;">
+                    <h3>سجل إنتاج المصنع والتقارير</h3>
+                    <button class="btn-excel" id="excelBtn" onclick="exportFilteredExcel()" style="display:none;">تصدير لـ Excel 📊</button>
+                </div>
+
+                <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <div style="flex:1; min-width: 130px;"><label style="font-size:11px;">التاريخ:</label><input type="date" id="filterDate" onchange="applyFilters()"></div>
+                    <div style="flex:1; min-width: 130px;">
+                        <label style="font-size:11px;">الوردية:</label>
+                        <select id="filterShift" onchange="applyFilters()">
+                            <option value="">كل الورديات</option>
+                            <option value="الوردية الأولى (الصباحية)">الأولى</option>
+                            <option value="الوردية الثانية (المسائية)">الثانية</option>
+                            <option value="الوردية الثالثة (الليلية)">الثالثة</option>
+                        </select>
+                    </div>
+                    <div style="flex:1; min-width: 130px;"><label style="font-size:11px;">المكبس:</label><select id="filterMachine" onchange="applyFilters()"><option value="">كل المكابس</option></select></div>
+                    <div style="display: flex; align-items: flex-end;"><button onclick="resetFilters()" style="background:#64748b; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:12px;">إلغاء الفلتر 🔄</button></div>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف</th><th>نسبة العيوب</th><th>الحالة</th></tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
                     </table>
@@ -353,164 +251,150 @@
         <!-- التبويب الثالث: السجل الفني والبيانات الأساسية -->
         <div id="masterTab" class="tab-content">
             <div class="card">
-                <h3 style="color: var(--primary);">⚙️ السجل الفني للمكابس والماكينات (للصيانة)</h3>
+                <h3 style="color: var(--primary); margin-bottom: 15px;">⚙️ السجل الفني للمكابس (مساحة التشغيل الفعالة)</h3>
                 <div class="form-row">
-                    <input type="text" id="mName" placeholder="اسم الماكينة / المكبس (مثال: مكبس هيدروليكي 1)">
-                    <input type="text" id="mType" placeholder="النوع (مثال: مكبس حراري)">
-                    <input type="text" id="mPower" placeholder="قوة الضغط (طن)">
+                    <div class="form-group-flex"><input type="text" id="mName" placeholder="اسم المكبس (مثال: مكبس 1)"></div>
+                    <div class="form-group-flex"><input type="text" id="mType" placeholder="النوع"></div>
+                    <div class="form-group-flex"><input type="text" id="mPower" placeholder="قوة الضغط (طن)"></div>
                 </div>
                 <div class="form-row">
-                    <input type="number" id="mLen" placeholder="الطول (سم)">
-                    <input type="number" id="mWidth" placeholder="العرض (سم)">
-                    <input type="number" id="mHeight" placeholder="الارتفاع (سم)">
-                    <input type="number" id="mTemp" placeholder="درجة الحرارة (°C)">
-                    <input type="date" id="mService" placeholder="تاريخ آخر صيانة">
+                    <div class="form-group-flex"><input type="number" id="mLen" placeholder="طول الفتحة (سم)"></div>
+                    <div class="form-group-flex"><input type="number" id="mWidth" placeholder="عرض الفتحة (سم)"></div>
+                    <div class="form-group-flex"><input type="number" id="mHeight" placeholder="ارتفاع الفتحة (سم)"></div>
                 </div>
-                <button class="btn-submit" style="background-color: var(--success);" onclick="addDetailedMachine()">إضافة الماكينة للسجل الفني 🛠️</button>
+                <button class="btn-submit" style="background-color: var(--success); padding: 10px;" onclick="addDetailedMachine()">إضافة الماكينة 🛠️</button>
 
-                <div style="overflow-x:auto; margin-top: 20px;">
+                <div style="overflow-x:auto; margin-top: 15px;">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>الاسم</th>
-                                <th>النوع</th>
-                                <th>القوة</th>
-                                <th>الأبعاد (ط×ع×ا سم)</th>
-                                <th>الحرارة</th>
-                                <th>آخر صيانة</th>
-                                <th>إجراءات</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>اسم المكبس (اضغط للتفاصيل والصيانة)</th><th>النوع</th><th>القوة</th><th>فتحة المكبس (طول×عرض×ارتفاع)</th><th>عمليات الصيانة</th><th>حذف</th></tr></thead>
                         <tbody id="machinesTableBody"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- بقية البيانات الأساسية -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                 <div class="card">
-                    <h3>قائمة العمال</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newWorker" placeholder="عامل جديد">
-                        <button class="btn-add" onclick="addMasterItem('workers', 'newWorker')">إضافة</button>
-                    </div>
-                    <div id="workersList"></div>
-                </div>
-
-                <div class="card">
-                    <h3>أنواع الأطباق/المنتجات</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newProduct" placeholder="منتج جديد">
-                        <button class="btn-add" onclick="addMasterItem('products', 'newProduct')">إضافة</button>
-                    </div>
+                    <h3>أنواع المنتجات (سحابي)</h3>
+                    <div class="list-add-box"><input type="text" id="newProduct" placeholder="منتج جديد"><button class="btn-add" onclick="addMasterDataFirestore('products', 'newProduct')">إضافة</button></div>
                     <div id="productsList"></div>
                 </div>
-
                 <div class="card">
-                    <h3>ألوان الميلامين السادة</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newColor" placeholder="لون جديد">
-                        <button class="btn-add" onclick="addMasterItem('colors', 'newColor')">إضافة</button>
-                    </div>
+                    <h3>الألوان السادة (سحابي)</h3>
+                    <div class="list-add-box"><input type="text" id="newColor" placeholder="لون جديد"><button class="btn-add" onclick="addMasterDataFirestore('colors', 'newColor')">إضافة</button></div>
                     <div id="colorsList"></div>
                 </div>
-
                 <div class="card">
-                    <h3>الرسومات / التصاميم (المطبوع)</h3>
-                    <div class="list-add-box">
-                        <input type="text" id="newPattern" placeholder="رسمة جديدة">
-                        <button class="btn-add" onclick="addMasterItem('patterns', 'newPattern')">إضافة</button>
-                    </div>
+                    <h3>الرسومات والتصاميم (سحابي)</h3>
+                    <div class="list-add-box"><input type="text" id="newPattern" placeholder="رسمة جديدة"><button class="btn-add" onclick="addMasterDataFirestore('patterns', 'newPattern')">إضافة</button></div>
                     <div id="patternsList"></div>
                 </div>
             </div>
         </div>
 
-        <!-- التبويب الرابع: إدارة المستخدمين والأذونات -->
+        <!-- التبويب الرابع: إدارة المستخدمين (العمال والمشرفين) والصلاحيات -->
         <div id="usersTab" class="tab-content">
             <div class="card">
-                <h3>إضافة مستخدم جديد وتحديد الصلاحيات 🛠️</h3>
+                <h3>إضافة مستخدم وتحديد الدور والأذونات 🛠️</h3>
                 <form onsubmit="handleAddNewUser(event)">
                     <div class="form-row">
+                        <div class="form-group-flex"><label>اسم المستخدم:</label><input type="text" id="newUsername" required></div>
+                        <div class="form-group-flex"><label>كلمة المرور:</label><input type="text" id="newUserPass" required></div>
+                    </div>
+                    
+                    <div class="form-row" style="background: #f1f5f9; padding: 10px; border-radius: 6px;">
                         <div class="form-group-flex">
-                            <label>اسم المستخدم (Username):</label>
-                            <input type="text" id="newUsername" placeholder="مثال: ahmed_qc" required>
-                        </div>
-                        <div class="form-group-flex">
-                            <label>كلمة المرور الأولية:</label>
-                            <input type="text" id="newUserPass" placeholder="••••••••" required>
+                            <label style="color:var(--primary);">الدور المهني للصالة:</label>
+                            <label style="font-weight:normal; display:inline-block; margin-left:15px;"><input type="checkbox" id="isWorker" checked> عامل تشغيل مكابس</label>
+                            <label style="font-weight:normal; display:inline-block;"><input type="checkbox" id="isSupervisor"> مشرف وردية</label>
                         </div>
                     </div>
 
                     <div class="perm-box">
-                        <label style="color: var(--primary);">حدد أذونات هذا المستخدم بالتفصيل:</label>
+                        <label style="color: var(--primary);">أذونات النظام:</label>
                         <div class="perm-grid">
-                            <label class="perm-item"><input type="checkbox" id="p_entry" checked> 📝 إدخال إنتاج الصالة</label>
-                            <label class="perm-item"><input type="checkbox" id="p_history"> 📊 السجلات والتقارير</label>
-                            <label class="perm-item"><input type="checkbox" id="p_ai"> 💡 الذكاء الاصطناعي</label>
-                            <label class="perm-item"><input type="checkbox" id="p_excel"> 📈 تصدير إكسيل</label>
-                            <label class="perm-item"><input type="checkbox" id="p_master"> ⚙️ السجل الفني والبيانات</label>
-                            <label class="perm-item"><input type="checkbox" id="p_users"> 👥 الصلاحيات</label>
+                            <label class="perm-item"><input type="checkbox" id="p_entry" checked> إدخال الإنتاج</label>
+                            <label class="perm-item"><input type="checkbox" id="p_history"> التقارير والفلترة</label>
+                            <label class="perm-item"><input type="checkbox" id="p_excel"> تصدير إكسيل</label>
+                            <label class="perm-item"><input type="checkbox" id="p_master"> السجل الفني والبيانات</label>
+                            <label class="perm-item"><input type="checkbox" id="p_users"> العمال والصلاحيات</label>
                         </div>
                     </div>
-
-                    <button type="submit" class="btn-submit" style="background-color: var(--success); margin-top: 15px;">إنشاء وحفظ 💾</button>
+                    <button type="submit" class="btn-submit" style="background-color: var(--success); margin-top: 10px;">إنشاء وحفظ المستخدم 💾</button>
                 </form>
             </div>
-
             <div class="card">
-                <h3>التحكم في أذونات المستخدمين 🛡️</h3>
-                <div style="overflow-x:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>المستخدم</th>
-                                <th>إدخال الصالة</th>
-                                <th>التقارير</th>
-                                <th>الذكاء الاصطناعي</th>
-                                <th>إكسيل</th>
-                                <th>السجل الفني</th>
-                                <th>الصلاحيات</th>
-                                <th>إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTableBody"></tbody>
-                    </table>
-                </div>
+                <h3>إدارة المستخدمين والأدوار 🛡️</h3>
+                <table>
+                    <thead><tr><th>المستخدم</th><th>عامل؟</th><th>مشرف؟</th><th>إدخال</th><th>تقارير</th><th>إكسيل</th><th>البيانات</th><th>الصلاحيات</th><th>إجراءات</th></tr></thead>
+                    <tbody id="usersTableBody"></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- التبويب الخامس: الملف الشخصي وتغيير كلمة السر -->
+        <!-- التبويب الخامس: الملف الشخصي -->
         <div id="profileTab" class="tab-content">
             <div class="card" style="max-width: 550px; margin: 0 auto;">
                 <h3 style="color: var(--primary); text-align: center;">👤 ملفك الشخصي</h3>
-                
                 <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="margin: 5px 0;"><b>اسم المستخدم:</b> <span id="profUsername" style="color:var(--secondary); font-size: 16px;"></span></p>
-                    <p style="margin: 10px 0 5px 0;"><b>الصلاحيات:</b></p>
+                    <p><b>اسم المستخدم:</b> <span id="profUsername" style="color:var(--secondary);"></span></p>
+                    <p><b>الدور والأذونات:</b></p>
                     <div id="profPermsBadges"></div>
                 </div>
-
-                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-
-                <h4 style="color: var(--primary); margin-bottom: 12px;">🔒 تغيير كلمة المرور</h4>
+                <h4 style="color: var(--primary);">🔒 تغيير كلمة المرور</h4>
                 <form onsubmit="handleChangePassword(event)">
-                    <div style="margin-bottom: 15px;">
-                        <label>كلمة المرور الجديدة:</label>
-                        <input type="password" id="newPass1" placeholder="أدخل كلمة المرور الجديدة" required minlength="6">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label>تأكيد كلمة المرور الجديدة:</label>
-                        <input type="password" id="newPass2" placeholder="أعد كلمة المرور" required minlength="6">
-                    </div>
+                    <div style="margin-bottom: 12px;"><label>كلمة المرور الجديدة:</label><input type="password" id="newPass1" required minlength="6"></div>
+                    <div style="margin-bottom: 12px;"><label>تأكيد كلمة المرور:</label><input type="password" id="newPass2" required minlength="6"></div>
                     <button type="submit" class="btn-submit" style="background-color: var(--secondary);">تحديث 🔐</button>
                 </form>
-                <div id="passMsg" style="text-align: center; margin-top: 12px; font-weight: bold;"></div>
+                <div id="passMsg" style="text-align: center; margin-top: 10px; font-weight: bold;"></div>
             </div>
         </div>
 
     </div>
 
+</div>
+
+<!-- نافذة تفاصيل المكبس وسجل الصيانات التفاعلي -->
+<div id="machineModal">
+    <div class="modal-box">
+        <h3 id="modalMachineTitle" style="color: var(--primary);"></h3>
+        <div style="background:#f1f5f9; padding:10px; border-radius:6px; margin-bottom:12px;">
+            <p><b>النوع:</b> <span id="mModalType"></span> | <b>القوة:</b> <span id="mModalPower"></span> | <b>الفتحة:</b> <span id="mModalDim"></span></p>
+        </div>
+        
+        <h4 style="color: var(--primary);">سجل عمليات الصيانة السابقة:</h4>
+        <div style="overflow-x:auto; margin-bottom: 15px;">
+            <table>
+                <thead><tr><th>التاريخ</th><th>نوع الصيانة</th><th>القائم بالصيانة</th><th>ملاحظات</th></tr></thead>
+                <tbody id="maintenanceTableBody"></tbody>
+            </table>
+        </div>
+
+        <hr style="margin: 15px 0;">
+        <h4 style="color: var(--success);">➕ تسجيل عملية صيانة جديدة للمكبس</h4>
+        <div class="form-row">
+            <div class="form-group-flex"><label>التاريخ:</label><input type="date" id="mMainDate"></div>
+            <div class="form-group-flex"><label>القائم بالصيانة:</label><input type="text" id="mMainBy" placeholder="اسم الفني/المهندس"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group-flex"><label>نوع الصيانة:</label><input type="text" id="mMainType" placeholder="مثال: تغيير طقم جلب / إصلاح بلف"></div>
+            <div class="form-group-flex"><label>ملاحظات:</label><input type="text" id="mMainNote" placeholder="تفاصيل إضافية..."></div>
+        </div>
+        <button class="btn-submit" onclick="saveMaintenanceRecord()" style="background-color:var(--success);">حفظ سجل الصيانة 🛠️</button>
+        <button onclick="closeMachineModal()" class="btn-submit" style="background-color:#64748b; margin-top:8px;">إغلاق النافذة ❌</button>
+    </div>
+</div>
+
+<!-- نافذة الاستعراض والمراجعة الشاملة قبل الترحيل النهائي -->
+<div id="reviewModal">
+    <div class="modal-box">
+        <h3 style="color: var(--primary); text-align: center;">🔍 استعراض نهائي لبيانات الوردية قبل الترحيل</h3>
+        <div id="reviewContent" style="margin: 15px 0; max-height: 50vh; overflow-y: auto;"></div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="commitStagingToFirestore()" style="flex:1; background:var(--success); color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">تأكيد وترحيل للداتابيز ✅</button>
+            <button onclick="closeReviewModal()" style="flex:1; background:var(--danger); color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">تعديل البيانات ❌</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -524,30 +408,22 @@
       measurementId: "G-LL2P27RD7X"
     };
 
-    const EMBEDDED_GEMINI_KEY = "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk"; 
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
-
     const NONE_OPTION = "--- اختر الخيار ---";
 
-    const defaultMasterData = {
-        workers: ["أحمد محمود", "محمد علي", "محمود إبراهيم"],
-        products: ["طبق غويط 9 بوصة", "طبق مسطح 10 بوصة", "سرفيس بيضاوي"],
-        colors: ["أبيض ناصع", "أسود ملكي", "بيج كلاسيك"],
-        patterns: ["زهور كلاسيك", "رخامي مودرن", "فواكه مشكلة"]
-    };
-
-    let masterData = JSON.parse(localStorage.getItem('melamine_master_data')) || defaultMasterData;
-    let currentRecord = null;
-    let currentUsername = "";
-    let userPermissions = {};
+    let globalMasterData = { products: [], colors: [], patterns: [] };
+    let stagingCart = [];
+    let cachedHistoryData = [];
+    let activeMachineIdForModal = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         const todayStr = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById('productionDate');
         if(dateInput) dateInput.value = todayStr;
+        const mMainDate = document.getElementById('mMainDate');
+        if(mMainDate) mMainDate.value = todayStr;
     });
 
     auth.onAuthStateChanged((user) => {
@@ -555,24 +431,24 @@
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
 
-            currentUsername = user.email.split('@')[0];
+            let currentUsername = user.email.split('@')[0];
             document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
             document.getElementById('profUsername').innerText = currentUsername;
 
             if (currentUsername.toLowerCase() === "admin") {
-                applyPermissions({ entry: true, history: true, ai: true, excel: true, master: true, users: true });
+                applyPermissions({ entry: true, history: true, excel: true, master: true, users: true }, true, true);
             } else {
                 db.collection("users_permissions").doc(currentUsername).get().then((doc) => {
-                    if (doc.exists && doc.data().perms) {
-                        applyPermissions(doc.data().perms);
-                    } else {
-                        applyPermissions({ entry: true, history: false, ai: false, excel: false, master: false, users: false });
-                    }
-                }).catch(() => applyPermissions({ entry: true }));
+                    if (doc.exists) {
+                        const d = doc.data();
+                        applyPermissions(d.perms || {}, d.isWorker, d.isSupervisor);
+                    } else { applyPermissions({ entry: true }, true, false); }
+                }).catch(() => applyPermissions({ entry: true }, true, false));
             }
 
-            renderMasterData();
+            loadMasterDataFromFirestore();
             loadMachinesTable();
+            loadWorkersAndSupervisorsDropdowns();
             listenToFirebaseHistory();
         } else {
             document.getElementById('loginSection').style.display = 'block';
@@ -580,24 +456,22 @@
         }
     });
 
-    function applyPermissions(p) {
-        userPermissions = p;
+    function applyPermissions(p, isWorker, isSupervisor) {
         document.getElementById('tabEntryBtn').style.display = p.entry ? 'inline-block' : 'none';
         document.getElementById('tabHistoryBtn').style.display = p.history ? 'inline-block' : 'none';
         document.getElementById('tabMasterBtn').style.display = p.master ? 'inline-block' : 'none';
         document.getElementById('tabUsersBtn').style.display = p.users ? 'inline-block' : 'none';
-        
-        document.getElementById('aiSection').style.display = p.ai ? 'block' : 'none';
         document.getElementById('excelBtn').style.display = p.excel ? 'inline-block' : 'none';
 
         const badgesContainer = document.getElementById('profPermsBadges');
         badgesContainer.innerHTML = '';
+        if(isWorker) badgesContainer.innerHTML += '<span class="badge-perm">👷 عامل تشغيل</span>';
+        if(isSupervisor) badgesContainer.innerHTML += '<span class="badge-perm">👔 مشرف وردية</span>';
         if(p.entry) badgesContainer.innerHTML += '<span class="badge-perm">📝 إدخال إنتاج</span>';
-        if(p.history) badgesContainer.innerHTML += '<span class="badge-perm">📊 السجلات</span>';
-        if(p.ai) badgesContainer.innerHTML += '<span class="badge-perm">💡 الذكاء الاصطناعي</span>';
+        if(p.history) badgesContainer.innerHTML += '<span class="badge-perm">📊 التقارير</span>';
         if(p.excel) badgesContainer.innerHTML += '<span class="badge-perm">📈 إكسيل</span>';
         if(p.master) badgesContainer.innerHTML += '<span class="badge-perm">⚙️ السجل الفني</span>';
-        if(p.users) badgesContainer.innerHTML += '<span class="badge-perm">👥 الصلاحيات</span>';
+        if(p.users) badgesContainer.innerHTML += '<span class="badge-perm">👥 العمال والصلاحيات</span>';
 
         if (p.entry) switchTab('entryTab');
         else if (p.history) switchTab('historyTab');
@@ -608,88 +482,80 @@
         if (p.users) loadUsersTable();
     }
 
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(btn => { if (btn) btn.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(content => { if (content) content.classList.remove('active'); });
+        
+        let btnId = tabId === 'entryTab' ? 'tabEntryBtn' : tabId === 'historyTab' ? 'tabHistoryBtn' : tabId === 'masterTab' ? 'tabMasterBtn' : tabId === 'usersTab' ? 'tabUsersBtn' : 'tabProfileBtn';
+        const btn = document.getElementById(btnId);
+        if (btn) btn.classList.add('active');
+        const content = document.getElementById(tabId);
+        if (content) content.classList.add('active');
+    }
+
     function handleLogin(e) {
         e.preventDefault();
         const rawUsername = document.getElementById('usernameInput').value.trim().toLowerCase();
         const pass = document.getElementById('loginPassword').value;
         const errDiv = document.getElementById('loginError');
-        const formattedEmail = `${rawUsername}@almanar.factory`;
-
-        auth.signInWithEmailAndPassword(formattedEmail, pass)
-        .catch((error) => {
-            if (rawUsername === "admin" && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
-                auth.createUserWithEmailAndPassword(formattedEmail, pass)
-                .then(() => {
+        auth.signInWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass).catch((error) => {
+            if (rawUsername === "admin") {
+                auth.createUserWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass).then(() => {
                     db.collection("users_permissions").doc("admin").set({
-                        username: "admin",
-                        perms: { entry: true, history: true, ai: true, excel: true, master: true, users: true }
+                        username: "admin", isWorker: true, isSupervisor: true,
+                        perms: { entry: true, history: true, excel: true, master: true, users: true }
                     });
                 });
-            } else {
-                errDiv.innerText = "خطأ في اسم المستخدم أو كلمة المرور!";
-                errDiv.style.display = 'block';
-            }
+            } else { errDiv.innerText = "خطأ في اسم المستخدم أو كلمة المرور!"; errDiv.style.display = 'block'; }
         });
     }
 
     function handleChangePassword(e) {
         e.preventDefault();
-        const p1 = document.getElementById('newPass1').value;
-        const p2 = document.getElementById('newPass2').value;
-        const msg = document.getElementById('passMsg');
-
-        if (p1 !== p2) {
-            msg.style.color = "red";
-            msg.innerText = "كلمتا المرور غير متطابقتين!";
-            return;
-        }
+        const p1 = document.getElementById('newPass1').value, p2 = document.getElementById('newPass2').value, msg = document.getElementById('passMsg');
+        if (p1 !== p2) { msg.style.color = "red"; msg.innerText = "كلمتا المرور غير متطابقتين!"; return; }
         auth.currentUser.updatePassword(p1).then(() => {
-            msg.style.color = "green";
-            msg.innerText = "✅ تم تحديث كلمة المرور بنجاح!";
-            document.getElementById('newPass1').value = '';
-            document.getElementById('newPass2').value = '';
-        }).catch(() => {
-            msg.style.color = "red";
-            msg.innerText = "حدث خطأ، سجل الدخول مجدداً وجرب.";
-        });
+            msg.style.color = "green"; msg.innerText = "✅ تم تحديث كلمة المرور!";
+            document.getElementById('newPass1').value = ''; document.getElementById('newPass2').value = '';
+        }).catch(() => { msg.style.color = "red"; msg.innerText = "أعد تسجيل الدخول ثم جرب مجدداً."; });
     }
 
     function handleAddNewUser(e) {
         e.preventDefault();
         const username = document.getElementById('newUsername').value.trim().toLowerCase();
         const pass = document.getElementById('newUserPass').value;
-        if(!username || !pass) return;
+        const isWorker = document.getElementById('isWorker').checked;
+        const isSupervisor = document.getElementById('isSupervisor').checked;
 
+        if(!username || !pass) return;
         const perms = {
-            entry: document.getElementById('p_entry').checked,
-            history: document.getElementById('p_history').checked,
-            ai: document.getElementById('p_ai').checked,
-            excel: document.getElementById('p_excel').checked,
-            master: document.getElementById('p_master').checked,
+            entry: document.getElementById('p_entry').checked, history: document.getElementById('p_history').checked,
+            excel: document.getElementById('p_excel').checked, master: document.getElementById('p_master').checked,
             users: document.getElementById('p_users').checked
         };
 
-        db.collection("users_permissions").doc(username).set({ username, perms }).then(() => {
-            alert(`تم إنشاء الحساب (${username}) بنجاح!`);
-            document.getElementById('newUsername').value = '';
-            document.getElementById('newUserPass').value = '';
+        db.collection("users_permissions").doc(username).set({ username, isWorker, isSupervisor, perms }).then(() => {
+            alert(`تم إنشاء الحساب وتحديث القوائم (${username}) بنجاح!`);
+            document.getElementById('newUsername').value = ''; document.getElementById('newUserPass').value = '';
             loadUsersTable();
+            loadWorkersAndSupervisorsDropdowns();
         });
     }
 
     function loadUsersTable() {
         db.collection("users_permissions").get().then((snapshot) => {
             const tbody = document.getElementById('usersTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
             snapshot.forEach((doc) => {
-                const u = doc.data();
-                const p = u.perms || {};
+                const u = doc.data(), p = u.perms || {};
                 tbody.innerHTML += `
                     <tr>
                         <td><b>${u.username}</b></td>
+                        <td><input type="checkbox" ${u.isWorker?'checked':''} onchange="toggleUserRole('${u.username}', 'isWorker', this.checked)"></td>
+                        <td><input type="checkbox" ${u.isSupervisor?'checked':''} onchange="toggleUserRole('${u.username}', 'isSupervisor', this.checked)"></td>
                         <td><input type="checkbox" ${p.entry?'checked':''} onchange="togglePerm('${u.username}', 'entry', this.checked)"></td>
                         <td><input type="checkbox" ${p.history?'checked':''} onchange="togglePerm('${u.username}', 'history', this.checked)"></td>
-                        <td><input type="checkbox" ${p.ai?'checked':''} onchange="togglePerm('${u.username}', 'ai', this.checked)"></td>
                         <td><input type="checkbox" ${p.excel?'checked':''} onchange="togglePerm('${u.username}', 'excel', this.checked)"></td>
                         <td><input type="checkbox" ${p.master?'checked':''} onchange="togglePerm('${u.username}', 'master', this.checked)"></td>
                         <td><input type="checkbox" ${p.users?'checked':''} onchange="togglePerm('${u.username}', 'users', this.checked)"></td>
@@ -700,127 +566,74 @@
         });
     }
 
-    function togglePerm(username, key, value) {
-        db.collection("users_permissions").doc(username).update({ [`perms.${key}`]: value });
+    function toggleUserRole(username, roleKey, value) {
+        db.collection("users_permissions").doc(username).update({ [roleKey]: value }).then(() => loadWorkersAndSupervisorsDropdowns());
     }
 
-    function deleteUserDoc(username) {
-        if(confirm(`حذف حساب ${username}؟`)) {
-            db.collection("users_permissions").doc(username).delete().then(() => loadUsersTable());
-        }
-    }
+    function togglePerm(username, key, value) { db.collection("users_permissions").doc(username).update({ [`perms.${key}`]: value }); }
+    function deleteUserDoc(username) { if(confirm(`حذف حساب ${username}؟`)) db.collection("users_permissions").doc(username).delete().then(() => { loadUsersTable(); loadWorkersAndSupervisorsDropdowns(); }); }
 
-    function addDetailedMachine() {
-        const machine = {
-            name: document.getElementById('mName').value.trim(),
-            type: document.getElementById('mType').value.trim(),
-            power: document.getElementById('mPower').value.trim(),
-            dimensions: `${document.getElementById('mLen').value || 0}×${document.getElementById('mWidth').value || 0}×${document.getElementById('mHeight').value || 0}`,
-            temp: document.getElementById('mTemp').value.trim(),
-            service: document.getElementById('mService').value
-        };
-        if(!machine.name) { alert("اكتب اسم الماكينة!"); return; }
-
-        db.collection("machines_detailed_specs").add(machine).then(() => {
-            alert("تم حفظ الماكينة بنجاح!");
-            document.getElementById('mName').value = '';
-            document.getElementById('mType').value = '';
-            document.getElementById('mPower').value = '';
-            document.getElementById('mLen').value = '';
-            document.getElementById('mWidth').value = '';
-            document.getElementById('mHeight').value = '';
-            document.getElementById('mTemp').value = '';
-            document.getElementById('mService').value = '';
-            loadMachinesTable();
-        });
-    }
-
-    function loadMachinesTable() {
-        db.collection("machines_detailed_specs").onSnapshot((snapshot) => {
-            const tbody = document.getElementById('machinesTableBody');
-            const select = document.getElementById('machineSelect');
-            if(tbody) tbody.innerHTML = '';
-            if(select) select.innerHTML = '';
-            let machineNamesList = [];
+    function loadWorkersAndSupervisorsDropdowns() {
+        db.collection("users_permissions").get().then((snapshot) => {
+            let workersList = [];
+            let supervisorsList = [];
 
             snapshot.forEach((doc) => {
-                const m = doc.data();
-                machineNamesList.push(m.name);
-                if(tbody) {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><b>${m.name}</b></td>
-                            <td>${m.type || '-'}</td>
-                            <td>${m.power ? m.power + ' طن' : '-'}</td>
-                            <td>${m.dimensions}</td>
-                            <td>${m.temp ? m.temp + '°C' : '-'}</td>
-                            <td>${m.service || '-'}</td>
-                            <td><button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button></td>
-                        </tr>
-                    `;
-                }
+                const u = doc.data();
+                if(u.isWorker) workersList.push(u.username);
+                if(u.isSupervisor) supervisorsList.push(u.username);
             });
 
-            if(select) {
-                if(machineNamesList.length === 0) {
-                    select.innerHTML = '<option value="">أضف مكابس من السجل الفني أولاً</option>';
-                } else {
-                    machineNamesList.forEach(name => {
-                        const opt = document.createElement('option');
-                        opt.value = name;
-                        opt.innerText = name;
-                        select.appendChild(opt);
-                    });
-                }
-            }
+            populateSelect('workerSelect', workersList, false);
+            populateSelect('supervisorSelect', supervisorsList, true);
         });
     }
 
-    function deleteMachineDoc(id) {
-        if(confirm("حذف الماكينة؟")) db.collection("machines_detailed_specs").doc(id).delete();
+    function loadMasterDataFromFirestore() {
+        db.collection("factory_settings").doc("master_data").onSnapshot((doc) => {
+            if (doc.exists) { globalMasterData = doc.data(); } 
+            else {
+                globalMasterData = {
+                    products: ["طبق غويط 9 بوصة", "طبق مسطح 10 بوصة", "سرفيس بيضاوي"],
+                    colors: ["أبيض ناصع", "أسود ملكي", "بيج كلاسيك"],
+                    patterns: ["زهور كلاسيك", "رخامي مودرن", "فواكه مشكلة"]
+                };
+                db.collection("factory_settings").doc("master_data").set(globalMasterData);
+            }
+            renderMasterDataUI();
+        });
     }
 
-    function handleLogout() { auth.signOut(); }
-
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        const btn = document.getElementById('tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1) + 'Btn');
-        if (btn) btn.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-    }
-
-    function renderMasterData() {
-        ['workers', 'products', 'colors', 'patterns'].forEach(key => {
+    function renderMasterDataUI() {
+        ['products', 'colors', 'patterns'].forEach(key => {
             const container = document.getElementById(key + 'List');
             if (container) {
                 container.innerHTML = '';
-                masterData[key].forEach((item, index) => {
-                    container.innerHTML += `
-                        <div class="master-list-item">
-                            <span>${item}</span>
-                            <button class="btn-del" onclick="deleteMasterItem('${key}', ${index})">حذف</button>
-                        </div>
-                    `;
+                (globalMasterData[key] || []).forEach((item, index) => {
+                    container.innerHTML += `<div class="master-list-item"><span>${item}</span><button class="btn-del" onclick="deleteMasterDataFirestore('${key}', ${index})">حذف</button></div>`;
                 });
             }
         });
-        localStorage.setItem('melamine_master_data', JSON.stringify(masterData));
         updateFormDropdowns();
     }
 
-    function addMasterItem(type, inputId) {
+    function addMasterDataFirestore(type, inputId) {
         const val = document.getElementById(inputId).value.trim();
-        if (val) { masterData[type].push(val); document.getElementById(inputId).value = ''; renderMasterData(); }
+        if (!val) return;
+        if (!globalMasterData[type]) globalMasterData[type] = [];
+        globalMasterData[type].push(val);
+        db.collection("factory_settings").doc("master_data").set(globalMasterData).then(() => { document.getElementById(inputId).value = ''; });
     }
 
-    function deleteMasterItem(type, index) { masterData[type].splice(index, 1); renderMasterData(); }
+    function deleteMasterDataFirestore(type, index) {
+        globalMasterData[type].splice(index, 1);
+        db.collection("factory_settings").doc("master_data").set(globalMasterData);
+    }
 
     function updateFormDropdowns() {
-        populateSelect('workerSelect', masterData.workers, false);
-        populateSelect('productSelect', masterData.products, false);
-        populateSelect('colorSelect', masterData.colors, true);
-        populateSelect('patternSelect', masterData.patterns, true);
+        populateSelect('productSelect', globalMasterData.products, false);
+        populateSelect('colorSelect', globalMasterData.colors, true);
+        populateSelect('patternSelect', globalMasterData.patterns, true);
     }
 
     function populateSelect(selectId, items, includeNone) {
@@ -829,42 +642,162 @@
         select.innerHTML = '';
         if (includeNone) {
             const optNone = document.createElement('option');
-            optNone.value = NONE_OPTION;
-            optNone.innerText = NONE_OPTION;
+            optNone.value = NONE_OPTION; optNone.innerText = NONE_OPTION;
             select.appendChild(optNone);
         }
-        items.forEach(item => {
+        (items || []).forEach(item => {
             const opt = document.createElement('option');
-            opt.value = item;
-            opt.innerText = item;
+            opt.value = item; opt.innerText = item;
             select.appendChild(opt);
         });
     }
 
     function handleColorChange() {
         const c = document.getElementById('colorSelect'), p = document.getElementById('patternSelect');
-        if (c.value !== NONE_OPTION) { p.value = NONE_OPTION; p.disabled = true; } else { p.disabled = false; }
+        if (c && p && c.value !== NONE_OPTION) { p.value = NONE_OPTION; p.disabled = true; } else if (p) { p.disabled = false; }
     }
 
     function handlePatternChange() {
         const c = document.getElementById('colorSelect'), p = document.getElementById('patternSelect');
-        if (p.value !== NONE_OPTION) { c.value = NONE_OPTION; c.disabled = true; } else { c.disabled = false; }
+        if (c && p && p.value !== NONE_OPTION) { c.value = NONE_OPTION; c.disabled = true; } else if (c) { c.disabled = false; }
     }
 
-    function processProduction() {
+    function addDetailedMachine() {
+        const machine = {
+            name: document.getElementById('mName').value.trim(),
+            type: document.getElementById('mType').value.trim(),
+            power: document.getElementById('mPower').value.trim(),
+            openingDimensions: `${document.getElementById('mLen').value || 0}×${document.getElementById('mWidth').value || 0}×${document.getElementById('mHeight').value || 0} سم`,
+            maintenanceLog: []
+        };
+        if(!machine.name) { alert("اكتب اسم المكبس!"); return; }
+
+        db.collection("machines_detailed_specs").add(machine).then(() => {
+            alert("تم حفظ المكبس بنجاح!");
+            document.getElementById('mName').value = ''; document.getElementById('mType').value = '';
+            document.getElementById('mPower').value = ''; document.getElementById('mLen').value = '';
+            document.getElementById('mWidth').value = ''; document.getElementById('mHeight').value = '';
+            loadMachinesTable();
+        });
+    }
+
+    function loadMachinesTable() {
+        db.collection("machines_detailed_specs").onSnapshot((snapshot) => {
+            const tbody = document.getElementById('machinesTableBody');
+            const select = document.getElementById('machineSelect');
+            const filterSelect = document.getElementById('filterMachine');
+            if(tbody) tbody.innerHTML = '';
+            if(select) select.innerHTML = '';
+            if(filterSelect) filterSelect.innerHTML = '<option value="">كل المكابس</option>';
+
+            let machineNamesList = [];
+            snapshot.forEach((doc) => {
+                const m = doc.data();
+                machineNamesList.push(m.name);
+                if(tbody) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="clickable" onclick="openMachineModal('${doc.id}')">${m.name}</span></td>
+                            <td>${m.type || '-'}</td>
+                            <td>${m.power ? m.power + ' طن' : '-'}</td>
+                            <td>${m.openingDimensions}</td>
+                            <td><b>${(m.maintenanceLog || []).length}</b> عمليات صيانة</td>
+                            <td><button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button></td>
+                        </tr>
+                    `;
+                }
+            });
+
+            if(select) {
+                if(machineNamesList.length === 0) select.innerHTML = '<option value="">أضف مكابس من السجل الفني أولاً</option>';
+                else machineNamesList.forEach(name => select.innerHTML += `<option value="${name}">${name}</option>`);
+            }
+            if(filterSelect) { machineNamesList.forEach(name => filterSelect.innerHTML += `<option value="${name}">${name}</option>`); }
+        });
+    }
+
+    // فتح نافذة تفاصيل وسجل صيانة المكبس
+    function openMachineModal(docId) {
+        activeMachineIdForModal = docId;
+        db.collection("machines_detailed_specs").doc(docId).get().then((doc) => {
+            if(!doc.exists) return;
+            const m = doc.data();
+            document.getElementById('modalMachineTitle').innerText = "بطاقة وتاريخ صيانة: " + m.name;
+            document.getElementById('mModalType').innerText = m.type || '-';
+            document.getElementById('mModalPower').innerText = m.power ? m.power + ' طن' : '-';
+            document.getElementById('mModalDim').innerText = m.openingDimensions || '-';
+
+            renderMaintenanceLogTable(m.maintenanceLog || []);
+            document.getElementById('machineModal').style.display = 'flex';
+        });
+    }
+
+    function closeMachineModal() {
+        document.getElementById('machineModal').style.display = 'none';
+        activeMachineIdForModal = null;
+    }
+
+    function renderMaintenanceLogTable(logList) {
+        const tbody = document.getElementById('maintenanceTableBody');
+        tbody.innerHTML = '';
+        if(logList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color:#64748b;">لا توجد سجلات صيانة مسجلة حتى الآن لهذا المكبس.</td></tr>`;
+            return;
+        }
+        logList.forEach(item => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${item.date}</b></td>
+                    <td>${item.type}</td>
+                    <td>${item.by}</td>
+                    <td>${item.note || '-'}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function saveMaintenanceRecord() {
+        if(!activeMachineIdForModal) return;
+        const date = document.getElementById('mMainDate').value;
+        const by = document.getElementById('mMainBy').value.trim();
+        const type = document.getElementById('mMainType').value.trim();
+        const note = document.getElementById('mMainNote').value.trim();
+
+        if(!date || !by || !type) {
+            alert("يرجى إدخال تاريخ الصيانة، اسم القائم بها، ونوع الصيانة!");
+            return;
+        }
+
+        const newLogEntry = { date, by, type, note };
+
+        db.collection("machines_detailed_specs").doc(activeMachineIdForModal).update({
+            maintenanceLog: firebase.firestore.FieldValue.arrayUnion(newLogEntry)
+        }).then(() => {
+            alert("✅ تمت إضافة سجل الصيانة بنجاح!");
+            document.getElementById('mMainBy').value = '';
+            document.getElementById('mMainType').value = '';
+            document.getElementById('mMainNote').value = '';
+            openMachineModal(activeMachineIdForModal); // تحديث القائمة في Modal
+        });
+    }
+
+    function deleteMachineDoc(id) { if(confirm("حذف الماكينة؟")) db.collection("machines_detailed_specs").doc(id).delete(); }
+    function handleLogout() { auth.signOut(); }
+
+    function addToStagingCart() {
         const date = document.getElementById('productionDate').value;
         const shift = document.getElementById('shiftSelect').value;
+        const supervisor = document.getElementById('supervisorSelect').value;
         const machine = document.getElementById('machineSelect').value;
         const worker = document.getElementById('workerSelect').value;
         const product = document.getElementById('productSelect').value;
         const color = document.getElementById('colorSelect').value;
         const pattern = document.getElementById('patternSelect').value;
 
-        if (!date || !shift || !machine || !worker || !product) {
-            alert("يرجى اختيار التاريخ، الوردية، المكبس، العامل، والمنتج!");
+        if (!date || !shift || !machine || !worker || !product || supervisor === NONE_OPTION) {
+            alert("يرجى اختيار التاريخ، الوردية، المشرف المسؤول، المكبس، العامل، والمنتج!");
             return;
         }
-
         if (color === NONE_OPTION && pattern === NONE_OPTION) {
             alert("اختر لون سادة أو تصميم مطبوع!");
             return;
@@ -885,100 +818,160 @@
         const totalProduction = g1 + totalDefects;
         const defectRate = g1 > 0 ? ((totalDefects / g1) * 100).toFixed(2) : 0;
 
-        currentRecord = {
-            date, shift,
-            entryBy: currentUsername,
-            machine, worker, product, appearance,
-            g1, g2, g3, waste,
-            totalProduction, totalDefects, defectRate,
-            isPassed: defectRate <= 8,
+        const recordItem = {
+            date, shift, supervisor, entryBy: auth.currentUser.email.split('@')[0],
+            machine, worker, product, appearance, g1, g2, g3, waste,
+            totalProduction, totalDefects, defectRate, isPassed: defectRate <= 8,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        document.getElementById('kpiTotal').innerText = totalProduction;
-        document.getElementById('kpiDefects').innerText = totalDefects;
-        document.getElementById('kpiDefectRate').innerText = defectRate + '%';
+        stagingCart.push(recordItem);
+        renderStagingTable();
+        document.getElementById('stagingCard').style.display = 'block';
 
-        const alertBox = document.getElementById('qualityAlert');
-        alertBox.style.display = 'block';
-        if (currentRecord.isPassed) {
-            alertBox.className = 'alert-box alert-success';
-            alertBox.innerHTML = `✅ تم تثبيت الوردية بنجاح: نسبة العيوب (${defectRate}%) مقبولة.`;
-        } else {
-            alertBox.className = 'alert-box alert-danger';
-            alertBox.innerHTML = `⚠️ تحذير: نسبة العيوب (${defectRate}%) تتجاوز الحد المسموح (8%)!`;
-        }
+        document.getElementById('g1').value = 0;
+        document.getElementById('g2').value = 0;
+        document.getElementById('g3').value = 0;
+        document.getElementById('waste').value = 0;
+    }
 
-        document.getElementById('resultCard').style.display = 'block';
-        db.collection("melamine_production").add(currentRecord).then(() => console.log("تم حفظ سطر الإنتاج"));
+    function renderStagingTable() {
+        const tbody = document.getElementById('stagingBody');
+        tbody.innerHTML = '';
+        stagingCart.forEach((item, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${item.machine}</b><br><small>${item.shift}</small></td>
+                    <td><b>${item.supervisor}</b></td>
+                    <td>${item.worker}</td>
+                    <td><b>${item.product}</b><br><span style="color:#555;">${item.appearance}</span></td>
+                    <td>${item.g1}</td>
+                    <td>${item.totalDefects} (نسبة العيوب: ${item.defectRate}%)</td>
+                    <td><button class="btn-del" onclick="removeFromStaging(${index})">حذف</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function removeFromStaging(index) {
+        stagingCart.splice(index, 1);
+        if(stagingCart.length === 0) document.getElementById('stagingCard').style.display = 'none';
+        renderStagingTable();
+    }
+
+    function openReviewModal() {
+        if(stagingCart.length === 0) { alert("القائمة فارغة!"); return; }
+        const reviewContent = document.getElementById('reviewContent');
+        reviewContent.innerHTML = '';
+        
+        stagingCart.forEach((item, idx) => {
+            reviewContent.innerHTML += `
+                <div style="background:#f8fafc; padding:10px; border-radius:6px; margin-bottom:8px; border-right:4px solid ${item.isPassed?'var(--success)':'var(--danger)'};">
+                    <b>#${idx+1} - المكبس:</b> ${item.machine} | <b>المشرف:</b> ${item.supervisor} | <b>العامل:</b> ${item.worker}<br>
+                    <b>المنتج:</b> ${item.product} (${item.appearance})<br>
+                    <b>الفرز الأول:</b> ${item.g1} | <b>العيوب والهالك:</b> ${item.totalDefects} (${item.defectRate}%) - <span style="font-weight:bold; color:${item.isPassed?'green':'red'}">${item.isPassed?'مقبول':'مرفوض'}</span>
+                </div>
+            `;
+        });
+        document.getElementById('reviewModal').style.display = 'flex';
+    }
+
+    function closeReviewModal() { document.getElementById('reviewModal').style.display = 'none'; }
+
+    function commitStagingToFirestore() {
+        closeReviewModal();
+        let batchPromises = stagingCart.map(record => db.collection("melamine_production").add(record));
+        
+        Promise.all(batchPromises).then(() => {
+            alert("✅ تم ترحيل وحفظ جميع سطور الوردية في السحاب بنجاح!");
+            stagingCart = [];
+            document.getElementById('stagingCard').style.display = 'none';
+        }).catch(err => alert("حدث خطأ أثناء الحفظ: " + err.message));
     }
 
     function listenToFirebaseHistory() {
-        db.collection("melamine_production").orderBy("timestamp", "desc")
-        .onSnapshot((snapshot) => {
-            const tbody = document.getElementById('historyBody');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const item = doc.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${item.date || ''}</b></td>
-                        <td style="color:var(--primary); font-weight:bold;">${item.shift || ''}</td>
-                        <td>${item.entryBy || ''}</td>
-                        <td>${item.machine || ''}</td>
-                        <td>${item.worker || ''}</td>
-                        <td><b>${item.product}</b><br><span style="font-size:11px; color:#555;">${item.appearance}</span></td>
-                        <td>${item.g1 || 0}</td>
-                        <td>${item.g2 || 0}</td>
-                        <td>${item.g3 || 0}</td>
-                        <td>${item.waste || 0}</td>
-                        <td><b>${item.defectRate || 0}%</b></td>
-                        <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
-                    </tr>
-                `;
-            });
+        db.collection("melamine_production").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+            cachedHistoryData = [];
+            snapshot.forEach((doc) => cachedHistoryData.push(doc.data()));
+            renderHistoryTable(cachedHistoryData);
         });
     }
 
-    async function getAIAnalysis() {
-        const aiOutput = document.getElementById('aiOutput');
-        aiOutput.style.display = 'block';
-        aiOutput.innerText = "جاري التحليل الفني...";
-        const promptText = `أنت مهندس جودة خبير في مكابس الميلامين. حلل وردية المكبس ${currentRecord.machine} في ${currentRecord.shift} بتاريخ ${currentRecord.date}: المنتج ${currentRecord.product}، نسبة العيوب ${currentRecord.defectRate}%. أعط أسباب وعلاج.`;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_GEMINI_KEY}`;
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-            });
-            const data = await response.json();
-            if (response.ok && data.candidates) {
-                aiOutput.innerText = data.candidates[0].content.parts[0].text;
-            } else { aiOutput.innerText = "تعذر التحليل."; }
-        } catch (e) { aiOutput.innerText = "خطأ في الاتصال بالذكاء الاصطناعي."; }
+    function renderHistoryTable(data) {
+        const tbody = document.getElementById('historyBody');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+        if(data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="11" style="padding:15px; color:#64748b;">لا توجد سجلات مطابقة.</td></tr>`;
+            return;
+        }
+        data.forEach((item) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${item.date || ''}</b></td>
+                    <td style="color:var(--primary); font-weight:bold;">${item.shift || ''}</td>
+                    <td><b>${item.supervisor || '-'}</b></td>
+                    <td>${item.entryBy || ''}</td>
+                    <td>${item.machine || ''}</td>
+                    <td>${item.worker || ''}</td>
+                    <td><b>${item.product}</b><br><span style="font-size:11px; color:#555;">${item.appearance}</span></td>
+                    <td>${item.g1 || 0}</td>
+                    <td>${item.totalDefects || 0}</td>
+                    <td><b>${item.defectRate || 0}%</b></td>
+                    <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
+                </tr>
+            `;
+        });
     }
 
-    function exportToExcel() {
-        db.collection("melamine_production").get().then((querySnapshot) => {
-            let reportsData = [];
-            querySnapshot.forEach((doc) => {
-                let data = doc.data();
-                reportsData.push({
-                    "التاريخ": data.date, "الوردية": data.shift, "المسجل": data.entryBy,
-                    "المكبس": data.machine, "العامل": data.worker, "المنتج": data.product,
-                    "المظهر": data.appearance, "فرز أول": data.g1, "فرز ثاني": data.g2,
-                    "فرز ثالث": data.g3, "التالف": data.waste, "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض'
-                });
-            });
-            if(reportsData.length === 0) { alert("لا توجد بيانات للتصدير."); return; }
-            const worksheet = XLSX.utils.json_to_sheet(reportsData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير_ورديات_المصنع");
-            XLSX.writeFile(workbook, `تقارير_مصنع_المنار_${new Date().toISOString().slice(0,10)}.xlsx`);
+    function applyFilters() {
+        const dVal = document.getElementById('filterDate').value;
+        const sVal = document.getElementById('filterShift').value;
+        const mVal = document.getElementById('filterMachine').value;
+
+        let filtered = cachedHistoryData.filter(item => {
+            let matchDate = dVal ? item.date === dVal : true;
+            let matchShift = sVal ? item.shift === sVal : true;
+            let matchMachine = mVal ? item.machine === mVal : true;
+            return matchDate && matchShift && matchMachine;
         });
+        renderHistoryTable(filtered);
+    }
+
+    function resetFilters() {
+        document.getElementById('filterDate').value = '';
+        document.getElementById('filterShift').value = '';
+        document.getElementById('filterMachine').value = '';
+        renderHistoryTable(cachedHistoryData);
+    }
+
+    function exportFilteredExcel() {
+        let reportsData = [];
+        const dVal = document.getElementById('filterDate').value;
+        const sVal = document.getElementById('filterShift').value;
+        const mVal = document.getElementById('filterMachine').value;
+
+        let exportList = cachedHistoryData.filter(item => {
+            let matchDate = dVal ? item.date === dVal : true;
+            let matchShift = sVal ? item.shift === sVal : true;
+            let matchMachine = mVal ? item.machine === mVal : true;
+            return matchDate && matchShift && matchMachine;
+        });
+
+        exportList.forEach((data) => {
+            reportsData.push({
+                "التاريخ": data.date, "الوردية": data.shift, "المشرف": data.supervisor, "المسجل": data.entryBy,
+                "المكبس": data.machine, "العامل": data.worker, "المنتج": data.product,
+                "المظهر": data.appearance, "فرز أول": data.g1, "إجمالي العيوب والتالف": data.totalDefects,
+                "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض'
+            });
+        });
+
+        if(reportsData.length === 0) { alert("لا توجد بيانات مطابقة للتصدير."); return; }
+        const worksheet = XLSX.utils.json_to_sheet(reportsData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير_المصنع");
+        XLSX.writeFile(workbook, `تقرير_مصنع_المنار_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 </script>
 
