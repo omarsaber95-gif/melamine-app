@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة إنتاج أطباق الميلامين - المنار</title>
+    <title>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين - المنار</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -83,7 +83,6 @@
         .master-list-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f1f5f9; border-radius: 6px; margin-bottom: 5px; font-size: 13px; }
         .btn-del { background: var(--danger); color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
-        /* صناديق الجداول ذات الارتفاع الثابت وشريط التمرير */
         .scrollable-container {
             max-height: 380px;
             overflow-y: auto;
@@ -129,7 +128,7 @@
     <div id="appSection" style="display: none;">
         
         <div class="header">
-            <h1>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين</h1>
+            <h1>نظام إدارة إنتاج ومراقبة جودة مصنع الميلامين والحوافز</h1>
             <div class="user-info-bar">
                 <span id="userNameDisplay"></span>
                 <button class="btn-profile-top" onclick="switchTab('profileTab')">👤 ملفي</button>
@@ -139,7 +138,7 @@
 
         <div class="tabs">
             <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال إنتاج الصالة</button>
-            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير والفلترة</button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 التقارير والحوافز</button>
             <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ السجل الفني والبيانات</button>
             <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 العمال والصلاحيات</button>
             <button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profileTab')">👤 ملفي</button>
@@ -151,10 +150,7 @@
                 <h3>تسجيل ورديات مكابس المصنع</h3>
                 <form id="prodForm">
                     <div class="form-row">
-                        <div class="form-group-flex">
-                            <label>تاريخ الإنتاج:</label>
-                            <input type="date" id="productionDate" required>
-                        </div>
+                        <div class="form-group-flex"><label>تاريخ الإنتاج:</label><input type="date" id="productionDate" required></div>
                         <div class="form-group-flex">
                             <label>اختر الوردية:</label>
                             <select id="shiftSelect" required>
@@ -165,36 +161,19 @@
                         </div>
                         <div class="form-group-flex">
                             <label>مشرف الوردية المسؤول:</label>
-                            <select id="supervisorSelect" required>
-                                <option value="">--- اختر المشرف ---</option>
-                            </select>
+                            <select id="supervisorSelect" required><option value="">--- اختر المشرف ---</option></select>
                         </div>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group-flex">
-                            <label>اختر المكبس:</label>
-                            <select id="machineSelect" required></select>
-                        </div>
-                        <div class="form-group-flex">
-                            <label>اختر العامل:</label>
-                            <select id="workerSelect" required></select>
-                        </div>
-                        <div class="form-group-flex">
-                            <label>اختر المنتج:</label>
-                            <select id="productSelect" required></select>
-                        </div>
+                        <div class="form-group-flex"><label>اختر المكبس:</label><select id="machineSelect" required></select></div>
+                        <div class="form-group-flex"><label>اختر العامل:</label><select id="workerSelect" required></select></div>
+                        <div class="form-group-flex"><label>اختر المنتج:</label><select id="productSelect" required></select></div>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group-flex">
-                            <label>اللون السادة:</label>
-                            <select id="colorSelect" onchange="handleColorChange()"></select>
-                        </div>
-                        <div class="form-group-flex">
-                            <label>التصميم المطبوع:</label>
-                            <select id="patternSelect" onchange="handlePatternChange()"></select>
-                        </div>
+                        <div class="form-group-flex"><label>اللون السادة:</label><select id="colorSelect" onchange="handleColorChange()"></select></div>
+                        <div class="form-group-flex"><label>التصميم المطبوع:</label><select id="patternSelect" onchange="handlePatternChange()"></select></div>
                     </div>
 
                     <div class="form-row">
@@ -227,7 +206,7 @@
         <div id="historyTab" class="tab-content">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 15px;">
-                    <h3>سجل إنتاج المصنع والتقارير</h3>
+                    <h3>سجل إنتاج المصنع والحوافز</h3>
                     <button class="btn-excel" id="excelBtn" onclick="exportFilteredExcel()" style="display:none;">تصدير لـ Excel 📊</button>
                 </div>
 
@@ -249,7 +228,7 @@
                 <div class="scrollable-container">
                     <table>
                         <thead>
-                            <tr><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف</th><th>نسبة العيوب</th><th>الحالة</th></tr>
+                            <tr><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>حافز العامل 💰</th></tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
                     </table>
@@ -281,12 +260,25 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-                <div class="card">
-                    <h3>أنواع المنتجات (سحابي)</h3>
-                    <div class="list-add-box"><input type="text" id="newProduct" placeholder="منتج جديد"><button class="btn-add" onclick="addMasterDataFirestore('products', 'newProduct')">إضافة</button></div>
-                    <div id="productsList" style="max-height: 200px; overflow-y: auto;"></div>
+            <!-- إعدادات المنتجات بالتفصيل والحوافز -->
+            <div class="card">
+                <h3 style="color: var(--primary); margin-bottom: 10px;">📦 المنتجات ومعايير الإنتاج والحوافز</h3>
+                <div class="form-row">
+                    <div class="form-group-flex"><input type="text" id="newProdName" placeholder="اسم المنتج (مثال: طبق غويط 9 بوصة)"></div>
+                    <div class="form-group-flex"><input type="number" id="newProdTarget" placeholder="الهدف المطلوب (عدد)"></div>
+                    <div class="form-group-flex"><input type="number" id="newProdWaste" placeholder="نسبة العادم المسموحة %"></div>
+                    <div class="form-group-flex"><input type="number" id="newProdIncentive" placeholder="حافز القطعة الزائدة (ج.م)"></div>
                 </div>
+                <button class="btn-submit" style="background-color: var(--success);" onclick="addDetailedProduct()">إضافة المنتج بالمعايير ➕</button>
+                <div class="scrollable-container" style="max-height: 220px;">
+                    <table>
+                        <thead><tr><th>اسم المنتج</th><th>الهدف المطلوب</th><th>عادم مسموح</th><th>حافز القطعة</th><th>إجراء</th></tr></thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                 <div class="card">
                     <h3>الألوان السادة (سحابي)</h3>
                     <div class="list-add-box"><input type="text" id="newColor" placeholder="لون جديد"><button class="btn-add" onclick="addMasterDataFirestore('colors', 'newColor')">إضافة</button></div>
@@ -400,7 +392,7 @@
 <!-- نافذة الاستعراض والمراجعة الشاملة قبل الترحيل النهائي -->
 <div id="reviewModal">
     <div class="modal-box">
-        <h3 style="color: var(--primary); text-align: center;">🔍 استعراض نهائي لبيانات الوردية قبل الترحيل</h3>
+        <h3 style="color: var(--primary); text-align: center;">🔍 استعراض نهائي لبيانات الوردية والحوافز</h3>
         <div id="reviewContent" style="margin: 15px 0; max-height: 50vh; overflow-y: auto;"></div>
         <div style="display: flex; gap: 10px;">
             <button onclick="commitStagingToFirestore()" style="flex:1; background:var(--success); color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">تأكيد وترحيل للداتابيز ✅</button>
@@ -553,7 +545,7 @@
         const isWorker = document.getElementById('isWorker').checked;
         const isSupervisor = document.getElementById('isSupervisor').checked;
 
-        if(!username || !pass || !fullName) { alert("يرجى ملء جميع الحقول المطلوبة (اسم المستخدم، الاسم الكامل، وكلمة المرور)!"); return; }
+        if(!username || !pass || !fullName) { alert("يرجى ملء جميع الحقول المطلوبة!"); return; }
 
         const perms = {
             entry: document.getElementById('p_entry').checked, history: document.getElementById('p_history').checked,
@@ -579,13 +571,8 @@
                 loadWorkersAndSupervisorsDropdowns();
                 return secondaryAuth.signOut();
             })
-            .then(() => {
-                secondaryApp.delete();
-            })
-            .catch((error) => {
-                alert("حدث خطأ أثناء إنشاء الحساب: " + error.message);
-                secondaryApp.delete();
-            });
+            .then(() => secondaryApp.delete())
+            .catch((error) => { alert("خطأ: " + error.message); secondaryApp.delete(); });
     }
 
     function loadUsersTable() {
@@ -640,10 +627,14 @@
 
     function loadMasterDataFromFirestore() {
         db.collection("factory_settings").doc("master_data").onSnapshot((doc) => {
-            if (doc.exists) { globalMasterData = doc.data(); } 
-            else {
+            if (doc.exists) { 
+                globalMasterData = doc.data(); 
+            } else {
                 globalMasterData = {
-                    products: ["طبق غويط 9 بوصة", "طبق مسطح 10 بوصة", "سرفيس بيضاوي"],
+                    products: [
+                        { name: "طبق غويط 9 بوصة", target: 500, maxWaste: 5, incentiveValue: 0.5 },
+                        { name: "طبق مسطح 10 بوصة", target: 450, maxWaste: 6, incentiveValue: 0.6 }
+                    ],
                     colors: ["أبيض ناصع", "أسود ملكي", "بيج كلاسيك"],
                     patterns: ["زهور كلاسيك", "رخامي مودرن", "فواكه مشكلة"]
                 };
@@ -654,7 +645,26 @@
     }
 
     function renderMasterDataUI() {
-        ['products', 'colors', 'patterns'].forEach(key => {
+        // إدارة المنتجات (أوبجكتات بالحوافز والمعايير)
+        const prodTbody = document.getElementById('productsTableBody');
+        if(prodTbody) {
+            prodTbody.innerHTML = '';
+            (globalMasterData.products || []).forEach((item, index) => {
+                let pObj = typeof item === 'string' ? { name: item, target: 0, maxWaste: 0, incentiveValue: 0 } : item;
+                prodTbody.innerHTML += `
+                    <tr>
+                        <td><b>${pObj.name}</b></td>
+                        <td>${pObj.target || 0}</td>
+                        <td>${pObj.maxWaste || 0}%</td>
+                        <td>${pObj.incentiveValue || 0} ج.م</td>
+                        <td><button class="btn-del" onclick="deleteProductFirestore(${index})">حذف</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // الألوان والتصاميم
+        ['colors', 'patterns'].forEach(key => {
             const container = document.getElementById(key + 'List');
             if (container) {
                 container.innerHTML = '';
@@ -664,6 +674,33 @@
             }
         });
         updateFormDropdowns();
+    }
+
+    function addDetailedProduct() {
+        const name = document.getElementById('newProdName').value.trim();
+        const target = Number(document.getElementById('newProdTarget').value);
+        const maxWaste = Number(document.getElementById('newProdWaste').value);
+        const incentiveValue = Number(document.getElementById('newProdIncentive').value);
+
+        if (!name || target <= 0) { alert("يرجى إدخال اسم المنتج والهدف المطلوب بشكل صحيح!"); return; }
+
+        if (!globalMasterData.products) globalMasterData.products = [];
+        globalMasterData.products.push({ name, target, maxWaste, incentiveValue });
+
+        db.collection("factory_settings").doc("master_data").set(globalMasterData).then(() => {
+            alert("✅ تم إضافة المنتج ومعايير الحوافز بنجاح!");
+            document.getElementById('newProdName').value = '';
+            document.getElementById('newProdTarget').value = '';
+            document.getElementById('newProdWaste').value = '';
+            document.getElementById('newProdIncentive').value = '';
+        });
+    }
+
+    function deleteProductFirestore(index) {
+        if(confirm("حذف هذا المنتج؟")) {
+            globalMasterData.products.splice(index, 1);
+            db.collection("factory_settings").doc("master_data").set(globalMasterData);
+        }
     }
 
     function addMasterDataFirestore(type, inputId) {
@@ -680,7 +717,16 @@
     }
 
     function updateFormDropdowns() {
-        populateSelect('productSelect', globalMasterData.products, false);
+        const select = document.getElementById('productSelect');
+        if (select) {
+            select.innerHTML = '';
+            (globalMasterData.products || []).forEach(item => {
+                let pName = typeof item === 'string' ? item : item.name;
+                const opt = document.createElement('option');
+                opt.value = pName; opt.innerText = pName;
+                select.appendChild(opt);
+            });
+        }
         populateSelect('colorSelect', globalMasterData.colors, true);
         populateSelect('patternSelect', globalMasterData.patterns, true);
     }
@@ -811,13 +857,9 @@
         const type = document.getElementById('mMainType').value.trim();
         const note = document.getElementById('mMainNote').value.trim();
 
-        if(!date || !by || !type) {
-            alert("يرجى إدخال تاريخ الصيانة، اسم القائم بها، ونوع الصيانة!");
-            return;
-        }
+        if(!date || !by || !type) { alert("يرجى إدخال تاريخ الصيانة، اسم القائم بها، ونوع الصيانة!"); return; }
 
         const newLogEntry = { date, by, type, note };
-
         db.collection("machines_detailed_specs").doc(activeMachineIdForModal).update({
             maintenanceLog: firebase.firestore.FieldValue.arrayUnion(newLogEntry)
         }).then(() => {
@@ -832,6 +874,22 @@
     function deleteMachineDoc(id) { if(confirm("حذف الماكينة؟")) db.collection("machines_detailed_specs").doc(id).delete(); }
     function handleLogout() { auth.signOut(); }
 
+    // حساب الحافز الذكي بناءً على المعدل ونسبة العادم
+    function calculateIncentive(productName, g1, defectRate) {
+        const productSpec = (globalMasterData.products || []).find(p => (typeof p === 'string' ? p === productName : p.name === productName));
+        
+        if (!productSpec || typeof productSpec === 'string') return 0; // إذا لم يُعَرَّف المنتج بالتفصيل
+
+        // الشروط: 1- عدم تجاوز نسبة العادم المسموحة. 2- تحقيق إنتاج أعلى من المستهدف.
+        if (defectRate <= productSpec.maxWaste) {
+            const extraPieces = g1 - productSpec.target;
+            if (extraPieces > 0) {
+                return Number((extraPieces * productSpec.incentiveValue).toFixed(2));
+            }
+        }
+        return 0;
+    }
+
     function addToStagingCart() {
         const date = document.getElementById('productionDate').value;
         const shift = document.getElementById('shiftSelect').value;
@@ -843,7 +901,7 @@
         const pattern = document.getElementById('patternSelect').value;
 
         if (!date || !shift || !machine || !worker || !product || supervisor === NONE_OPTION) {
-            alert("يرجى اختيار التاريخ، الوردية، المشرف المسؤول، المكبس، العامل، والمنتج!");
+            alert("يرجى اختيار البيانات الأساسية للوردية!");
             return;
         }
         if (color === NONE_OPTION && pattern === NONE_OPTION) {
@@ -863,13 +921,14 @@
         }
 
         const totalDefects = g2 + g3 + waste;
-        const totalProduction = g1 + totalDefects;
-        const defectRate = g1 > 0 ? ((totalDefects / g1) * 100).toFixed(2) : 0;
+        const defectRate = g1 > 0 ? Number(((totalDefects / g1) * 100).toFixed(2)) : 0;
+        const isPassed = defectRate <= 8;
+        const incentive = calculateIncentive(product, g1, defectRate);
 
         const recordItem = {
             date, shift, supervisor, entryBy: document.getElementById('userNameDisplay').innerText.replace("المستخدم: ", ""),
             machine, worker, product, appearance, g1, g2, g3, waste,
-            totalProduction, totalDefects, defectRate, isPassed: defectRate <= 8,
+            totalDefects, defectRate, isPassed, incentive,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -894,7 +953,7 @@
                     <td>${item.worker}</td>
                     <td><b>${item.product}</b><br><span style="color:#555;">${item.appearance}</span></td>
                     <td>${item.g1}</td>
-                    <td>${item.totalDefects} (نسبة العيوب: ${item.defectRate}%)</td>
+                    <td>${item.totalDefects} (عيوب: ${item.defectRate}%) | الحافز: <b style="color:var(--success);">${item.incentive} ج.م</b></td>
                     <td><button class="btn-del" onclick="removeFromStaging(${index})">حذف</button></td>
                 </tr>
             `;
@@ -915,9 +974,9 @@
         stagingCart.forEach((item, idx) => {
             reviewContent.innerHTML += `
                 <div style="background:#f8fafc; padding:10px; border-radius:6px; margin-bottom:8px; border-right:4px solid ${item.isPassed?'var(--success)':'var(--danger)'};">
-                    <b>#${idx+1} - المكبس:</b> ${item.machine} | <b>المشرف:</b> ${item.supervisor} | <b>العامل:</b> ${item.worker}<br>
+                    <b>#${idx+1} - المكبس:</b> ${item.machine} | <b>العامل:</b> ${item.worker}<br>
                     <b>المنتج:</b> ${item.product} (${item.appearance})<br>
-                    <b>الفرز الأول:</b> ${item.g1} | <b>العيوب والهالك:</b> ${item.totalDefects} (${item.defectRate}%) - <span style="font-weight:bold; color:${item.isPassed?'green':'red'}">${item.isPassed?'مقبول':'مرفوض'}</span>
+                    <b>فرز أول:</b> ${item.g1} | <b>العيوب:</b> ${item.totalDefects} (${item.defectRate}%) | <b>حافز العامل:</b> <span style="color:var(--success); font-weight:bold;">${item.incentive} ج.م</span>
                 </div>
             `;
         });
@@ -931,10 +990,10 @@
         let batchPromises = stagingCart.map(record => db.collection("melamine_production").add(record));
         
         Promise.all(batchPromises).then(() => {
-            alert("✅ تم ترحيل وحفظ جميع سطور الوردية في السحاب بنجاح!");
+            alert("✅ تم ترحيل وحفظ جميع سطور الوردية وحساب الحوافز بنجاح!");
             stagingCart = [];
             document.getElementById('stagingCard').style.display = 'none';
-        }).catch(err => alert("حدث خطأ أثناء الحفظ: " + err.message));
+        }).catch(err => alert("خطأ أثناء الحفظ: " + err.message));
     }
 
     function listenToFirebaseHistory() {
@@ -950,7 +1009,7 @@
         if(!tbody) return;
         tbody.innerHTML = '';
         if(data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="11" style="padding:15px; color:#64748b;">لا توجد سجلات مطابقة.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="12" style="padding:15px; color:#64748b;">لا توجد سجلات مطابقة.</td></tr>`;
             return;
         }
         data.forEach((item) => {
@@ -967,6 +1026,7 @@
                     <td>${item.totalDefects || 0}</td>
                     <td><b>${item.defectRate || 0}%</b></td>
                     <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
+                    <td style="color:var(--success); font-weight:bold; font-size:14px;">${item.incentive || 0} ج.م</td>
                 </tr>
             `;
         });
@@ -1011,15 +1071,16 @@
                 "التاريخ": data.date, "الوردية": data.shift, "المشرف": data.supervisor, "المسجل": data.entryBy,
                 "المكبس": data.machine, "العامل": data.worker, "المنتج": data.product,
                 "المظهر": data.appearance, "فرز أول": data.g1, "إجمالي العيوب والتالف": data.totalDefects,
-                "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض'
+                "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض',
+                "حافز العامل (ج.م)": data.incentive || 0
             });
         });
 
         if(reportsData.length === 0) { alert("لا توجد بيانات مطابقة للتصدير."); return; }
         const worksheet = XLSX.utils.json_to_sheet(reportsData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير_المصنع");
-        XLSX.writeFile(workbook, `تقرير_مصنع_المنار_${new Date().toISOString().slice(0,10)}.xlsx`);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "تقارير_الإنتاج_والحوافز");
+        XLSX.writeFile(workbook, `تقرير_مصنع_المنار_والحوافز_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 </script>
 
