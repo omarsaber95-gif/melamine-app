@@ -83,7 +83,7 @@
         .master-list-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f1f5f9; border-radius: 6px; margin-bottom: 5px; font-size: 13px; }
         .btn-del { background: var(--danger); color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
-        /* صندوق ذو ارتفاع ثابت مع شريط تمرير داخلي لحل مشكلة الصف الطويل */
+        /* صناديق الجداول ذات الارتفاع الثابت وشريط التمرير */
         .scrollable-container {
             max-height: 380px;
             overflow-y: auto;
@@ -306,7 +306,8 @@
                 <h3>إضافة مستخدم وتحديد الدور والأذونات 🛠️</h3>
                 <form onsubmit="handleAddNewUser(event)">
                     <div class="form-row">
-                        <div class="form-group-flex"><label>اسم المستخدم:</label><input type="text" id="newUsername" required></div>
+                        <div class="form-group-flex"><label>اسم المستخدم (إنجليزي):</label><input type="text" id="newUsername" required placeholder="مثال: omar"></div>
+                        <div class="form-group-flex"><label>الاسم الكامل (عربي):</label><input type="text" id="newFullName" required placeholder="مثال: عمر أحمد"></div>
                         <div class="form-group-flex"><label>كلمة المرور:</label><input type="text" id="newUserPass" required></div>
                     </div>
                     
@@ -335,7 +336,7 @@
                 <h3>إدارة المستخدمين والأدوار 🛡️</h3>
                 <div class="scrollable-container">
                     <table>
-                        <thead><tr><th>المستخدم</th><th>عامل؟</th><th>مشرف؟</th><th>إدخال</th><th>تقارير</th><th>إكسيل</th><th>البيانات</th><th>الصلاحيات</th><th>إجراءات</th></tr></thead>
+                        <thead><tr><th>اسم المستخدم</th><th>الاسم الكامل</th><th>عامل؟</th><th>مشرف؟</th><th>إدخال</th><th>تقارير</th><th>إكسيل</th><th>البيانات</th><th>الصلاحيات</th><th>إجراءات</th></tr></thead>
                         <tbody id="usersTableBody"></tbody>
                     </table>
                 </div>
@@ -443,19 +444,25 @@
             document.getElementById('appSection').style.display = 'block';
 
             let currentUsername = user.email.split('@')[0];
-            document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
-            document.getElementById('profUsername').innerText = currentUsername;
+            
+            db.collection("users_permissions").doc(currentUsername).get().then((doc) => {
+                const data = doc.exists ? doc.data() : null;
+                const displayName = (data && data.fullName) ? data.fullName : currentUsername;
+                document.getElementById('userNameDisplay').innerText = "المستخدم: " + displayName;
+                document.getElementById('profUsername').innerText = displayName;
 
-            if (currentUsername.toLowerCase() === "admin") {
-                applyPermissions({ entry: true, history: true, excel: true, master: true, users: true }, true, true);
-            } else {
-                db.collection("users_permissions").doc(currentUsername).get().then((doc) => {
-                    if (doc.exists) {
-                        const d = doc.data();
-                        applyPermissions(d.perms || {}, d.isWorker, d.isSupervisor);
-                    } else { applyPermissions({ entry: true }, true, false); }
-                }).catch(() => applyPermissions({ entry: true }, true, false));
-            }
+                if (currentUsername.toLowerCase() === "admin") {
+                    applyPermissions({ entry: true, history: true, excel: true, master: true, users: true }, true, true);
+                } else if (data) {
+                    applyPermissions(data.perms || {}, data.isWorker, data.isSupervisor);
+                } else { 
+                    applyPermissions({ entry: true }, true, false); 
+                }
+            }).catch(() => {
+                document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
+                document.getElementById('profUsername').innerText = currentUsername;
+                applyPermissions({ entry: true }, true, false);
+            });
 
             loadMasterDataFromFirestore();
             loadMachinesTable();
@@ -516,7 +523,7 @@
             if (rawUsername === "admin") {
                 auth.createUserWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass).then(() => {
                     db.collection("users_permissions").doc("admin").set({
-                        username: "admin", isWorker: true, isSupervisor: true,
+                        username: "admin", fullName: "مدير النظام", isWorker: true, isSupervisor: true,
                         perms: { entry: true, history: true, excel: true, master: true, users: true }
                     });
                 });
@@ -540,12 +547,13 @@
     function handleAddNewUser(e) {
         e.preventDefault();
         let rawInput = document.getElementById('newUsername').value.trim();
+        const fullName = document.getElementById('newFullName').value.trim();
         const username = rawInput.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
         const pass = document.getElementById('newUserPass').value;
         const isWorker = document.getElementById('isWorker').checked;
         const isSupervisor = document.getElementById('isSupervisor').checked;
 
-        if(!username || !pass) { alert("يرجى إدخال اسم مستخدم صالح وكلمة مرور!"); return; }
+        if(!username || !pass || !fullName) { alert("يرجى ملء جميع الحقول المطلوبة (اسم المستخدم، الاسم الكامل، وكلمة المرور)!"); return; }
 
         const perms = {
             entry: document.getElementById('p_entry').checked, history: document.getElementById('p_history').checked,
@@ -560,11 +568,12 @@
 
         secondaryAuth.createUserWithEmailAndPassword(email, pass)
             .then(() => {
-                return db.collection("users_permissions").doc(username).set({ username, isWorker, isSupervisor, perms });
+                return db.collection("users_permissions").doc(username).set({ username, fullName, isWorker, isSupervisor, perms });
             })
             .then(() => {
-                alert(`تم إنشاء حساب الدخول وصلاحيات المستخدم (${username}) بنجاح! 🚀`);
+                alert(`تم إنشاء حساب الدخول وصلاحيات المستخدم (${fullName}) بنجاح! 🚀`);
                 document.getElementById('newUsername').value = ''; 
+                document.getElementById('newFullName').value = '';
                 document.getElementById('newUserPass').value = '';
                 loadUsersTable();
                 loadWorkersAndSupervisorsDropdowns();
@@ -586,9 +595,11 @@
             tbody.innerHTML = '';
             snapshot.forEach((doc) => {
                 const u = doc.data(), p = u.perms || {};
+                const dispName = u.fullName || u.username;
                 tbody.innerHTML += `
                     <tr>
                         <td><b>${u.username}</b></td>
+                        <td><b>${dispName}</b></td>
                         <td><input type="checkbox" ${u.isWorker?'checked':''} onchange="toggleUserRole('${u.username}', 'isWorker', this.checked)"></td>
                         <td><input type="checkbox" ${u.isSupervisor?'checked':''} onchange="toggleUserRole('${u.username}', 'isSupervisor', this.checked)"></td>
                         <td><input type="checkbox" ${p.entry?'checked':''} onchange="togglePerm('${u.username}', 'entry', this.checked)"></td>
@@ -617,8 +628,9 @@
 
             snapshot.forEach((doc) => {
                 const u = doc.data();
-                if(u.isWorker) workersList.push(u.username);
-                if(u.isSupervisor) supervisorsList.push(u.username);
+                const displayName = u.fullName || u.username;
+                if(u.isWorker) workersList.push(displayName);
+                if(u.isSupervisor) supervisorsList.push(displayName);
             });
 
             populateSelect('workerSelect', workersList, false);
@@ -855,7 +867,7 @@
         const defectRate = g1 > 0 ? ((totalDefects / g1) * 100).toFixed(2) : 0;
 
         const recordItem = {
-            date, shift, supervisor, entryBy: auth.currentUser.email.split('@')[0],
+            date, shift, supervisor, entryBy: document.getElementById('userNameDisplay').innerText.replace("المستخدم: ", ""),
             machine, worker, product, appearance, g1, g2, g3, waste,
             totalProduction, totalDefects, defectRate, isPassed: defectRate <= 8,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
