@@ -13,13 +13,17 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
-    body { font-family: system-ui, sans-serif; padding: 20px; background: #f4f6f8; direction: rtl; }
-    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-    h2 { color: #1e293b; text-align: center; }
-    input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-    button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: bold; }
-    button.excel-btn { background: #16a34a; }
-    .status { text-align: center; font-weight: bold; margin-top: 10px; color: #16a34a; }
+    body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; background: #f4f6f8; direction: rtl; margin: 0; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 450px; margin: 20px auto; }
+    h2 { color: #1e293b; text-align: center; margin-top: 0; margin-bottom: 20px; }
+    label { font-weight: bold; color: #334155; display: block; margin-top: 12px; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; }
+    button { width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .save-btn { background: #2563eb; color: white; }
+    .save-btn:hover { background: #1d4ed8; }
+    .excel-btn { background: #16a34a; color: white; }
+    .excel-btn:hover { background: #15803d; }
+    .status { text-align: center; font-weight: bold; margin-top: 15px; color: #16a34a; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -43,7 +47,7 @@
     <label>ملاحظات:</label>
     <input type="text" id="notes" placeholder="أي ملاحظات إضافية">
     
-    <button onclick="saveData()">تسجيل التقرير في الداتابيز</button>
+    <button class="save-btn" onclick="saveData()">تسجيل التقرير في الداتابيز 💾</button>
     <button class="excel-btn" onclick="exportToExcel()">تحميل شيت إكسيل (Excel) 📊</button>
     
     <div id="statusMsg" class="status"></div>
@@ -65,7 +69,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 3. دالة حفظ البيانات في Firebase
+    // 3. دالة حفظ البيانات
     function saveData() {
       const inspector = document.getElementById('inspectorName').value;
       const shift = document.getElementById('shiftNo').value;
@@ -95,7 +99,7 @@
       });
     }
 
-    // 4. دالة سحب البيانات وتصديرها كـ ملف Excel
+    // 4. دالة تصدير الإكسيل
     function exportToExcel() {
       const statusMsg = document.getElementById('statusMsg');
       statusMsg.innerText = "جاري تحضير ملف الإكسيل... ⏳";
@@ -120,12 +124,10 @@
           return;
         }
 
-        // تحويل البيانات لشيت إكسيل
         const worksheet = XLSX.utils.json_to_sheet(reportsData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "تقارير الجودة");
 
-        // تنزيل الملف على الجهاز
         XLSX.writeFile(workbook, "تقارير_جودة_المنار.xlsx");
         statusMsg.innerText = "تم تحميل ملف الإكسيل بنجاح! 📊";
         setTimeout(() => { statusMsg.innerText = ''; }, 3000);
