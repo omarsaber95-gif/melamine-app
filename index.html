@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة إنتاج المنار - المتكامل</title>
+    <title>نظام المنار - حل مشكلة الدخول</title>
     
-    <!-- المكتبات -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -13,148 +12,125 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        :root {
-            --primary: #1e3a8a; --secondary: #0284c7; --success: #16a34a;
-            --danger: #dc2626; --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b;
-        }
-
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; direction: rtl; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        
-        /* الترويسة */
-        .header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .header h1 { font-size: 18px; margin: 0; }
-
-        /* التبويبات */
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 6px; border-radius: 10px; overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: bold; cursor: pointer; border-radius: 8px; white-space: nowrap; font-size: 13px; }
-        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* البطاقات والجداول */
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
-        th { background: #f1f5f9; }
-
-        /* الأزرار والمدخلات */
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
-        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-        .form-group-flex { flex: 1; min-width: 130px; }
-        button { cursor: pointer; font-weight: bold; border-radius: 8px; border: none; }
-        .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; }
-        .btn-del { background: var(--danger); color: white; padding: 5px 10px; }
-        .btn-add { background: var(--success); color: white; padding: 10px; }
-        .btn-edit { background: #f59e0b; color: white; padding: 5px 10px; }
-
-        /* مودال التأكيد */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; text-align: center; }
-
-        /* شارات الصلاحيات */
-        .badge-perm { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 11px; margin: 2px; }
-        .filter-bar { background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        :root { --primary: #1e3a8a; --bg: #f8fafc; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); direction: rtl; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; text-align: center; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .error-msg { color: red; background: #fee2e2; padding: 10px; border-radius: 5px; margin-top: 10px; display: none; font-size: 13px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .tab-btn { padding: 10px; background: #e2e8f0; border-radius: 8px; border: none; cursor: pointer; display: none; }
+        .tab-content { display: none; background: white; padding: 20px; border-radius: 12px; }
+        .active { display: block !important; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div id="loginSection" class="card">
+    <h2>تسجيل الدخول</h2>
+    <input type="text" id="userInput" placeholder="اسم المستخدم (مثال: admin)">
+    <input type="password" id="passInput" placeholder="كلمة المرور">
+    <button onclick="handleLogin()">دخول 🔑</button>
+    <div id="loginError" class="error-msg"></div>
+</div>
 
-    <!-- 1. تسجيل الدخول -->
-    <div id="loginSection">
-        <div class="card" style="max-width: 400px; margin: 60px auto; text-align: center;">
-            <h2 style="color: var(--primary);">دخول نظام مصنع المنار</h2>
-            <form onsubmit="handleLogin(event)">
-                <input type="text" id="usernameInput" placeholder="اسم المستخدم" required style="margin-bottom:10px;">
-                <input type="password" id="loginPassword" placeholder="••••••••" required style="margin-bottom:20px;">
-                <button type="submit" class="btn-submit">دخول 🔑</button>
-            </form>
-            <div id="loginError" style="color:red; margin-top:10px; display:none;"></div>
-        </div>
+<div id="appSection" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3 id="welcomeMsg">مرحباً</h3>
+        <button onclick="auth.signOut()" style="width:auto; padding:5px 15px; background:red;">خروج</button>
     </div>
 
-    <!-- 2. الشاشة الرئيسية -->
-    <div id="appSection" style="display: none;">
-        
-        <div class="header">
-            <h1>نظام إدارة الجودة والإنتاج</h1>
-            <div>
-                <span id="userNameDisplay"></span> | 
-                <button onclick="auth.signOut()" style="background:transparent; color:white;">خروج 🚪</button>
-            </div>
-        </div>
+    <div class="tabs">
+        <button id="tabEntry" class="tab-btn" onclick="showTab('entry')">📝 إدخال</button>
+        <button id="tabHistory" class="tab-btn" onclick="showTab('history')">📊 سجلات</button>
+        <button id="tabUsers" class="tab-btn" onclick="showTab('users')">👥 صلاحيات</button>
+    </div>
 
-        <div class="tabs">
-            <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entryTab')">📝 إدخال</button>
-            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('historyTab')">📊 السجلات</button>
-            <button class="tab-btn" id="tabStatsBtn" onclick="switchTab('statsTab')">📈 إحصائيات</button>
-            <button class="tab-btn" id="tabMasterBtn" onclick="switchTab('masterTab')">⚙️ الإعدادات</button>
-            <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('usersTab')">👥 المستخدمين</button>
-        </div>
+    <div id="entry" class="tab-content">
+        <h3>صفحة الإدخال</h3>
+        <p>تم تسجيل الدخول بنجاح! يمكنك البدء بالعمل.</p>
+    </div>
+    
+    <div id="history" class="tab-content">
+        <h3>السجلات</h3>
+    </div>
 
-        <!-- تبويب الإدخال -->
-        <div id="entryTab" class="tab-content active">
-            <div class="card">
-                <h3>إضافة بيانات الوردية</h3>
-                <form id="prodForm">
-                    <div class="form-row">
-                        <div class="form-group-flex"><label>التاريخ</label><input type="date" id="productionDate" required></div>
-                        <div class="form-group-flex">
-                            <label>الوردية</label>
-                            <select id="shiftSelect">
-                                <option>الوردية 1</option><option>الوردية 2</option><option>الوردية 3</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group-flex"><label>المكبس</label><select id="machineSelect"></select></div>
-                        <div class="form-group-flex"><label>العامل</label><select id="workerSelect"></select></div>
-                        <div class="form-group-flex"><label>المنتج</label><select id="productSelect"></select></div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group-flex"><label>فرز 1</label><input type="number" id="g1" value="0"></div>
-                        <div class="form-group-flex"><label>فرز 2</label><input type="number" id="g2" value="0"></div>
-                        <div class="form-group-flex"><label>فرز 3</label><input type="number" id="g3" value="0"></div>
-                        <div class="form-group-flex"><label>تالف</label><input type="number" id="waste" value="0"></div>
-                    </div>
-                    <button type="button" class="btn-submit" onclick="showConfirmModal()">مراجعة وتثبيت 💾</button>
-                </form>
-            </div>
-        </div>
+    <div id="users" class="tab-content">
+        <h3>إدارة المستخدمين</h3>
+    </div>
+</div>
 
-        <!-- تبويب السجلات والفلترة -->
-        <div id="historyTab" class="tab-content">
-            <div class="filter-bar">
-                <div class="form-group-flex"><label>بحث بالمكبس:</label><select id="filterMachine" onchange="applyFilters()"></select></div>
-                <div class="form-group-flex"><label>بحث بالتاريخ:</label><input type="date" id="filterDate" onchange="applyFilters()"></div>
-                <button class="btn-submit" style="width:auto; padding: 10px;" onclick="exportToExcel()">إكسيل 📊</button>
-            </div>
-            <div class="card" style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr><th>التاريخ</th><th>المكبس</th><th>العامل</th><th>فرز 1</th><th>فرز 2</th><th>تالف</th><th>% العيوب</th><th>إجراء</th></tr>
-                    </thead>
-                    <tbody id="historyBody"></tbody>
-                </table>
-            </div>
-        </div>
+<script>
+    // ضع الـ Config الخاص بك هنا (تأكد أنه مطابق تماماً لبيانات Firebase لديك)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
+      authDomain: "almanar-industry.firebaseapp.com",
+      projectId: "almanar-industry",
+      storageBucket: "almanar-industry.firebasestorage.app",
+      messagingSenderId: "113518445928",
+      appId: "1:113518445928:web:d9d3e645cdbd157ea8c2dd"
+    };
 
-        <!-- تبويب الإحصائيات -->
-        <div id="statsTab" class="tab-content">
-            <div class="card">
-                <h3>نظرة عامة على إنتاج الأسبوع</h3>
-                <canvas id="productionChart" height="120"></canvas>
-            </div>
-        </div>
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-        <!-- تبويب الإعدادات (Masters) -->
-        <div id="masterTab" class="tab-content">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <div class="card"><h4>العمال</h4><div class="form-row"><input id="nw"><button onclick="addMasterItem('workers','nw')">+</button></div><div id="workersList"></div></div>
-                <div class="card"><h4>المنتجات</h4><div class="form-row"><input id="np"><button onclick="addMasterItem('products','np')">+</button></div><div id="productsList"></div></div>
-                <div class="card"><h4>المكابس</h4><div class="form-row"><input id="nm"><button onclick="addMasterItem('machines','nm')">+</button></div><div id="machinesList"></div></div>
-            </div>
-        </div>
+    // دالة تسجيل الدخول المحسنة
+    async function handleLogin() {
+        const user = document.getElementById('userInput').value.trim().toLowerCase();
+        const pass = document.getElementById('passInput').value;
+        const errDiv = document.getElementById('loginError');
 
-        <!-- تبويب المستخدمين والصلاحيات
+        errDiv.style.display = 'none';
+
+        if(!user || !pass) {
+            errDiv.innerText = "يرجى كتابة الاسم وكلمة المرور";
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            // محاولة تسجيل الدخول بإضافة الدومين تلقائياً
+            const email = user + "@almanar.factory";
+            await auth.signInWithEmailAndPassword(email, pass);
+        } catch (error) {
+            console.error(error);
+            errDiv.style.display = 'block';
+            // ترجمة الأخطاء لكي تفهم المشكلة
+            if (error.code === 'auth/user-not-found') errDiv.innerText = "اسم المستخدم غير موجود";
+            else if (error.code === 'auth/wrong-password') errDiv.innerText = "كلمة المرور خطأ";
+            else if (error.code === 'auth/network-request-failed') errDiv.innerText = "خطأ في الاتصال بالإنترنت";
+            else errDiv.innerText = "خطأ: " + error.message;
+        }
+    }
+
+    // مراقبة حالة المستخدم
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            const userName = user.email.split('@')[0];
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('appSection').style.display = 'block';
+            document.getElementById('welcomeMsg').innerText = "مرحباً: " + userName;
+            
+            // تفعيل الصلاحيات
+            if(userName === 'admin') {
+                document.querySelectorAll('.tab-btn').forEach(b => b.style.display = 'block');
+                showTab('entry');
+            } else {
+                // للمستخدمين العاديين، تظهر صفحة الإدخال فقط كمثال
+                document.getElementById('tabEntry').style.display = 'block';
+                showTab('entry');
+            }
+        } else {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('appSection').style.display = 'none';
+        }
+    });
+
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+</script>
+</body>
+</html>
