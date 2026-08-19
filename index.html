@@ -16,6 +16,7 @@
             --secondary: #0284c7;
             --success: #16a34a;
             --danger: #dc2626;
+            --warning: #d97706;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text: #1e293b;
@@ -81,7 +82,9 @@
         .list-add-box { display: flex; gap: 8px; margin-bottom: 10px; }
         .btn-add { background: var(--success); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; white-space: nowrap; }
         .master-list-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f1f5f9; border-radius: 6px; margin-bottom: 5px; font-size: 13px; }
-        .btn-del { background: var(--danger); color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        
+        .btn-del { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .btn-edit { background: var(--warning); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-left: 4px; }
 
         .scrollable-container {
             max-height: 380px;
@@ -193,7 +196,7 @@
                 <div class="scrollable-container">
                     <table>
                         <thead>
-                            <tr><th>المكبس</th><th>المشرف</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف والحوافز</th><th>إجراء</th></tr>
+                            <tr><th>#</th><th>المكبس</th><th>المشرف</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>فرز 2/3 والتالف والحوافز</th><th>إجراء</th></tr>
                         </thead>
                         <tbody id="stagingBody"></tbody>
                     </table>
@@ -228,7 +231,7 @@
                 <div class="scrollable-container">
                     <table>
                         <thead>
-                            <tr><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>إجمالي الحافز 💰</th></tr>
+                            <tr><th>#</th><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>إجمالي الحافز 💰</th></tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
                     </table>
@@ -240,6 +243,7 @@
         <div id="masterTab" class="tab-content">
             <div class="card">
                 <h3 style="color: var(--primary); margin-bottom: 15px;">⚙️ السجل الفني للمكابس (مساحة التشغيل الفعالة)</h3>
+                <input type="hidden" id="editingMachineDocId" value="">
                 <div class="form-row">
                     <div class="form-group-flex"><input type="text" id="mName" placeholder="اسم المكبس (مثال: مكبس 1)"></div>
                     <div class="form-group-flex"><input type="text" id="mType" placeholder="النوع"></div>
@@ -250,19 +254,20 @@
                     <div class="form-group-flex"><input type="number" id="mWidth" placeholder="عرض الفتحة (سم)"></div>
                     <div class="form-group-flex"><input type="number" id="mHeight" placeholder="ارتفاع الفتحة (سم)"></div>
                 </div>
-                <button class="btn-submit" style="background-color: var(--success); padding: 10px;" onclick="addDetailedMachine()">إضافة الماكينة 🛠️</button>
+                <button class="btn-submit" id="saveMachineBtn" style="background-color: var(--success); padding: 10px;" onclick="saveOrUpdateDetailedMachine()">إضافة أو تحديث الماكينة 🛠️</button>
 
                 <div class="scrollable-container">
                     <table>
-                        <thead><tr><th>اسم المكبس (اضغط للتفاصيل والصيانة)</th><th>النوع</th><th>القوة</th><th>فتحة المكبس (طول×عرض×ارتفاع)</th><th>عمليات الصيانة</th><th>حذف</th></tr></thead>
+                        <thead><tr><th>#</th><th>اسم المكبس (اضغط للتفاصيل والصيانة)</th><th>النوع</th><th>القوة</th><th>فتحة المكبس (طول×عرض×ارتفاع)</th><th>عمليات الصيانة</th><th>إجراء</th></tr></thead>
                         <tbody id="machinesTableBody"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- إعدادات المنتجات ومعايير الحوافز الجديدة -->
+            <!-- إعدادات المنتجات ومعايير الحوافز وتعديلها -->
             <div class="card">
                 <h3 style="color: var(--primary); margin-bottom: 10px;">📦 المنتجات ومعايير الإنتاج وحوافز الجودة</h3>
+                <input type="hidden" id="editingProductIndex" value="">
                 <div class="form-row">
                     <div class="form-group-flex"><input type="text" id="newProdName" placeholder="اسم المنتج"></div>
                     <div class="form-group-flex"><input type="number" id="newProdTarget" placeholder="معدل الإنتاج"></div>
@@ -273,10 +278,10 @@
                     <div class="form-group-flex"><input type="number" step="0.1" id="newQualityLowWaste" placeholder="نسبة عوادم ممتازة % (مثال: 2)"></div>
                     <div class="form-group-flex"><input type="number" id="newQualityBonus" placeholder="مبلغ حافز الجودة الأساسي"></div>
                 </div>
-                <button class="btn-submit" style="background-color: var(--success);" onclick="addDetailedProduct()">إضافة المنتج بالمعايير والحوافز ➕</button>
+                <button class="btn-submit" id="saveProductBtn" style="background-color: var(--success);" onclick="saveOrUpdateDetailedProduct()">إضافة أو تحديث المنتج ➕</button>
                 <div class="scrollable-container" style="max-height: 220px;">
                     <table>
-                        <thead><tr><th>اسم المنتج</th><th>معدل الإنتاج</th><th>أقصى عوادم</th><th>حافز القطعة</th><th>نسبة عوادم ممتازة</th><th>حافز الجودة الأساسي (الضعف لنصف النسبة)</th><th>إجراء</th></tr></thead>
+                        <thead><tr><th>#</th><th>اسم المنتج</th><th>معدل الإنتاج</th><th>أقصى عوادم</th><th>حافز القطعة</th><th>نسبة عوادم ممتازة</th><th>حافز الجودة الأساسي</th><th>إجراء</th></tr></thead>
                         <tbody id="productsTableBody"></tbody>
                     </table>
                 </div>
@@ -332,7 +337,7 @@
                 <h3>إدارة المستخدمين والأدوار 🛡️</h3>
                 <div class="scrollable-container">
                     <table>
-                        <thead><tr><th>اسم المستخدم</th><th>الاسم الكامل</th><th>عامل؟</th><th>مشرف؟</th><th>إدخال</th><th>تقارير</th><th>إكسيل</th><th>البيانات</th><th>الصلاحيات</th><th>إجراءات</th></tr></thead>
+                        <thead><tr><th>#</th><th>اسم المستخدم</th><th>الاسم الكامل</th><th>عامل؟</th><th>مشرف؟</th><th>إدخال</th><th>تقارير</th><th>إكسيل</th><th>البيانات</th><th>الصلاحيات</th><th>إجراءات</th></tr></thead>
                         <tbody id="usersTableBody"></tbody>
                     </table>
                 </div>
@@ -373,7 +378,7 @@
         <h4 style="color: var(--primary);">سجل عمليات الصيانة السابقة:</h4>
         <div class="scrollable-container" style="max-height: 220px; margin-bottom: 15px;">
             <table>
-                <thead><tr><th>التاريخ</th><th>نوع الصيانة</th><th>القائم بالصيانة</th><th>ملاحظات</th></tr></thead>
+                <thead><tr><th>#</th><th>التاريخ</th><th>نوع الصيانة</th><th>القائم بالصيانة</th><th>ملاحظات</th></tr></thead>
                 <tbody id="maintenanceTableBody"></tbody>
             </table>
         </div>
@@ -584,11 +589,13 @@
             const tbody = document.getElementById('usersTableBody');
             if(!tbody) return;
             tbody.innerHTML = '';
+            let counter = 1;
             snapshot.forEach((doc) => {
                 const u = doc.data(), p = u.perms || {};
                 const dispName = u.fullName || u.username;
                 tbody.innerHTML += `
                     <tr>
+                        <td><b>${counter++}</b></td>
                         <td><b>${u.username}</b></td>
                         <td><b>${dispName}</b></td>
                         <td><input type="checkbox" ${u.isWorker?'checked':''} onchange="toggleUserRole('${u.username}', 'isWorker', this.checked)"></td>
@@ -655,13 +662,17 @@
                 let pObj = typeof item === 'string' ? { name: item, target: 0, maxWaste: 0, incentiveValue: 0, qualityLowWaste: 0, qualityBonus: 0 } : item;
                 prodTbody.innerHTML += `
                     <tr>
+                        <td><b>${index + 1}</b></td>
                         <td><b>${pObj.name}</b></td>
                         <td>${pObj.target || 0}</td>
                         <td>${pObj.maxWaste || 0}%</td>
                         <td>${pObj.incentiveValue || 0} ج.م</td>
                         <td>${pObj.qualityLowWaste || 0}%</td>
-                        <td>${pObj.qualityBonus || 0} ج.م (يُضاعف لنصف النسبة)</td>
-                        <td><button class="btn-del" onclick="deleteProductFirestore(${index})">حذف</button></td>
+                        <td>${pObj.qualityBonus || 0} ج.م</td>
+                        <td>
+                            <button class="btn-edit" onclick="editProduct(${index})">تعديل</button>
+                            <button class="btn-del" onclick="deleteProductFirestore(${index})">حذف</button>
+                        </td>
                     </tr>
                 `;
             });
@@ -679,7 +690,9 @@
         updateFormDropdowns();
     }
 
-    function addDetailedProduct() {
+    // دوال المنتجات (إضافة وتعديل)
+    function saveOrUpdateDetailedProduct() {
+        const editIndex = document.getElementById('editingProductIndex').value;
         const name = document.getElementById('newProdName').value.trim();
         const target = Number(document.getElementById('newProdTarget').value);
         const maxWaste = Number(document.getElementById('newProdWaste').value);
@@ -690,10 +703,20 @@
         if (!name || target <= 0) { alert("يرجى إدخال اسم المنتج ومعدل الإنتاج بشكل صحيح!"); return; }
 
         if (!globalMasterData.products) globalMasterData.products = [];
-        globalMasterData.products.push({ name, target, maxWaste, incentiveValue, qualityLowWaste, qualityBonus });
+
+        const productData = { name, target, maxWaste, incentiveValue, qualityLowWaste, qualityBonus };
+
+        if (editIndex === "") {
+            globalMasterData.products.push(productData);
+        } else {
+            globalMasterData.products[parseInt(editIndex)] = productData;
+            document.getElementById('editingProductIndex').value = "";
+            document.getElementById('saveProductBtn').innerText = "إضافة أو تحديث المنتج ➕";
+            document.getElementById('saveProductBtn').style.backgroundColor = "var(--success)";
+        }
 
         db.collection("factory_settings").doc("master_data").set(globalMasterData).then(() => {
-            alert("✅ تم إضافة المنتج ومعايير الإنتاج وحوافز الجودة بنجاح!");
+            alert("✅ تم حفظ وتحديث المنتج بنجاح!");
             document.getElementById('newProdName').value = '';
             document.getElementById('newProdTarget').value = '';
             document.getElementById('newProdWaste').value = '';
@@ -701,6 +724,22 @@
             document.getElementById('newQualityLowWaste').value = '';
             document.getElementById('newQualityBonus').value = '';
         });
+    }
+
+    function editProduct(index) {
+        const p = globalMasterData.products[index];
+        document.getElementById('newProdName').value = p.name || '';
+        document.getElementById('newProdTarget').value = p.target || '';
+        document.getElementById('newProdWaste').value = p.maxWaste || '';
+        document.getElementById('newProdIncentive').value = p.incentiveValue || '';
+        document.getElementById('newQualityLowWaste').value = p.qualityLowWaste || '';
+        document.getElementById('newQualityBonus').value = p.qualityBonus || '';
+        
+        document.getElementById('editingProductIndex').value = index;
+        const btn = document.getElementById('saveProductBtn');
+        btn.innerText = "حفظ التعديلات ✏️";
+        btn.style.backgroundColor = "var(--warning)";
+        window.scrollTo({ top: document.getElementById('masterTab').offsetTop, behavior: 'smooth' });
     }
 
     function deleteProductFirestore(index) {
@@ -764,23 +803,61 @@
         if (c && p && p.value !== NONE_OPTION) { c.value = NONE_OPTION; c.disabled = true; } else if (c) { c.disabled = false; }
     }
 
-    function addDetailedMachine() {
+    // دوال المكابس والماكينات (إضافة وتعديل)
+    function saveOrUpdateDetailedMachine() {
+        const editId = document.getElementById('editingMachineDocId').value;
         const machine = {
             name: document.getElementById('mName').value.trim(),
             type: document.getElementById('mType').value.trim(),
             power: document.getElementById('mPower').value.trim(),
-            openingDimensions: `${document.getElementById('mLen').value || 0}×${document.getElementById('mWidth').value || 0}×${document.getElementById('mHeight').value || 0} سم`,
-            maintenanceLog: []
+            openingDimensions: `${document.getElementById('mLen').value || 0}×${document.getElementById('mWidth').value || 0}×${document.getElementById('mHeight').value || 0} سم`
         };
         if(!machine.name) { alert("اكتب اسم المكبس!"); return; }
 
-        db.collection("machines_detailed_specs").add(machine).then(() => {
-            alert("تم حفظ المكبس بنجاح!");
-            document.getElementById('mName').value = ''; document.getElementById('mType').value = '';
-            document.getElementById('mPower').value = ''; document.getElementById('mLen').value = '';
-            document.getElementById('mWidth').value = ''; document.getElementById('mHeight').value = '';
-            loadMachinesTable();
-        });
+        if (editId === "") {
+            machine.maintenanceLog = [];
+            db.collection("machines_detailed_specs").add(machine).then(() => {
+                alert("تم حفظ المكبس بنجاح!");
+                resetMachineForm();
+            });
+        } else {
+            db.collection("machines_detailed_specs").doc(editId).update(machine).then(() => {
+                alert("✅ تم تحديث بيانات المكبس بنجاح!");
+                resetMachineForm();
+            });
+        }
+    }
+
+    function resetMachineForm() {
+        document.getElementById('editingMachineDocId').value = '';
+        document.getElementById('mName').value = ''; 
+        document.getElementById('mType').value = '';
+        document.getElementById('mPower').value = ''; 
+        document.getElementById('mLen').value = '';
+        document.getElementById('mWidth').value = ''; 
+        document.getElementById('mHeight').value = '';
+        const btn = document.getElementById('saveMachineBtn');
+        btn.innerText = "إضافة أو تحديث الماكينة 🛠️";
+        btn.style.backgroundColor = "var(--success)";
+    }
+
+    function editMachine(id, name, type, power, dims) {
+        document.getElementById('editingMachineDocId').value = id;
+        document.getElementById('mName').value = name;
+        document.getElementById('mType').value = type === '-' ? '' : type;
+        document.getElementById('mPower').value = power.replace(' طن', '') === '-' ? '' : power.replace(' طن', '');
+        
+        const parts = dims.split('×');
+        if(parts.length === 3) {
+            document.getElementById('mLen').value = parts[0].replace(' سم', '');
+            document.getElementById('mWidth').value = parts[1];
+            document.getElementById('mHeight').value = parts[2].replace(' سم', '');
+        }
+
+        const btn = document.getElementById('saveMachineBtn');
+        btn.innerText = "حفظ تعديلات الماكينة ✏️";
+        btn.style.backgroundColor = "var(--warning)";
+        window.scrollTo({ top: document.getElementById('masterTab').offsetTop, behavior: 'smooth' });
     }
 
     function loadMachinesTable() {
@@ -793,18 +870,23 @@
             if(filterSelect) filterSelect.innerHTML = '<option value="">كل المكابس</option>';
 
             let machineNamesList = [];
+            let counter = 1;
             snapshot.forEach((doc) => {
                 const m = doc.data();
                 machineNamesList.push(m.name);
                 if(tbody) {
                     tbody.innerHTML += `
                         <tr>
+                            <td><b>${counter++}</b></td>
                             <td><span class="clickable" onclick="openMachineModal('${doc.id}')">${m.name}</span></td>
                             <td>${m.type || '-'}</td>
                             <td>${m.power ? m.power + ' طن' : '-'}</td>
                             <td>${m.openingDimensions}</td>
                             <td><b>${(m.maintenanceLog || []).length}</b> عمليات صيانة</td>
-                            <td><button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button></td>
+                            <td>
+                                <button class="btn-edit" onclick="editMachine('${doc.id}', '${m.name}', '${m.type || '-'}', '${m.power ? m.power + ' طن' : '-'}', '${m.openingDimensions}')">تعديل</button>
+                                <button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button>
+                            </td>
                         </tr>
                     `;
                 }
@@ -842,12 +924,14 @@
         const tbody = document.getElementById('maintenanceTableBody');
         tbody.innerHTML = '';
         if(logList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="color:#64748b;">لا توجد سجلات صيانة مسجلة حتى الآن لهذا المكبس.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="color:#64748b;">لا توجد سجلات صيانة مسجلة حتى الآن لهذا المكبس.</td></tr>`;
             return;
         }
+        let counter = 1;
         logList.forEach(item => {
             tbody.innerHTML += `
                 <tr>
+                    <td><b>${counter++}</b></td>
                     <td><b>${item.date}</b></td>
                     <td>${item.type}</td>
                     <td>${item.by}</td>
@@ -881,7 +965,6 @@
     function deleteMachineDoc(id) { if(confirm("حذف الماكينة؟")) db.collection("machines_detailed_specs").doc(id).delete(); }
     function handleLogout() { auth.signOut(); }
 
-    // حساب الحوافز المتطورة (حافز كمية الإنتاج + حافز الجودة التدرجي)
     function calculateTotalIncentive(productName, g1, defectRate) {
         const productSpec = (globalMasterData.products || []).find(p => (typeof p === 'string' ? p === productName : p.name === productName));
         
@@ -890,7 +973,6 @@
         let quantityIncentive = 0;
         let qualityIncentive = 0;
 
-        // 1. حساب حافز الكمية (إذا لم نتجاوز أقصى نسبة للعوادم وحققنا أعلى من معدل الإنتاج)
         if (defectRate <= productSpec.maxWaste) {
             const extraPieces = g1 - productSpec.target;
             if (extraPieces > 0) {
@@ -898,16 +980,15 @@
             }
         }
 
-        // 2. حساب حافز الجودة التدرجي
         const lowWasteLimit = productSpec.qualityLowWaste || 0;
         const baseBonus = productSpec.qualityBonus || 0;
 
         if (lowWasteLimit > 0 && baseBonus > 0) {
             const halfWasteLimit = lowWasteLimit / 2;
             if (defectRate <= halfWasteLimit) {
-                qualityIncentive = baseBonus * 2; // ضعف المبلغ إذا حقق نصف النسبة الممتازة
+                qualityIncentive = baseBonus * 2;
             } else if (defectRate <= lowWasteLimit) {
-                qualityIncentive = baseBonus; // المبلغ الأساسي إذا حقق النسبة الممتازة
+                qualityIncentive = baseBonus;
             }
         }
 
@@ -977,12 +1058,13 @@
         stagingCart.forEach((item, index) => {
             tbody.innerHTML += `
                 <tr>
+                    <td><b>${index + 1}</b></td>
                     <td><b>${item.machine}</b><br><small>${item.shift}</small></td>
                     <td><b>${item.supervisor}</b></td>
                     <td>${item.worker}</td>
                     <td><b>${item.product}</b><br><span style="color:#555;">${item.appearance}</span></td>
                     <td>${item.g1}</td>
-                    <td>عيوب: ${item.defectRate}% | إجمالي الحافز: <b style="color:var(--success);">${item.incentive} ج.م</b> (كمية: ${item.quantityIncentive} + جودة: ${item.qualityIncentive})</td>
+                    <td>عيوب: ${item.defectRate}% | الحافز: <b style="color:var(--success);">${item.incentive} ج.م</b></td>
                     <td><button class="btn-del" onclick="removeFromStaging(${index})">حذف</button></td>
                 </tr>
             `;
@@ -1006,7 +1088,7 @@
                     <b>#${idx+1} - المكبس:</b> ${item.machine} | <b>العامل:</b> ${item.worker}<br>
                     <b>المنتج:</b> ${item.product} (${item.appearance})<br>
                     <b>فرز أول:</b> ${item.g1} | <b>العيوب:</b> ${item.totalDefects} (${item.defectRate}%)<br>
-                    <b>إجمالي حافز العامل:</b> <span style="color:var(--success); font-weight:bold;">${item.incentive} ج.م</span> (حافز كمية: ${item.quantityIncentive} | حافز جودة: ${item.qualityIncentive})
+                    <b>إجمالي حافز العامل:</b> <span style="color:var(--success); font-weight:bold;">${item.incentive} ج.م</span> (كمية: ${item.quantityIncentive} | جودة: ${item.qualityIncentive})
                 </div>
             `;
         });
@@ -1039,12 +1121,14 @@
         if(!tbody) return;
         tbody.innerHTML = '';
         if(data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="12" style="padding:15px; color:#64748b;">لا توجد سجلات مطابقة.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="13" style="padding:15px; color:#64748b;">لا توجد سجلات مطابقة.</td></tr>`;
             return;
         }
+        let counter = 1;
         data.forEach((item) => {
             tbody.innerHTML += `
                 <tr>
+                    <td><b>${counter++}</b></td>
                     <td><b>${item.date || ''}</b></td>
                     <td style="color:var(--primary); font-weight:bold;">${item.shift || ''}</td>
                     <td><b>${item.supervisor || '-'}</b></td>
@@ -1096,8 +1180,10 @@
             return matchDate && matchShift && matchMachine;
         });
 
+        let excelCounter = 1;
         exportList.forEach((data) => {
             reportsData.push({
+                "مسلسل": excelCounter++,
                 "التاريخ": data.date, "الوردية": data.shift, "المشرف": data.supervisor, "المسجل": data.entryBy,
                 "المكبس": data.machine, "العامل": data.worker, "المنتج": data.product,
                 "المظهر": data.appearance, "فرز أول": data.g1, "إجمالي العيوب والتالف": data.totalDefects,
