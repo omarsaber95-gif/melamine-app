@@ -106,7 +106,7 @@
         .perm-item input { width: auto; }
         .badge-perm { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-size: 11px; margin: 2px; font-weight: bold; }
 
-        #reviewModal, #machineModal, #editRecordModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; padding: 10px; }
+        #reviewModal, #machineModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; padding: 10px; }
         .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
@@ -231,7 +231,7 @@
                 <div class="scrollable-container">
                     <table>
                         <thead>
-                            <tr><th>#</th><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>إجمالي الحافز 💰</th><th>تعديل</th></tr>
+                            <tr><th>#</th><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>إجمالي الحافز 💰</th></tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
                     </table>
@@ -410,29 +410,6 @@
     </div>
 </div>
 
-<!-- نافذة التعديل المنبثقة (Popup) لسجل الإنتاج مع سجل التعديلات -->
-<div id="editRecordModal">
-    <div class="modal-box">
-        <h3 style="color: var(--primary); text-align: center;">✏️ تعديل سجل الإنتاج</h3>
-        <input type="hidden" id="editRecordDocId">
-        <div class="form-row">
-            <div class="form-group-flex"><label>الفرز الأول:</label><input type="number" id="editG1" class="num-input" min="0"></div>
-            <div class="form-group-flex"><label>الفرز الثاني:</label><input type="number" id="editG2" class="num-input" min="0"></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group-flex"><label>الفرز الثالث:</label><input type="number" id="editG3" class="num-input" min="0"></div>
-            <div class="form-group-flex"><label>التالف / الهالك:</label><input type="number" id="editWaste" class="num-input" min="0"></div>
-        </div>
-        
-        <div id="editAuditInfo" style="background: #f1f5f9; padding: 10px; border-radius: 6px; font-size: 11px; margin: 10px 0; color: #475569;"></div>
-
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button onclick="saveEditedRecord()" style="flex:1; background:var(--success); color:white; padding:10px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">حفظ التحديث 💾</button>
-            <button onclick="closeEditRecordModal()" style="flex:1; background:#64748b; color:white; padding:10px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">إلغاء ❌</button>
-        </div>
-    </div>
-</div>
-
 <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCVgCIZmjFn7v_erTVe-XdRkD1efTRvDNk",
@@ -547,201 +524,476 @@
             if (rawUsername === "admin") {
                 auth.createUserWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass).then(() => {
                     db.collection("users_permissions").doc("admin").set({
-                        username: "admin", fullName: "المدير العام", isWorker: false, isSupervisor: true,
+                        username: "admin", fullName: "مدير النظام", isWorker: true, isSupervisor: true,
                         perms: { entry: true, history: true, excel: true, master: true, users: true }
                     });
-                }).catch(err => {
-                    errDiv.innerText = "خطأ في تسجيل دخول المدير: " + err.message;
-                    errDiv.style.display = 'block';
                 });
-            } else {
-                errDiv.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة!";
-                errDiv.style.display = 'block';
+            } else { 
+                errDiv.innerText = "خطأ في اسم المستخدم أو كلمة المرور!"; 
+                errDiv.style.display = 'block'; 
             }
         });
     }
 
-    function handleLogout() {
-        auth.signOut();
+    function handleChangePassword(e) {
+        e.preventDefault();
+        const p1 = document.getElementById('newPass1').value, p2 = document.getElementById('newPass2').value, msg = document.getElementById('passMsg');
+        if (p1 !== p2) { msg.style.color = "red"; msg.innerText = "كلمتا المرور غير متطابقتين!"; return; }
+        auth.currentUser.updatePassword(p1).then(() => {
+            msg.style.color = "green"; msg.innerText = "✅ تم تحديث كلمة المرور!";
+            document.getElementById('newPass1').value = ''; document.getElementById('newPass2').value = '';
+        }).catch(() => { msg.style.color = "red"; msg.innerText = "أعد تسجيل الدخول ثم جرب مجدداً."; });
+    }
+
+    function handleAddNewUser(e) {
+        e.preventDefault();
+        let rawInput = document.getElementById('newUsername').value.trim();
+        const fullName = document.getElementById('newFullName').value.trim();
+        const username = rawInput.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        const pass = document.getElementById('newUserPass').value;
+        const isWorker = document.getElementById('isWorker').checked;
+        const isSupervisor = document.getElementById('isSupervisor').checked;
+
+        if(!username || !pass || !fullName) { alert("يرجى ملء جميع الحقول المطلوبة!"); return; }
+
+        const perms = {
+            entry: document.getElementById('p_entry').checked, history: document.getElementById('p_history').checked,
+            excel: document.getElementById('p_excel').checked, master: document.getElementById('p_master').checked,
+            users: document.getElementById('p_users').checked
+        };
+
+        const email = `${username}@almanar.factory`;
+        const secondaryAppName = "SecondaryApp_" + Date.now();
+        const secondaryApp = firebase.initializeApp(firebaseConfig, secondaryAppName);
+        const secondaryAuth = firebase.auth(secondaryApp);
+
+        secondaryAuth.createUserWithEmailAndPassword(email, pass)
+            .then(() => {
+                return db.collection("users_permissions").doc(username).set({ username, fullName, isWorker, isSupervisor, perms });
+            })
+            .then(() => {
+                alert(`تم إنشاء حساب الدخول وصلاحيات المستخدم (${fullName}) بنجاح! 🚀`);
+                document.getElementById('newUsername').value = ''; 
+                document.getElementById('newFullName').value = '';
+                document.getElementById('newUserPass').value = '';
+                loadUsersTable();
+                loadWorkersAndSupervisorsDropdowns();
+                return secondaryAuth.signOut();
+            })
+            .then(() => secondaryApp.delete())
+            .catch((error) => { alert("خطأ: " + error.message); secondaryApp.delete(); });
+    }
+
+    function loadUsersTable() {
+        db.collection("users_permissions").get().then((snapshot) => {
+            const tbody = document.getElementById('usersTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let counter = 1;
+            snapshot.forEach((doc) => {
+                const u = doc.data(), p = u.perms || {};
+                const dispName = u.fullName || u.username;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${counter++}</b></td>
+                        <td><b>${u.username}</b></td>
+                        <td><b>${dispName}</b></td>
+                        <td><input type="checkbox" ${u.isWorker?'checked':''} onchange="toggleUserRole('${u.username}', 'isWorker', this.checked)"></td>
+                        <td><input type="checkbox" ${u.isSupervisor?'checked':''} onchange="toggleUserRole('${u.username}', 'isSupervisor', this.checked)"></td>
+                        <td><input type="checkbox" ${p.entry?'checked':''} onchange="togglePerm('${u.username}', 'entry', this.checked)"></td>
+                        <td><input type="checkbox" ${p.history?'checked':''} onchange="togglePerm('${u.username}', 'history', this.checked)"></td>
+                        <td><input type="checkbox" ${p.excel?'checked':''} onchange="togglePerm('${u.username}', 'excel', this.checked)"></td>
+                        <td><input type="checkbox" ${p.master?'checked':''} onchange="togglePerm('${u.username}', 'master', this.checked)"></td>
+                        <td><input type="checkbox" ${p.users?'checked':''} onchange="togglePerm('${u.username}', 'users', this.checked)"></td>
+                        <td><button class="btn-del" onclick="deleteUserDoc('${u.username}')">حذف</button></td>
+                    </tr>
+                `;
+            });
+        });
+    }
+
+    function toggleUserRole(username, roleKey, value) {
+        db.collection("users_permissions").doc(username).update({ [roleKey]: value }).then(() => loadWorkersAndSupervisorsDropdowns());
+    }
+
+    function togglePerm(username, key, value) { db.collection("users_permissions").doc(username).update({ [`perms.${key}`]: value }); }
+    function deleteUserDoc(username) { if(confirm(`حذف حساب ${username}؟`)) db.collection("users_permissions").doc(username).delete().then(() => { loadUsersTable(); loadWorkersAndSupervisorsDropdowns(); }); }
+
+    function loadWorkersAndSupervisorsDropdowns() {
+        db.collection("users_permissions").get().then((snapshot) => {
+            let workersList = [];
+            let supervisorsList = [];
+
+            snapshot.forEach((doc) => {
+                const u = doc.data();
+                const displayName = u.fullName || u.username;
+                if(u.isWorker) workersList.push(displayName);
+                if(u.isSupervisor) supervisorsList.push(displayName);
+            });
+
+            populateSelect('workerSelect', workersList, false);
+            populateSelect('supervisorSelect', supervisorsList, true);
+        });
     }
 
     function loadMasterDataFromFirestore() {
-        db.collection("factory_settings").doc("master_data").get().then((doc) => {
-            if (doc.exists) {
-                globalMasterData = doc.data();
-                if(!globalMasterData.products) globalMasterData.products = [];
-                if(!globalMasterData.colors) globalMasterData.colors = [];
-                if(!globalMasterData.patterns) globalMasterData.patterns = [];
+        db.collection("factory_settings").doc("master_data").onSnapshot((doc) => {
+            if (doc.exists) { 
+                globalMasterData = doc.data(); 
+            } else {
+                globalMasterData = {
+                    products: [
+                        { name: "طبق غويط 9 بوصة", target: 500, maxWaste: 5, incentiveValue: 0.5, qualityLowWaste: 2, qualityBonus: 10 }
+                    ],
+                    colors: ["أبيض ناصع", "أسود ملكي", "بيج كلاسيك"],
+                    patterns: ["زهور كلاسيك", "رخامي مودرن", "فواكه مشكلة"]
+                };
+                db.collection("factory_settings").doc("master_data").set(globalMasterData);
             }
-            renderMasterDropdownsAndLists();
+            renderMasterDataUI();
         });
     }
 
-    function renderMasterDropdownsAndLists() {
-        const prodSelect = document.getElementById('productSelect');
-        if(prodSelect) {
-            prodSelect.innerHTML = `<option value="">${NONE_OPTION}</option>`;
-            globalMasterData.products.forEach((p, idx) => {
-                prodSelect.innerHTML += `<option value="${idx}">${p.name} (المستهدف: ${p.target})</option>`;
+    function renderMasterDataUI() {
+        const prodTbody = document.getElementById('productsTableBody');
+        if(prodTbody) {
+            prodTbody.innerHTML = '';
+            (globalMasterData.products || []).forEach((item, index) => {
+                let pObj = typeof item === 'string' ? { name: item, target: 0, maxWaste: 0, incentiveValue: 0, qualityLowWaste: 0, qualityBonus: 0 } : item;
+                prodTbody.innerHTML += `
+                    <tr>
+                        <td><b>${index + 1}</b></td>
+                        <td><b>${pObj.name}</b></td>
+                        <td>${pObj.target || 0}</td>
+                        <td>${pObj.maxWaste || 0}%</td>
+                        <td>${pObj.incentiveValue || 0} ج.م</td>
+                        <td>${pObj.qualityLowWaste || 0}%</td>
+                        <td>${pObj.qualityBonus || 0} ج.م</td>
+                        <td>
+                            <button class="btn-edit" onclick="editProduct(${index})">تعديل</button>
+                            <button class="btn-del" onclick="deleteProductFirestore(${index})">حذف</button>
+                        </td>
+                    </tr>
+                `;
             });
         }
 
-        const colorSelect = document.getElementById('colorSelect');
-        if(colorSelect) {
-            colorSelect.innerHTML = `<option value="">بدون لون سادة</option>`;
-            globalMasterData.colors.forEach(c => { colorSelect.innerHTML += `<option value="${c}">${c}</option>`; });
-        }
-
-        const patternSelect = document.getElementById('patternSelect');
-        if(patternSelect) {
-            patternSelect.innerHTML = `<option value="">بدون تصميم</option>`;
-            globalMasterData.patterns.forEach(pt => { patternSelect.innerHTML += `<option value="${pt}">${pt}</option>`; });
-        }
-
-        const colorsList = document.getElementById('colorsList');
-        if(colorsList) {
-            colorsList.innerHTML = '';
-            globalMasterData.colors.forEach((c, i) => {
-                colorsList.innerHTML += `<div class="master-list-item"><span>${c}</span><button class="btn-del" onclick="deleteMasterItem('colors', ${i})">حذف</button></div>`;
-            });
-        }
-
-        const patternsList = document.getElementById('patternsList');
-        if(patternsList) {
-            patternsList.innerHTML = '';
-            globalMasterData.patterns.forEach((pt, i) => {
-                patternsList.innerHTML += `<div class="master-list-item"><span>${pt}</span><button class="btn-del" onclick="deleteMasterItem('patterns', ${i})">حذف</button></div>`;
-            });
-        }
-
-        renderProductsTable();
-    }
-
-    function addMasterDataFirestore(type, inputId) {
-        const val = document.getElementById(inputId).value.trim();
-        if(!val) return;
-        if(!globalMasterData[type]) globalMasterData[type] = [];
-        globalMasterData[type].push(val);
-        db.collection("factory_settings").doc("master_data").set(globalMasterData, {merge: true}).then(() => {
-            document.getElementById(inputId).value = '';
-            renderMasterDropdownsAndLists();
+        ['colors', 'patterns'].forEach(key => {
+            const container = document.getElementById(key + 'List');
+            if (container) {
+                container.innerHTML = '';
+                (globalMasterData[key] || []).forEach((item, index) => {
+                    container.innerHTML += `<div class="master-list-item"><span>${item}</span><button class="btn-del" onclick="deleteMasterDataFirestore('${key}', ${index})">حذف</button></div>`;
+                });
+            }
         });
+        updateFormDropdowns();
     }
 
-    function deleteMasterItem(type, index) {
-        globalMasterData[type].splice(index, 1);
-        db.collection("factory_settings").doc("master_data").set(globalMasterData, {merge: true}).then(() => {
-            renderMasterDropdownsAndLists();
-        });
-    }
-
+    // دوال المنتجات (إضافة وتعديل)
     function saveOrUpdateDetailedProduct() {
+        const editIndex = document.getElementById('editingProductIndex').value;
         const name = document.getElementById('newProdName').value.trim();
-        const target = parseFloat(document.getElementById('newProdTarget').value) || 0;
-        const waste = parseFloat(document.getElementById('newProdWaste').value) || 0;
-        const incentive = parseFloat(document.getElementById('newProdIncentive').value) || 0;
-        const lowWaste = parseFloat(document.getElementById('newQualityLowWaste').value) || 0;
-        const qBonus = parseFloat(document.getElementById('newQualityBonus').value) || 0;
-        const editIdx = document.getElementById('editingProductIndex').value;
+        const target = Number(document.getElementById('newProdTarget').value);
+        const maxWaste = Number(document.getElementById('newProdWaste').value);
+        const incentiveValue = Number(document.getElementById('newProdIncentive').value);
+        const qualityLowWaste = Number(document.getElementById('newQualityLowWaste').value);
+        const qualityBonus = Number(document.getElementById('newQualityBonus').value);
 
-        if(!name) { alert("أدخل اسم المنتج"); return; }
+        if (!name || target <= 0) { alert("يرجى إدخال اسم المنتج ومعدل الإنتاج بشكل صحيح!"); return; }
 
-        const prodObj = { name, target, waste, incentive, lowWaste, qBonus };
-        if(editIdx === "") {
-            globalMasterData.products.push(prodObj);
+        if (!globalMasterData.products) globalMasterData.products = [];
+
+        const productData = { name, target, maxWaste, incentiveValue, qualityLowWaste, qualityBonus };
+
+        if (editIndex === "") {
+            globalMasterData.products.push(productData);
         } else {
-            globalMasterData.products[parseInt(editIdx)] = prodObj;
+            globalMasterData.products[parseInt(editIndex)] = productData;
             document.getElementById('editingProductIndex').value = "";
             document.getElementById('saveProductBtn').innerText = "إضافة أو تحديث المنتج ➕";
+            document.getElementById('saveProductBtn').style.backgroundColor = "var(--success)";
         }
 
-        db.collection("factory_settings").doc("master_data").set(globalMasterData, {merge: true}).then(() => {
+        db.collection("factory_settings").doc("master_data").set(globalMasterData).then(() => {
+            alert("✅ تم حفظ وتحديث المنتج بنجاح!");
             document.getElementById('newProdName').value = '';
             document.getElementById('newProdTarget').value = '';
             document.getElementById('newProdWaste').value = '';
             document.getElementById('newProdIncentive').value = '';
             document.getElementById('newQualityLowWaste').value = '';
             document.getElementById('newQualityBonus').value = '';
-            renderMasterDropdownsAndLists();
         });
     }
 
-    function renderProductsTable() {
-        const tbody = document.getElementById('productsTableBody');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        globalMasterData.products.forEach((p, idx) => {
-            tbody.innerHTML += `<tr>
-                <td>${idx+1}</td>
-                <td><b>${p.name}</b></td>
-                <td>${p.target}</td>
-                <td>${p.waste}%</td>
-                <td>${p.incentive} ج.م</td>
-                <td>${p.lowWaste}%</td>
-                <td>${p.qBonus} ج.م</td>
-                <td>
-                    <button class="btn-edit" onclick="editProduct(${idx})">تعديل</button>
-                    <button class="btn-del" onclick="deleteMasterItem('products', ${idx})">حذف</button>
-                </td>
-            </tr>`;
-        });
+    function editProduct(index) {
+        const p = globalMasterData.products[index];
+        document.getElementById('newProdName').value = p.name || '';
+        document.getElementById('newProdTarget').value = p.target || '';
+        document.getElementById('newProdWaste').value = p.maxWaste || '';
+        document.getElementById('newProdIncentive').value = p.incentiveValue || '';
+        document.getElementById('newQualityLowWaste').value = p.qualityLowWaste || '';
+        document.getElementById('newQualityBonus').value = p.qualityBonus || '';
+        
+        document.getElementById('editingProductIndex').value = index;
+        const btn = document.getElementById('saveProductBtn');
+        btn.innerText = "حفظ التعديلات ✏️";
+        btn.style.backgroundColor = "var(--warning)";
+        window.scrollTo({ top: document.getElementById('masterTab').offsetTop, behavior: 'smooth' });
     }
 
-    function editProduct(idx) {
-        const p = globalMasterData.products[idx];
-        document.getElementById('newProdName').value = p.name;
-        document.getElementById('newProdTarget').value = p.target;
-        document.getElementById('newProdWaste').value = p.waste;
-        document.getElementById('newProdIncentive').value = p.incentive;
-        document.getElementById('newQualityLowWaste').value = p.lowWaste;
-        document.getElementById('newQualityBonus').value = p.qBonus;
-        document.getElementById('editingProductIndex').value = idx;
-        document.getElementById('saveProductBtn').innerText = "تعديل المنتج الحالي 🔄";
+    function deleteProductFirestore(index) {
+        if(confirm("حذف هذا المنتج؟")) {
+            globalMasterData.products.splice(index, 1);
+            db.collection("factory_settings").doc("master_data").set(globalMasterData);
+        }
     }
 
-    function loadWorkersAndSupervisorsDropdowns() {
-        db.collection("users_permissions").get().then((snapshot) => {
-            let workersOptions = `<option value="">${NONE_OPTION}</option>`;
-            let supervisorsOptions = `<option value="">--- اختر المشرف ---</option>`;
-            let filterMachineOpts = `<option value="">كل المكابس</option>`;
+    function addMasterDataFirestore(type, inputId) {
+        const val = document.getElementById(inputId).value.trim();
+        if (!val) return;
+        if (!globalMasterData[type]) globalMasterData[type] = [];
+        globalMasterData[type].push(val);
+        db.collection("factory_settings").doc("master_data").set(globalMasterData).then(() => { document.getElementById(inputId).value = ''; });
+    }
 
-            snapshot.forEach((doc) => {
-                const u = doc.data();
-                const name = u.fullName || u.username;
-                if(u.isWorker) workersOptions += `<option value="${name}">${name}</option>`;
-                if(u.isSupervisor) supervisorsOptions += `<option value="${name}">${name}</option>`;
+    function deleteMasterDataFirestore(type, index) {
+        globalMasterData[type].splice(index, 1);
+        db.collection("factory_settings").doc("master_data").set(globalMasterData);
+    }
+
+    function updateFormDropdowns() {
+        const select = document.getElementById('productSelect');
+        if (select) {
+            select.innerHTML = '';
+            (globalMasterData.products || []).forEach(item => {
+                let pName = typeof item === 'string' ? item : item.name;
+                const opt = document.createElement('option');
+                opt.value = pName; opt.innerText = pName;
+                select.appendChild(opt);
             });
+        }
+        populateSelect('colorSelect', globalMasterData.colors, true);
+        populateSelect('patternSelect', globalMasterData.patterns, true);
+    }
 
-            const workerSel = document.getElementById('workerSelect');
-            if(workerSel) workerSel.innerHTML = workersOptions;
-            const supSel = document.getElementById('supervisorSelect');
-            if(supSel) supSel.innerHTML = supervisorsOptions;
-
-            db.collection("machines_detailed_specs").get().then((mSnap) => {
-                let machineOptions = `<option value="">${NONE_OPTION}</option>`;
-                mSnap.forEach((mDoc) => {
-                    const mName = mDoc.data().name;
-                    machineOptions += `<option value="${mName}">${mName}</option>`;
-                    filterMachineOpts += `<option value="${mName}">${mName}</option>`;
-                });
-                const machSel = document.getElementById('machineSelect');
-                if(machSel) machSel.innerHTML = machineOptions;
-                const filtMach = document.getElementById('filterMachine');
-                if(filtMach) filtMach.innerHTML = filterMachineOpts;
-            });
+    function populateSelect(selectId, items, includeNone) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '';
+        if (includeNone) {
+            const optNone = document.createElement('option');
+            optNone.value = NONE_OPTION; optNone.innerText = NONE_OPTION;
+            select.appendChild(optNone);
+        }
+        (items || []).forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item; opt.innerText = item;
+            select.appendChild(opt);
         });
     }
 
     function handleColorChange() {
-        if(document.getElementById('colorSelect').value) {
-            document.getElementById('patternSelect').value = "";
-        }
+        const c = document.getElementById('colorSelect'), p = document.getElementById('patternSelect');
+        if (c && p && c.value !== NONE_OPTION) { p.value = NONE_OPTION; p.disabled = true; } else if (p) { p.disabled = false; }
     }
 
     function handlePatternChange() {
-        if(document.getElementById('patternSelect').value) {
-            document.getElementById('colorSelect').value = "";
+        const c = document.getElementById('colorSelect'), p = document.getElementById('patternSelect');
+        if (c && p && p.value !== NONE_OPTION) { c.value = NONE_OPTION; c.disabled = true; } else if (c) { c.disabled = false; }
+    }
+
+    // دوال المكابس والماكينات (إضافة وتعديل)
+    function saveOrUpdateDetailedMachine() {
+        const editId = document.getElementById('editingMachineDocId').value;
+        const machine = {
+            name: document.getElementById('mName').value.trim(),
+            type: document.getElementById('mType').value.trim(),
+            power: document.getElementById('mPower').value.trim(),
+            openingDimensions: `${document.getElementById('mLen').value || 0}×${document.getElementById('mWidth').value || 0}×${document.getElementById('mHeight').value || 0} سم`
+        };
+        if(!machine.name) { alert("اكتب اسم المكبس!"); return; }
+
+        if (editId === "") {
+            machine.maintenanceLog = [];
+            db.collection("machines_detailed_specs").add(machine).then(() => {
+                alert("تم حفظ المكبس بنجاح!");
+                resetMachineForm();
+            });
+        } else {
+            db.collection("machines_detailed_specs").doc(editId).update(machine).then(() => {
+                alert("✅ تم تحديث بيانات المكبس بنجاح!");
+                resetMachineForm();
+            });
         }
+    }
+
+    function resetMachineForm() {
+        document.getElementById('editingMachineDocId').value = '';
+        document.getElementById('mName').value = ''; 
+        document.getElementById('mType').value = '';
+        document.getElementById('mPower').value = ''; 
+        document.getElementById('mLen').value = '';
+        document.getElementById('mWidth').value = ''; 
+        document.getElementById('mHeight').value = '';
+        const btn = document.getElementById('saveMachineBtn');
+        btn.innerText = "إضافة أو تحديث الماكينة 🛠️";
+        btn.style.backgroundColor = "var(--success)";
+    }
+
+    function editMachine(id, name, type, power, dims) {
+        document.getElementById('editingMachineDocId').value = id;
+        document.getElementById('mName').value = name;
+        document.getElementById('mType').value = type === '-' ? '' : type;
+        document.getElementById('mPower').value = power.replace(' طن', '') === '-' ? '' : power.replace(' طن', '');
+        
+        const parts = dims.split('×');
+        if(parts.length === 3) {
+            document.getElementById('mLen').value = parts[0].replace(' سم', '');
+            document.getElementById('mWidth').value = parts[1];
+            document.getElementById('mHeight').value = parts[2].replace(' سم', '');
+        }
+
+        const btn = document.getElementById('saveMachineBtn');
+        btn.innerText = "حفظ تعديلات الماكينة ✏️";
+        btn.style.backgroundColor = "var(--warning)";
+        window.scrollTo({ top: document.getElementById('masterTab').offsetTop, behavior: 'smooth' });
+    }
+
+    function loadMachinesTable() {
+        db.collection("machines_detailed_specs").onSnapshot((snapshot) => {
+            const tbody = document.getElementById('machinesTableBody');
+            const select = document.getElementById('machineSelect');
+            const filterSelect = document.getElementById('filterMachine');
+            if(tbody) tbody.innerHTML = '';
+            if(select) select.innerHTML = '';
+            if(filterSelect) filterSelect.innerHTML = '<option value="">كل المكابس</option>';
+
+            let machineNamesList = [];
+            let counter = 1;
+            snapshot.forEach((doc) => {
+                const m = doc.data();
+                machineNamesList.push(m.name);
+                if(tbody) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${counter++}</b></td>
+                            <td><span class="clickable" onclick="openMachineModal('${doc.id}')">${m.name}</span></td>
+                            <td>${m.type || '-'}</td>
+                            <td>${m.power ? m.power + ' طن' : '-'}</td>
+                            <td>${m.openingDimensions}</td>
+                            <td><b>${(m.maintenanceLog || []).length}</b> عمليات صيانة</td>
+                            <td>
+                                <button class="btn-edit" onclick="editMachine('${doc.id}', '${m.name}', '${m.type || '-'}', '${m.power ? m.power + ' طن' : '-'}', '${m.openingDimensions}')">تعديل</button>
+                                <button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            if(select) {
+                if(machineNamesList.length === 0) select.innerHTML = '<option value="">أضف مكابس من السجل الفني أولاً</option>';
+                else machineNamesList.forEach(name => select.innerHTML += `<option value="${name}">${name}</option>`);
+            }
+            if(filterSelect) { machineNamesList.forEach(name => filterSelect.innerHTML += `<option value="${name}">${name}</option>`); }
+        });
+    }
+
+    function openMachineModal(docId) {
+        activeMachineIdForModal = docId;
+        db.collection("machines_detailed_specs").doc(docId).get().then((doc) => {
+            if(!doc.exists) return;
+            const m = doc.data();
+            document.getElementById('modalMachineTitle').innerText = "بطاقة وتاريخ صيانة: " + m.name;
+            document.getElementById('mModalType').innerText = m.type || '-';
+            document.getElementById('mModalPower').innerText = m.power ? m.power + ' طن' : '-';
+            document.getElementById('mModalDim').innerText = m.openingDimensions || '-';
+
+            renderMaintenanceLogTable(m.maintenanceLog || []);
+            document.getElementById('machineModal').style.display = 'flex';
+        });
+    }
+
+    function closeMachineModal() {
+        document.getElementById('machineModal').style.display = 'none';
+        activeMachineIdForModal = null;
+    }
+
+    function renderMaintenanceLogTable(logList) {
+        const tbody = document.getElementById('maintenanceTableBody');
+        tbody.innerHTML = '';
+        if(logList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color:#64748b;">لا توجد سجلات صيانة مسجلة حتى الآن لهذا المكبس.</td></tr>`;
+            return;
+        }
+        let counter = 1;
+        logList.forEach(item => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${counter++}</b></td>
+                    <td><b>${item.date}</b></td>
+                    <td>${item.type}</td>
+                    <td>${item.by}</td>
+                    <td>${item.note || '-'}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function saveMaintenanceRecord() {
+        if(!activeMachineIdForModal) return;
+        const date = document.getElementById('mMainDate').value;
+        const by = document.getElementById('mMainBy').value.trim();
+        const type = document.getElementById('mMainType').value.trim();
+        const note = document.getElementById('mMainNote').value.trim();
+
+        if(!date || !by || !type) { alert("يرجى إدخال تاريخ الصيانة، اسم القائم بها، ونوع الصيانة!"); return; }
+
+        const newLogEntry = { date, by, type, note };
+        db.collection("machines_detailed_specs").doc(activeMachineIdForModal).update({
+            maintenanceLog: firebase.firestore.FieldValue.arrayUnion(newLogEntry)
+        }).then(() => {
+            alert("✅ تمت إضافة سجل الصيانة بنجاح!");
+            document.getElementById('mMainBy').value = '';
+            document.getElementById('mMainType').value = '';
+            document.getElementById('mMainNote').value = '';
+            openMachineModal(activeMachineIdForModal);
+        });
+    }
+
+    function deleteMachineDoc(id) { if(confirm("حذف الماكينة؟")) db.collection("machines_detailed_specs").doc(id).delete(); }
+    function handleLogout() { auth.signOut(); }
+
+    function calculateTotalIncentive(productName, g1, defectRate) {
+        const productSpec = (globalMasterData.products || []).find(p => (typeof p === 'string' ? p === productName : p.name === productName));
+        
+        if (!productSpec || typeof productSpec === 'string') return { quantityIncentive: 0, qualityIncentive: 0, total: 0 };
+
+        let quantityIncentive = 0;
+        let qualityIncentive = 0;
+
+        if (defectRate <= productSpec.maxWaste) {
+            const extraPieces = g1 - productSpec.target;
+            if (extraPieces > 0) {
+                quantityIncentive = extraPieces * (productSpec.incentiveValue || 0);
+            }
+        }
+
+        const lowWasteLimit = productSpec.qualityLowWaste || 0;
+        const baseBonus = productSpec.qualityBonus || 0;
+
+        if (lowWasteLimit > 0 && baseBonus > 0) {
+            const halfWasteLimit = lowWasteLimit / 2;
+            if (defectRate <= halfWasteLimit) {
+                qualityIncentive = baseBonus * 2;
+            } else if (defectRate <= lowWasteLimit) {
+                qualityIncentive = baseBonus;
+            }
+        }
+
+        const total = Number((quantityIncentive + qualityIncentive).toFixed(2));
+        return { quantityIncentive, qualityIncentive, total };
     }
 
     function addToStagingCart() {
@@ -750,487 +1002,203 @@
         const supervisor = document.getElementById('supervisorSelect').value;
         const machine = document.getElementById('machineSelect').value;
         const worker = document.getElementById('workerSelect').value;
-        const prodIdx = document.getElementById('productSelect').value;
+        const product = document.getElementById('productSelect').value;
         const color = document.getElementById('colorSelect').value;
         const pattern = document.getElementById('patternSelect').value;
-        const g1 = parseInt(document.getElementById('g1').value) || 0;
-        const g2 = parseInt(document.getElementById('g2').value) || 0;
-        const g3 = parseInt(document.getElementById('g3').value) || 0;
-        const waste = parseInt(document.getElementById('waste').value) || 0;
 
-        if(!date || !shift || !supervisor || !machine || !worker || prodIdx === "") {
-            alert("يرجى استكمال الحقول الأساسية (التاريخ، الوردية، المشرف، المكبس، العامل، المنتج)!");
+        if (!date || !shift || !machine || !worker || !product || supervisor === NONE_OPTION) {
+            alert("يرجى اختيار البيانات الأساسية للوردية!");
+            return;
+        }
+        if (color === NONE_OPTION && pattern === NONE_OPTION) {
+            alert("اختر لون سادة أو تصميم مطبوع!");
             return;
         }
 
-        if(g1 < 0 || g2 < 0 || g3 < 0 || waste < 0) {
-            alert("لا يمكن إدخال قيم سالبة في كميات الإنتاج والعيوب!");
+        const appearance = color !== NONE_OPTION ? `سادة (${color})` : `مطبوع (${pattern})`;
+        const g1 = Number(document.getElementById('g1').value);
+        const g2 = Number(document.getElementById('g2').value);
+        const g3 = Number(document.getElementById('g3').value);
+        const waste = Number(document.getElementById('waste').value);
+
+        if (g1 <= 0 && (g2 > 0 || g3 > 0 || waste > 0)) {
+            alert("خطأ: الفرز الأول لا يمكن أن يكون صفراً مع وجود عيوب!");
             return;
         }
 
-        const prodObj = globalMasterData.products[parseInt(prodIdx)];
-        const totalProduced = g1 + g2 + g3 + waste;
-        const defects = g2 + g3 + waste;
-        const defectRate = totalProduced > 0 ? (defects / totalProduced) * 100 : 0;
+        const totalDefects = g2 + g3 + waste;
+        const defectRate = g1 > 0 ? Number(((totalDefects / g1) * 100).toFixed(2)) : 0;
+        const isPassed = defectRate <= 8;
+        
+        const incentives = calculateTotalIncentive(product, g1, defectRate);
 
-        let incentiveDetails = calculateIncentive(prodObj, g1, defectRate);
+        const recordItem = {
+            date, shift, supervisor, entryBy: document.getElementById('userNameDisplay').innerText.replace("المستخدم: ", ""),
+            machine, worker, product, appearance, g1, g2, g3, waste,
+            totalDefects, defectRate, isPassed, 
+            incentive: incentives.total,
+            quantityIncentive: incentives.quantityIncentive,
+            qualityIncentive: incentives.qualityIncentive,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
 
-        stagingCart.push({
-            date, shift, supervisor, machine, worker,
-            productName: prodObj.name,
-            appearance: color ? `لون: ${color}` : (pattern ? `رسمة: ${pattern}` : 'سادة'),
-            g1, g2, g3, waste, totalProduced, defectRate,
-            incentive: incentiveDetails.totalIncentive,
-            incentiveBreakdown: incentiveDetails
-        });
-
-        renderStagingCart();
+        stagingCart.push(recordItem);
+        renderStagingTable();
         document.getElementById('stagingCard').style.display = 'block';
+
+        document.getElementById('g1').value = 0;
+        document.getElementById('g2').value = 0;
+        document.getElementById('g3').value = 0;
+        document.getElementById('waste').value = 0;
     }
 
-    function renderStagingCart() {
+    function renderStagingTable() {
         const tbody = document.getElementById('stagingBody');
         tbody.innerHTML = '';
-        stagingCart.forEach((item, idx) => {
-            tbody.innerHTML += `<tr>
-                <td>${idx+1}</td>
-                <td><b>${item.machine}</b></td>
-                <td>${item.supervisor}</td>
-                <td>${item.worker}</td>
-                <td><b>${item.productName}</b><br><small>${item.appearance}</small></td>
-                <td>${item.g1}</td>
-                <td>ع2:${item.g2} | ع3:${item.g3} | تالف:${item.waste}<br><b>الحافز: ${item.incentive} ج.م</b></td>
-                <td><button class="btn-del" onclick="removeFromStaging(${idx})">حذف</button></td>
-            </tr>`;
+        stagingCart.forEach((item, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${index + 1}</b></td>
+                    <td><b>${item.machine}</b><br><small>${item.shift}</small></td>
+                    <td><b>${item.supervisor}</b></td>
+                    <td>${item.worker}</td>
+                    <td><b>${item.product}</b><br><span style="color:#555;">${item.appearance}</span></td>
+                    <td>${item.g1}</td>
+                    <td>عيوب: ${item.defectRate}% | الحافز: <b style="color:var(--success);">${item.incentive} ج.م</b></td>
+                    <td><button class="btn-del" onclick="removeFromStaging(${index})">حذف</button></td>
+                </tr>
+            `;
         });
     }
 
-    function removeFromStaging(idx) {
-        stagingCart.splice(idx, 1);
-        renderStagingCart();
-        if(stagingCart.length === 0) {
-            document.getElementById('stagingCard').style.display = 'none';
-        }
-    }
-
-    function calculateIncentive(prodObj, g1, defectRate) {
-        let extraQty = Math.max(0, g1 - prodObj.target);
-        let qtyBonus = extraQty * prodObj.incentive;
-        let qualityBonus = 0;
-        let qualityStatus = "مقبول";
-
-        if(defectRate <= prodObj.lowWaste) {
-            qualityBonus = prodObj.qBonus;
-            qualityStatus = "ممتازة ⭐";
-        } else if(defectRate > prodObj.waste) {
-            qualityBonus = - (prodObj.qBonus / 2);
-            qualityStatus = "مخالفة ⚠️";
-        }
-
-        let totalIncentive = qtyBonus + qualityBonus;
-        return { qtyBonus, qualityBonus, totalIncentive, qualityStatus };
+    function removeFromStaging(index) {
+        stagingCart.splice(index, 1);
+        if(stagingCart.length === 0) document.getElementById('stagingCard').style.display = 'none';
+        renderStagingTable();
     }
 
     function openReviewModal() {
-        if(stagingCart.length === 0) return;
-        let html = `<table><thead><tr><th>#</th><th>المكبس</th><th>العامل</th><th>المنتج</th><th>فرز 1</th><th>الحافز</th></tr></thead><tbody>`;
-        stagingCart.forEach((item, i) => {
-            html += `<tr><td>${i+1}</td><td>${item.machine}</td><td>${item.worker}</td><td>${item.productName}</td><td>${item.g1}</td><td>${item.incentive} ج.م</td></tr>`;
+        if(stagingCart.length === 0) { alert("القائمة فارغة!"); return; }
+        const reviewContent = document.getElementById('reviewContent');
+        reviewContent.innerHTML = '';
+        
+        stagingCart.forEach((item, idx) => {
+            reviewContent.innerHTML += `
+                <div style="background:#f8fafc; padding:10px; border-radius:6px; margin-bottom:8px; border-right:4px solid ${item.isPassed?'var(--success)':'var(--danger)'};">
+                    <b>#${idx+1} - المكبس:</b> ${item.machine} | <b>العامل:</b> ${item.worker}<br>
+                    <b>المنتج:</b> ${item.product} (${item.appearance})<br>
+                    <b>فرز أول:</b> ${item.g1} | <b>العيوب:</b> ${item.totalDefects} (${item.defectRate}%)<br>
+                    <b>إجمالي حافز العامل:</b> <span style="color:var(--success); font-weight:bold;">${item.incentive} ج.م</span> (كمية: ${item.quantityIncentive} | جودة: ${item.qualityIncentive})
+                </div>
+            `;
         });
-        html += `</tbody></table>`;
-        document.getElementById('reviewContent').innerHTML = html;
         document.getElementById('reviewModal').style.display = 'flex';
     }
 
-    function closeReviewModal() {
-        document.getElementById('reviewModal').style.display = 'none';
-    }
+    function closeReviewModal() { document.getElementById('reviewModal').style.display = 'none'; }
 
     function commitStagingToFirestore() {
-        const currentUserEmail = auth.currentUser ? auth.currentUser.email : "unknown";
-        const batch = db.batch();
-
-        stagingCart.forEach((item) => {
-            const docRef = db.collection("melamine_production").doc();
-            batch.set(docRef, {
-                ...item,
-                recordedBy: currentUserEmail,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        });
-
-        batch.commit().then(() => {
-            alert("تم ترحيل البيانات بنجاح إلى قاعدة البيانات الرئيسية! 🚀");
+        closeReviewModal();
+        let batchPromises = stagingCart.map(record => db.collection("melamine_production").add(record));
+        
+        Promise.all(batchPromises).then(() => {
+            alert("✅ تم ترحيل وحفظ جميع سطور الوردية وحساب الحوافز بنجاح!");
             stagingCart = [];
             document.getElementById('stagingCard').style.display = 'none';
-            closeReviewModal();
-            document.getElementById('prodForm').reset();
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('productionDate').value = todayStr;
-        }).catch(err => {
-            alert("حدث خطأ أثناء الترحيل: " + err.message);
-        });
+        }).catch(err => alert("خطأ أثناء الحفظ: " + err.message));
     }
 
     function listenToFirebaseHistory() {
-        db.collection("melamine_production").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+        db.collection("melamine_production").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
             cachedHistoryData = [];
-            snapshot.forEach((doc) => {
-                cachedHistoryData.push({ id: doc.id, ...doc.data() });
-            });
-            applyFilters();
+            snapshot.forEach((doc) => cachedHistoryData.push(doc.data()));
+            renderHistoryTable(cachedHistoryData);
         });
-    }
-
-    function applyFilters() {
-        const fDate = document.getElementById('filterDate').value;
-        const fShift = document.getElementById('filterShift').value;
-        const fMachine = document.getElementById('filterMachine').value;
-
-        let filtered = cachedHistoryData.filter(item => {
-            if(fDate && item.date !== fDate) return false;
-            if(fShift && item.shift !== fShift) return false;
-            if(fMachine && item.machine !== fMachine) return false;
-            return true;
-        });
-
-        renderHistoryTable(filtered);
-    }
-
-    function resetFilters() {
-        document.getElementById('filterDate').value = "";
-        document.getElementById('filterShift').value = "";
-        document.getElementById('filterMachine').value = "";
-        applyFilters();
     }
 
     function renderHistoryTable(data) {
         const tbody = document.getElementById('historyBody');
+        if(!tbody) return;
         tbody.innerHTML = '';
-        data.forEach((item, idx) => {
-            const lastMod = item.lastModifiedBy ? `<br><small style="color:#64748b;">عدل بواسطة: ${item.lastModifiedBy}</small>` : '';
-            tbody.innerHTML += `<tr>
-                <td>${idx+1}</td>
-                <td>${item.date}</td>
-                <td>${item.shift}</td>
-                <td>${item.supervisor}</td>
-                <td><small>${item.recordedBy || '-'}</small></td>
-                <td><b>${item.machine}</b></td>
-                <td>${item.worker}</td>
-                <td><b>${item.productName}</b><br><small>${item.appearance}</small></td>
-                <td>${item.g1}</td>
-                <td>ع2:${item.g2} | ع3:${item.g3} | تالف:${item.waste}</td>
-                <td>${item.defectRate.toFixed(1)}%</td>
-                <td><span style="color:${item.defectRate <= 2 ? 'green':'red'}">${item.incentiveBreakdown ? item.incentiveBreakdown.qualityStatus : 'مقبول'}</span></td>
-                <td><b>${item.incentive} ج.م</b></td>
-                <td><button class="btn-edit" onclick="openEditRecordModal('${item.id}')">تعديل</button></td>
-            </tr>`;
-        });
-    }
-
-    function openEditRecordModal(docId) {
-        const item = cachedHistoryData.find(d => d.id === docId);
-        if(!item) return;
-
-        document.getElementById('editRecordDocId').value = item.id;
-        document.getElementById('editG1').value = item.g1;
-        document.getElementById('editG2').value = item.g2;
-        document.getElementById('editG3').value = item.g3;
-        document.getElementById('editWaste').value = item.waste;
-
-        let auditText = `تاريخ الإنشاء: ${item.createdAt ? new Date(item.createdAt.seconds * 1000).toLocaleString('ar-EG') : 'غير متوفر'}`;
-        if(item.lastModifiedBy && item.lastModifiedAt) {
-            auditText += `<br>آخر تعديل بواسطة: <b>${item.lastModifiedBy}</b> بتاريخ: ${new Date(item.lastModifiedAt.seconds * 1000).toLocaleString('ar-EG')}`;
-        }
-        document.getElementById('editAuditInfo').innerHTML = auditText;
-        document.getElementById('editRecordModal').style.display = 'flex';
-    }
-
-    function closeEditRecordModal() {
-        document.getElementById('editRecordModal').style.display = 'none';
-    }
-
-    function saveEditedRecord() {
-        const docId = document.getElementById('editRecordDocId').value;
-        const g1 = parseInt(document.getElementById('editG1').value) || 0;
-        const g2 = parseInt(document.getElementById('editG2').value) || 0;
-        const g3 = parseInt(document.getElementById('editG3').value) || 0;
-        const waste = parseInt(document.getElementById('editWaste').value) || 0;
-
-        if(g1 < 0 || g2 < 0 || g3 < 0 || waste < 0) {
-            alert("لا يمكن إدخال قيم سالبة!");
+        if(data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="13" style="padding:15px; color:#64748b;">لا توجد سجلات مطابقة.</td></tr>`;
             return;
         }
-
-        const item = cachedHistoryData.find(d => d.id === docId);
-        if(!item) return;
-
-        const prodObj = globalMasterData.products.find(p => p.name === item.productName) || { target: 100, incentive: 1, lowWaste: 2, waste: 5, qBonus: 50 };
-        const totalProduced = g1 + g2 + g3 + waste;
-        const defects = g2 + g3 + waste;
-        const defectRate = totalProduced > 0 ? (defects / totalProduced) * 100 : 0;
-        let incentiveDetails = calculateIncentive(prodObj, g1, defectRate);
-
-        const currentEmail = auth.currentUser ? auth.currentUser.email : "unknown";
-
-        db.collection("melamine_production").doc(docId).update({
-            g1, g2, g3, waste, totalProduced, defectRate,
-            incentive: incentiveDetails.totalIncentive,
-            incentiveBreakdown: incentiveDetails,
-            lastModifiedBy: currentEmail,
-            lastModifiedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-            alert("تم تحديث السجل بنجاح! ✨");
-            closeEditRecordModal();
-        }).catch(err => {
-            alert("خطأ أثناء التحديث: " + err.message);
+        let counter = 1;
+        data.forEach((item) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${counter++}</b></td>
+                    <td><b>${item.date || ''}</b></td>
+                    <td style="color:var(--primary); font-weight:bold;">${item.shift || ''}</td>
+                    <td><b>${item.supervisor || '-'}</b></td>
+                    <td>${item.entryBy || ''}</td>
+                    <td>${item.machine || ''}</td>
+                    <td>${item.worker || ''}</td>
+                    <td><b>${item.product}</b><br><span style="font-size:11px; color:#555;">${item.appearance}</span></td>
+                    <td>${item.g1 || 0}</td>
+                    <td>${item.totalDefects || 0}</td>
+                    <td><b>${item.defectRate || 0}%</b></td>
+                    <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
+                    <td style="color:var(--success); font-weight:bold; font-size:14px;">${item.incentive || 0} ج.م</td>
+                </tr>
+            `;
         });
+    }
+
+    function applyFilters() {
+        const dVal = document.getElementById('filterDate').value;
+        const sVal = document.getElementById('filterShift').value;
+        const mVal = document.getElementById('filterMachine').value;
+
+        let filtered = cachedHistoryData.filter(item => {
+            let matchDate = dVal ? item.date === dVal : true;
+            let matchShift = sVal ? item.shift === sVal : true;
+            let matchMachine = mVal ? item.machine === mVal : true;
+            return matchDate && matchShift && matchMachine;
+        });
+        renderHistoryTable(filtered);
+    }
+
+    function resetFilters() {
+        document.getElementById('filterDate').value = '';
+        document.getElementById('filterShift').value = '';
+        document.getElementById('filterMachine').value = '';
+        renderHistoryTable(cachedHistoryData);
     }
 
     function exportFilteredExcel() {
-        const fDate = document.getElementById('filterDate').value;
-        const fShift = document.getElementById('filterShift').value;
-        const fMachine = document.getElementById('filterMachine').value;
+        let reportsData = [];
+        const dVal = document.getElementById('filterDate').value;
+        const sVal = document.getElementById('filterShift').value;
+        const mVal = document.getElementById('filterMachine').value;
 
-        let filtered = cachedHistoryData.filter(item => {
-            if(fDate && item.date !== fDate) return false;
-            if(fShift && item.shift !== fShift) return false;
-            if(fMachine && item.machine !== fMachine) return false;
-            return true;
+        let exportList = cachedHistoryData.filter(item => {
+            let matchDate = dVal ? item.date === dVal : true;
+            let matchShift = sVal ? item.shift === sVal : true;
+            let matchMachine = mVal ? item.machine === mVal : true;
+            return matchDate && matchShift && matchMachine;
         });
 
-        if(filtered.length === 0) {
-            alert("لا توجد بيانات مطابقة لتصديرها!");
-            return;
-        }
-
-        let excelData = filtered.map((item, idx) => ({
-            "م": idx + 1,
-            "التاريخ": item.date,
-            "الوردية": item.shift,
-            "المشرف": item.supervisor,
-            "المكبس": item.machine,
-            "العامل": item.worker,
-            "المنتج": item.productName,
-            "المظهر": item.appearance,
-            "فرز أول": item.g1,
-            "فرز ثان": item.g2,
-            "فرز ثالث": item.g3,
-            "التالف": item.waste,
-            "إجمالي الحافز (ج.م)": item.incentive
-        }));
-
-        const ws = XLSX.utils.json_to_sheet(excelData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "تقرير الإنتاج والحوافز");
-        XLSX.writeFile(wb, "AlManar_Production_Report.xlsx");
-    }
-
-    function saveOrUpdateDetailedMachine() {
-        const name = document.getElementById('mName').value.trim();
-        const type = document.getElementById('mType').value.trim();
-        const power = document.getElementById('mPower').value.trim();
-        const len = document.getElementById('mLen').value;
-        const width = document.getElementById('mWidth').value;
-        const height = document.getElementById('mHeight').value;
-        const docId = document.getElementById('editingMachineDocId').value;
-
-        if(!name) { alert("أدخل اسم المكبس"); return; }
-
-        const machineData = {
-            name, type, power,
-            dimensions: `${len}×${width}×${height} سم`
-        };
-
-        let promise = docId ? 
-            db.collection("machines_detailed_specs").doc(docId).update(machineData) :
-            db.collection("machines_detailed_specs").add(machineData);
-
-        promise.then(() => {
-            document.getElementById('mName').value = '';
-            document.getElementById('mType').value = '';
-            document.getElementById('mPower').value = '';
-            document.getElementById('mLen').value = '';
-            document.getElementById('mWidth').value = '';
-            document.getElementById('mHeight').value = '';
-            document.getElementById('editingMachineDocId').value = '';
-            document.getElementById('saveMachineBtn').innerText = "إضافة أو تحديث الماكينة 🛠️";
-            loadMachinesTable();
-            loadWorkersAndSupervisorsDropdowns();
-        });
-    }
-
-    function loadMachinesTable() {
-        const tbody = document.getElementById('machinesTableBody');
-        if(!tbody) return;
-        db.collection("machines_detailed_specs").get().then((snapshot) => {
-            tbody.innerHTML = '';
-            let idx = 1;
-            snapshot.forEach((doc) => {
-                const m = doc.data();
-                tbody.innerHTML += `<tr>
-                    <td>${idx++}</td>
-                    <td><span class="clickable" onclick="openMachineModal('${doc.id}', '${m.name}', '${m.type}', '${m.power}', '${m.dimensions}')">${m.name}</span></td>
-                    <td>${m.type || '-'}</td>
-                    <td>${m.power || '-'} طن</td>
-                    <td>${m.dimensions || '-'}</td>
-                    <td>سجل الصيانة 📋</td>
-                    <td>
-                        <button class="btn-edit" onclick="editMachine('${doc.id}', '${m.name}', '${m.type}', '${m.power}')">تعديل</button>
-                        <button class="btn-del" onclick="deleteMachine('${doc.id}')">حذف</button>
-                    </td>
-                </tr>`;
+        let excelCounter = 1;
+        exportList.forEach((data) => {
+            reportsData.push({
+                "مسلسل": excelCounter++,
+                "التاريخ": data.date, "الوردية": data.shift, "المشرف": data.supervisor, "المسجل": data.entryBy,
+                "المكبس": data.machine, "العامل": data.worker, "المنتج": data.product,
+                "المظهر": data.appearance, "فرز أول": data.g1, "إجمالي العيوب والتالف": data.totalDefects,
+                "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض',
+                "حافز الكمية": data.quantityIncentive || 0,
+                "حافز الجودة": data.qualityIncentive || 0,
+                "إجمالي الحافز (ج.م)": data.incentive || 0
             });
         });
-    }
 
-    function editMachine(id, name, type, power) {
-        document.getElementById('editingMachineDocId').value = id;
-        document.getElementById('mName').value = name;
-        document.getElementById('mType').value = type;
-        document.getElementById('mPower').value = power;
-        document.getElementById('saveMachineBtn').innerText = "تعديل الماكينة الحالية 🔄";
-    }
-
-    function deleteMachine(id) {
-        if(confirm("هل أنت متأكد من حذف هذه الماكينة؟")) {
-            db.collection("machines_detailed_specs").doc(id).delete().then(() => {
-                loadMachinesTable();
-                loadWorkersAndSupervisorsDropdowns();
-            });
-        }
-    }
-
-    function openMachineModal(id, name, type, power, dim) {
-        activeMachineIdForModal = id;
-        document.getElementById('modalMachineTitle').innerText = "تفاصيل المكبس: " + name;
-        document.getElementById('mModalType').innerText = type;
-        document.getElementById('mModalPower').innerText = power + " طن";
-        document.getElementById('mModalDim').innerText = dim;
-        loadMaintenanceRecords(id);
-        document.getElementById('machineModal').style.display = 'flex';
-    }
-
-    function closeMachineModal() {
-        document.getElementById('machineModal').style.display = 'none';
-    }
-
-    function loadMaintenanceRecords(machineId) {
-        const tbody = document.getElementById('maintenanceTableBody');
-        tbody.innerHTML = '';
-        db.collection("machines_detailed_specs").doc(machineId).collection("maintenance").orderBy("date", "desc").get().then((snapshot) => {
-            let i = 1;
-            snapshot.forEach((doc) => {
-                const m = doc.data();
-                tbody.innerHTML += `<tr><td>${i++}</td><td>${m.date}</td><td>${m.type}</td><td>${m.by}</td><td>${m.note || '-'}</td></tr>`;
-            });
-        });
-    }
-
-    function saveMaintenanceRecord() {
-        const date = document.getElementById('mMainDate').value;
-        const by = document.getElementById('mMainBy').value.trim();
-        const type = document.getElementById('mMainType').value.trim();
-        const note = document.getElementById('mMainNote').value.trim();
-
-        if(!date || !type) { alert("أدخل التاريخ ونوع الصيانة"); return; }
-
-        db.collection("machines_detailed_specs").doc(activeMachineIdForModal).collection("maintenance").add({
-            date, by, type, note
-        }).then(() => {
-            document.getElementById('mMainBy').value = '';
-            document.getElementById('mMainType').value = '';
-            document.getElementById('mMainNote').value = '';
-            loadMaintenanceRecords(activeMachineIdForModal);
-        });
-    }
-
-    function handleAddNewUser(e) {
-        e.preventDefault();
-        const username = document.getElementById('newUsername').value.trim().toLowerCase();
-        const fullName = document.getElementById('newFullName').value.trim();
-        const pass = document.getElementById('newUserPass').value;
-        const isWorker = document.getElementById('isWorker').checked;
-        const isSupervisor = document.getElementById('isSupervisor').checked;
-
-        const perms = {
-            entry: document.getElementById('p_entry').checked,
-            history: document.getElementById('p_history').checked,
-            excel: document.getElementById('p_excel').checked,
-            master: document.getElementById('p_master').checked,
-            users: document.getElementById('p_users').checked
-        };
-
-        auth.createUserWithEmailAndPassword(`${username}@almanar.factory`, pass).then(() => {
-            db.collection("users_permissions").doc(username).set({
-                username, fullName, isWorker, isSupervisor, perms
-            }).then(() => {
-                alert("تم إنشاء المستخدم بنجاح! 👤");
-                loadWorkersAndSupervisorsDropdowns();
-                loadUsersTable();
-                e.target.reset();
-            });
-        }).catch(err => {
-            alert("خطأ أثناء إنشاء المستخدم: " + err.message);
-        });
-    }
-
-    function loadUsersTable() {
-        const tbody = document.getElementById('usersTableBody');
-        if(!tbody) return;
-        db.collection("users_permissions").get().then((snapshot) => {
-            tbody.innerHTML = '';
-            let idx = 1;
-            snapshot.forEach((doc) => {
-                const u = doc.data();
-                const p = u.perms || {};
-                tbody.innerHTML += `<tr>
-                    <td>${idx++}</td>
-                    <td><b>${u.username}</b></td>
-                    <td>${u.fullName || '-'}</td>
-                    <td>${u.isWorker ? '✔️' : '❌'}</td>
-                    <td>${u.isSupervisor ? '✔️' : '❌'}</td>
-                    <td>${p.entry ? '✔️' : '❌'}</td>
-                    <td>${p.history ? '✔️' : '❌'}</td>
-                    <td>${p.excel ? '✔️' : '❌'}</td>
-                    <td>${p.master ? '✔️' : '❌'}</td>
-                    <td>${p.users ? '✔️' : '❌'}</td>
-                    <td><button class="btn-del" onclick="deleteUser('${u.username}')">حذف</button></td>
-                </tr>`;
-            });
-        });
-    }
-
-    function deleteUser(username) {
-        if(confirm(`هل أنت متأكد من حذف المستخدم ${username}؟`)) {
-            db.collection("users_permissions").doc(username).delete().then(() => {
-                loadUsersTable();
-                loadWorkersAndSupervisorsDropdowns();
-            });
-        }
-    }
-
-    function handleChangePassword(e) {
-        e.preventDefault();
-        const p1 = document.getElementById('newPass1').value;
-        const p2 = document.getElementById('newPass2').value;
-        const msg = document.getElementById('passMsg');
-
-        if(p1 !== p2) {
-            msg.style.color = 'red';
-            msg.innerText = "كلمتا المرور غير متطابقتين!";
-            return;
-        }
-
-        auth.currentUser.updatePassword(p1).then(() => {
-            msg.style.color = 'green';
-            msg.innerText = "تم تحديث كلمة المرور بنجاح! 🔐";
-            document.getElementById('newPass1').value = '';
-            document.getElementById('newPass2').value = '';
-        }).catch(err => {
-            msg.style.color = 'red';
-            msg.innerText = "خطأ: " + err.message;
-        });
+        if(reportsData.length === 0) { alert("لا توجد بيانات مطابقة للتصدير."); return; }
+        const worksheet = XLSX.utils.json_to_sheet(reportsData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "تقارير_الإنتاج_والحوافز");
+        XLSX.writeFile(workbook, `تقرير_مصنع_المنار_والحوافز_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 </script>
 
