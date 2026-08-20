@@ -456,13 +456,13 @@
                     applyPermissions({ entry: true, history: true, excel: true, master: true, users: true }, true, true);
                 } else if (data) {
                     applyPermissions(data.perms || {}, data.isWorker, data.isSupervisor);
-                } else { 
-                    applyPermissions({ entry: true }, true, false); 
+                } else {
+                    alert("حسابك غير مُفعّل بعد. تواصل مع مسؤول النظام لتفعيل صلاحياتك.");
+                    auth.signOut();
                 }
             }).catch(() => {
-                document.getElementById('userNameDisplay').innerText = "المستخدم: " + currentUsername;
-                document.getElementById('profUsername').innerText = currentUsername;
-                applyPermissions({ entry: true }, true, false);
+                alert("حسابك غير مُفعّل بعد. تواصل مع مسؤول النظام لتفعيل صلاحياتك.");
+                auth.signOut();
             });
 
             loadMasterDataFromFirestore();
