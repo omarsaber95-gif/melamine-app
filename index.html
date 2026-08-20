@@ -106,7 +106,7 @@
         .perm-item input { width: auto; }
         .badge-perm { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-size: 11px; margin: 2px; font-weight: bold; }
 
-        #reviewModal, #machineModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; padding: 10px; }
+        #reviewModal, #machineModal, #customEditModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; padding: 10px; }
         .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
@@ -190,7 +190,6 @@
                 </form>
             </div>
 
-            <!-- قائمة المراجعة والاستعراض المؤقت للوردية -->
             <div class="card" id="stagingCard" style="display:none;">
                 <h3 style="color: var(--primary);">📋 قائمة الاستعراض والمراجعة (الوردية الحالية قبل الترحيل)</h3>
                 <div class="scrollable-container">
@@ -231,7 +230,7 @@
                 <div class="scrollable-container">
                     <table>
                         <thead>
-                            <tr><th>#</th><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>إجمالي الحافز 💰</th></tr>
+                            <tr><th>#</th><th>التاريخ</th><th>الوردية</th><th>المشرف</th><th>المسجل</th><th>المكبس</th><th>العامل</th><th>المنتج والمظهر</th><th>فرز 1</th><th>العيوب</th><th>نسبة العيوب</th><th>الحالة</th><th>إجمالي الحافز 💰</th><th>إجراءات التعديل</th></tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
                     </table>
@@ -264,7 +263,6 @@
                 </div>
             </div>
 
-            <!-- إعدادات المنتجات ومعايير الحوافز وتعديلها -->
             <div class="card">
                 <h3 style="color: var(--primary); margin-bottom: 10px;">📦 المنتجات ومعايير الإنتاج وحوافز الجودة</h3>
                 <input type="hidden" id="editingProductIndex" value="">
@@ -301,7 +299,7 @@
             </div>
         </div>
 
-        <!-- التبويب الرابع: إدارة المستخدمين (العمال والمشرفين) والصلاحيات -->
+        <!-- التبويب الرابع: إدارة المستخدمين -->
         <div id="usersTab" class="tab-content">
             <div class="card">
                 <h3>إضافة مستخدم وتحديد الدور والأذونات 🛠️</h3>
@@ -406,6 +404,29 @@
         <div style="display: flex; gap: 10px;">
             <button onclick="commitStagingToFirestore()" style="flex:1; background:var(--success); color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">تأكيد وترحيل للداتابيز ✅</button>
             <button onclick="closeReviewModal()" style="flex:1; background:var(--danger); color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">تعديل البيانات ❌</button>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة تعديل سجل الإنتاج المنفرد (مع نظام تتبع من تعدل ومتى) -->
+<div id="customEditModal">
+    <div class="modal-box" style="max-width: 450px;">
+        <h3 style="color: var(--primary); margin-bottom: 15px;">✏️ تعديل سجل الإنتاج</h3>
+        <input type="hidden" id="editDocId">
+        
+        <div style="margin-bottom: 10px;"><label>الفرز الأول:</label><input type="number" id="editG1" class="num-input"></div>
+        <div style="margin-bottom: 10px;"><label>الفرز الثاني:</label><input type="number" id="editG2" class="num-input"></div>
+        <div style="margin-bottom: 10px;"><label>الفرز الثالث:</label><input type="number" id="editG3" class="num-input"></div>
+        <div style="margin-bottom: 15px;"><label>التالف / الهالك:</label><input type="number" id="editWaste" class="num-input"></div>
+
+        <div style="background:#f1f5f9; padding:8px; border-radius:6px; font-size:11px; color:#555; margin-bottom:15px;">
+            آخر تعديل بواسطة: <span id="editInfoUser" style="font-weight:bold; color:var(--primary);">-</span><br>
+            وقت التعديل: <span id="editInfoTime" style="font-weight:bold;">-</span>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button onclick="saveCustomEdit()" style="flex:1; background:var(--success); color:white; padding:10px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">حفظ التعديلات ✅</button>
+            <button onclick="document.getElementById('customEditModal').style.display='none'" style="flex:1; background:#64748b; color:white; padding:10px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">إلغاء ❌</button>
         </div>
     </div>
 </div>
@@ -520,424 +541,275 @@
         errDiv.style.display = 'none';
 
         auth.signInWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass)
-        .catch((error) => {
+        .catch(() => {
             if (rawUsername === "admin") {
-                auth.createUserWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass).then(() => {
-                    db.collection("users_permissions").doc("admin").set({
-                        username: "admin", fullName: "مدير النظام", isWorker: true, isSupervisor: true,
-                        perms: { entry: true, history: true, excel: true, master: true, users: true }
-                    });
-                });
-            } else { 
-                errDiv.innerText = "خطأ في اسم المستخدم أو كلمة المرور!"; 
-                errDiv.style.display = 'block'; 
+                auth.createUserWithEmailAndPassword(`${rawUsername}@almanar.factory`, pass).catch(()=>{});
+            } else {
+                errDiv.innerText = "خطأ في اسم المستخدم أو كلمة المرور";
+                errDiv.style.display = 'block';
             }
         });
     }
 
-    function handleChangePassword(e) {
-        e.preventDefault();
-        const p1 = document.getElementById('newPass1').value, p2 = document.getElementById('newPass2').value, msg = document.getElementById('passMsg');
-        if (p1 !== p2) { msg.style.color = "red"; msg.innerText = "كلمتا المرور غير متطابقتين!"; return; }
-        auth.currentUser.updatePassword(p1).then(() => {
-            msg.style.color = "green"; msg.innerText = "✅ تم تحديث كلمة المرور!";
-            document.getElementById('newPass1').value = ''; document.getElementById('newPass2').value = '';
-        }).catch(() => { msg.style.color = "red"; msg.innerText = "أعد تسجيل الدخول ثم جرب مجدداً."; });
-    }
-
-    function handleAddNewUser(e) {
-        e.preventDefault();
-        let rawInput = document.getElementById('newUsername').value.trim();
-        const fullName = document.getElementById('newFullName').value.trim();
-        const username = rawInput.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-        const pass = document.getElementById('newUserPass').value;
-        const isWorker = document.getElementById('isWorker').checked;
-        const isSupervisor = document.getElementById('isSupervisor').checked;
-
-        if(!username || !pass || !fullName) { alert("يرجى ملء جميع الحقول المطلوبة!"); return; }
-
-        const perms = {
-            entry: document.getElementById('p_entry').checked, history: document.getElementById('p_history').checked,
-            excel: document.getElementById('p_excel').checked, master: document.getElementById('p_master').checked,
-            users: document.getElementById('p_users').checked
-        };
-
-        const email = `${username}@almanar.factory`;
-        const secondaryAppName = "SecondaryApp_" + Date.now();
-        const secondaryApp = firebase.initializeApp(firebaseConfig, secondaryAppName);
-        const secondaryAuth = firebase.auth(secondaryApp);
-
-        secondaryAuth.createUserWithEmailAndPassword(email, pass)
-            .then(() => {
-                return db.collection("users_permissions").doc(username).set({ username, fullName, isWorker, isSupervisor, perms });
-            })
-            .then(() => {
-                alert(`تم إنشاء حساب الدخول وصلاحيات المستخدم (${fullName}) بنجاح! 🚀`);
-                document.getElementById('newUsername').value = ''; 
-                document.getElementById('newFullName').value = '';
-                document.getElementById('newUserPass').value = '';
-                loadUsersTable();
-                loadWorkersAndSupervisorsDropdowns();
-                return secondaryAuth.signOut();
-            })
-            .then(() => secondaryApp.delete())
-            .catch((error) => { alert("خطأ: " + error.message); secondaryApp.delete(); });
-    }
-
-    function loadUsersTable() {
-        db.collection("users_permissions").get().then((snapshot) => {
-            const tbody = document.getElementById('usersTableBody');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-            let counter = 1;
-            snapshot.forEach((doc) => {
-                const u = doc.data(), p = u.perms || {};
-                const dispName = u.fullName || u.username;
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${counter++}</b></td>
-                        <td><b>${u.username}</b></td>
-                        <td><b>${dispName}</b></td>
-                        <td><input type="checkbox" ${u.isWorker?'checked':''} onchange="toggleUserRole('${u.username}', 'isWorker', this.checked)"></td>
-                        <td><input type="checkbox" ${u.isSupervisor?'checked':''} onchange="toggleUserRole('${u.username}', 'isSupervisor', this.checked)"></td>
-                        <td><input type="checkbox" ${p.entry?'checked':''} onchange="togglePerm('${u.username}', 'entry', this.checked)"></td>
-                        <td><input type="checkbox" ${p.history?'checked':''} onchange="togglePerm('${u.username}', 'history', this.checked)"></td>
-                        <td><input type="checkbox" ${p.excel?'checked':''} onchange="togglePerm('${u.username}', 'excel', this.checked)"></td>
-                        <td><input type="checkbox" ${p.master?'checked':''} onchange="togglePerm('${u.username}', 'master', this.checked)"></td>
-                        <td><input type="checkbox" ${p.users?'checked':''} onchange="togglePerm('${u.username}', 'users', this.checked)"></td>
-                        <td><button class="btn-del" onclick="deleteUserDoc('${u.username}')">حذف</button></td>
-                    </tr>
-                `;
-            });
-        });
-    }
-
-    function toggleUserRole(username, roleKey, value) {
-        db.collection("users_permissions").doc(username).update({ [roleKey]: value }).then(() => loadWorkersAndSupervisorsDropdowns());
-    }
-
-    function togglePerm(username, key, value) { db.collection("users_permissions").doc(username).update({ [`perms.${key}`]: value }); }
-    function deleteUserDoc(username) { if(confirm(`حذف حساب ${username}؟`)) db.collection("users_permissions").doc(username).delete().then(() => { loadUsersTable(); loadWorkersAndSupervisorsDropdowns(); }); }
-
-    function loadWorkersAndSupervisorsDropdowns() {
-        db.collection("users_permissions").get().then((snapshot) => {
-            let workersList = [];
-            let supervisorsList = [];
-
-            snapshot.forEach((doc) => {
-                const u = doc.data();
-                const displayName = u.fullName || u.username;
-                if(u.isWorker) workersList.push(displayName);
-                if(u.isSupervisor) supervisorsList.push(displayName);
-            });
-
-            populateSelect('workerSelect', workersList, false);
-            populateSelect('supervisorSelect', supervisorsList, true);
-        });
-    }
+    function handleLogout() { auth.signOut(); }
 
     function loadMasterDataFromFirestore() {
-        db.collection("factory_settings").doc("master_data").onSnapshot((doc) => {
-            if (doc.exists) { 
-                globalMasterData = doc.data(); 
-            } else {
-                globalMasterData = {
-                    products: [
-                        { name: "طبق غويط 9 بوصة", target: 500, maxWaste: 5, incentiveValue: 0.5, qualityLowWaste: 2, qualityBonus: 10 }
-                    ],
-                    colors: ["أبيض ناصع", "أسود ملكي", "بيج كلاسيك"],
-                    patterns: ["زهور كلاسيك", "رخامي مودرن", "فواكه مشكلة"]
-                };
-                db.collection("factory_settings").doc("master_data").set(globalMasterData);
+        db.collection("master_settings").doc("config").get().then((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                globalMasterData.products = data.products || [];
+                globalMasterData.colors = data.colors || [];
+                globalMasterData.patterns = data.patterns || [];
+                updateDropdowns();
+                renderMasterLists();
             }
-            renderMasterDataUI();
         });
     }
 
-    function renderMasterDataUI() {
-        const prodTbody = document.getElementById('productsTableBody');
-        if(prodTbody) {
-            prodTbody.innerHTML = '';
-            (globalMasterData.products || []).forEach((item, index) => {
-                let pObj = typeof item === 'string' ? { name: item, target: 0, maxWaste: 0, incentiveValue: 0, qualityLowWaste: 0, qualityBonus: 0 } : item;
-                prodTbody.innerHTML += `
-                    <tr>
-                        <td><b>${index + 1}</b></td>
-                        <td><b>${pObj.name}</b></td>
-                        <td>${pObj.target || 0}</td>
-                        <td>${pObj.maxWaste || 0}%</td>
-                        <td>${pObj.incentiveValue || 0} ج.م</td>
-                        <td>${pObj.qualityLowWaste || 0}%</td>
-                        <td>${pObj.qualityBonus || 0} ج.م</td>
-                        <td>
-                            <button class="btn-edit" onclick="editProduct(${index})">تعديل</button>
-                            <button class="btn-del" onclick="deleteProductFirestore(${index})">حذف</button>
-                        </td>
-                    </tr>
-                `;
+    function updateDropdowns() {
+        const prodSelect = document.getElementById('productSelect');
+        if (prodSelect) {
+            prodSelect.innerHTML = `<option value="">${NONE_OPTION}</option>`;
+            globalMasterData.products.forEach(p => {
+                prodSelect.innerHTML += `<option value="${p.name}">${p.name} (المستهدف: ${p.target})</option>`;
             });
         }
-
-        ['colors', 'patterns'].forEach(key => {
-            const container = document.getElementById(key + 'List');
-            if (container) {
-                container.innerHTML = '';
-                (globalMasterData[key] || []).forEach((item, index) => {
-                    container.innerHTML += `<div class="master-list-item"><span>${item}</span><button class="btn-del" onclick="deleteMasterDataFirestore('${key}', ${index})">حذف</button></div>`;
-                });
-            }
-        });
-        updateFormDropdowns();
-    }
-
-    // دوال المنتجات (إضافة وتعديل)
-    function saveOrUpdateDetailedProduct() {
-        const editIndex = document.getElementById('editingProductIndex').value;
-        const name = document.getElementById('newProdName').value.trim();
-        const target = Number(document.getElementById('newProdTarget').value);
-        const maxWaste = Number(document.getElementById('newProdWaste').value);
-        const incentiveValue = Number(document.getElementById('newProdIncentive').value);
-        const qualityLowWaste = Number(document.getElementById('newQualityLowWaste').value);
-        const qualityBonus = Number(document.getElementById('newQualityBonus').value);
-
-        if (!name || target <= 0) { alert("يرجى إدخال اسم المنتج ومعدل الإنتاج بشكل صحيح!"); return; }
-
-        if (!globalMasterData.products) globalMasterData.products = [];
-
-        const productData = { name, target, maxWaste, incentiveValue, qualityLowWaste, qualityBonus };
-
-        if (editIndex === "") {
-            globalMasterData.products.push(productData);
-        } else {
-            globalMasterData.products[parseInt(editIndex)] = productData;
-            document.getElementById('editingProductIndex').value = "";
-            document.getElementById('saveProductBtn').innerText = "إضافة أو تحديث المنتج ➕";
-            document.getElementById('saveProductBtn').style.backgroundColor = "var(--success)";
+        const colorSelect = document.getElementById('colorSelect');
+        if (colorSelect) {
+            colorSelect.innerHTML = `<option value="">${NONE_OPTION}</option>`;
+            globalMasterData.colors.forEach(c => { colorSelect.innerHTML += `<option value="${c}">${c}</option>`; });
         }
-
-        db.collection("factory_settings").doc("master_data").set(globalMasterData).then(() => {
-            alert("✅ تم حفظ وتحديث المنتج بنجاح!");
-            document.getElementById('newProdName').value = '';
-            document.getElementById('newProdTarget').value = '';
-            document.getElementById('newProdWaste').value = '';
-            document.getElementById('newProdIncentive').value = '';
-            document.getElementById('newQualityLowWaste').value = '';
-            document.getElementById('newQualityBonus').value = '';
-        });
+        const patternSelect = document.getElementById('patternSelect');
+        if (patternSelect) {
+            patternSelect.innerHTML = `<option value="">${NONE_OPTION}</option>`;
+            globalMasterData.patterns.forEach(pt => { patternSelect.innerHTML += `<option value="${pt}">${pt}</option>`; });
+        }
     }
 
-    function editProduct(index) {
-        const p = globalMasterData.products[index];
-        document.getElementById('newProdName').value = p.name || '';
-        document.getElementById('newProdTarget').value = p.target || '';
-        document.getElementById('newProdWaste').value = p.maxWaste || '';
-        document.getElementById('newProdIncentive').value = p.incentiveValue || '';
-        document.getElementById('newQualityLowWaste').value = p.qualityLowWaste || '';
-        document.getElementById('newQualityBonus').value = p.qualityBonus || '';
+    function renderMasterLists() {
+        const cList = document.getElementById('colorsList');
+        if (cList) {
+            cList.innerHTML = globalMasterData.colors.map((c, i) => `
+                <div class="master-list-item"><span>${c}</span><button class="btn-del" onclick="deleteMasterItem('colors', ${i})">حذف</button></div>
+            `).join('');
+        }
+        const pList = document.getElementById('patternsList');
+        if (pList) {
+            pList.innerHTML = globalMasterData.patterns.map((pt, i) => `
+                <div class="master-list-item"><span>${pt}</span><button class="btn-del" onclick="deleteMasterItem('patterns', ${i})">حذف</button></div>
+            `).join('');
+        }
         
-        document.getElementById('editingProductIndex').value = index;
-        const btn = document.getElementById('saveProductBtn');
-        btn.innerText = "حفظ التعديلات ✏️";
-        btn.style.backgroundColor = "var(--warning)";
-        window.scrollTo({ top: document.getElementById('masterTab').offsetTop, behavior: 'smooth' });
-    }
-
-    function deleteProductFirestore(index) {
-        if(confirm("حذف هذا المنتج؟")) {
-            globalMasterData.products.splice(index, 1);
-            db.collection("factory_settings").doc("master_data").set(globalMasterData);
+        const productsBody = document.getElementById('productsTableBody');
+        if(productsBody) {
+            productsBody.innerHTML = globalMasterData.products.map((p, idx) => `
+                <tr>
+                    <td>${idx+1}</td>
+                    <td><b>${p.name}</b></td>
+                    <td>${p.target}</td>
+                    <td>${p.waste}%</td>
+                    <td>${p.incentive} ج.م</td>
+                    <td>${p.lowWaste || '-'}%</td>
+                    <td>${p.qualityBonus || 0} ج.م</td>
+                    <td>
+                        <button class="btn-edit" onclick="editProductItem(${idx})">تعديل</button>
+                        <button class="btn-del" onclick="deleteProductItem(${idx})">حذف</button>
+                    </td>
+                </tr>
+            `).join('');
         }
     }
 
     function addMasterDataFirestore(type, inputId) {
         const val = document.getElementById(inputId).value.trim();
         if (!val) return;
-        if (!globalMasterData[type]) globalMasterData[type] = [];
-        globalMasterData[type].push(val);
-        db.collection("factory_settings").doc("master_data").set(globalMasterData).then(() => { document.getElementById(inputId).value = ''; });
-    }
-
-    function deleteMasterDataFirestore(type, index) {
-        globalMasterData[type].splice(index, 1);
-        db.collection("factory_settings").doc("master_data").set(globalMasterData);
-    }
-
-    function updateFormDropdowns() {
-        const select = document.getElementById('productSelect');
-        if (select) {
-            select.innerHTML = '';
-            (globalMasterData.products || []).forEach(item => {
-                let pName = typeof item === 'string' ? item : item.name;
-                const opt = document.createElement('option');
-                opt.value = pName; opt.innerText = pName;
-                select.appendChild(opt);
-            });
-        }
-        populateSelect('colorSelect', globalMasterData.colors, true);
-        populateSelect('patternSelect', globalMasterData.patterns, true);
-    }
-
-    function populateSelect(selectId, items, includeNone) {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-        select.innerHTML = '';
-        if (includeNone) {
-            const optNone = document.createElement('option');
-            optNone.value = NONE_OPTION; optNone.innerText = NONE_OPTION;
-            select.appendChild(optNone);
-        }
-        (items || []).forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item; opt.innerText = item;
-            select.appendChild(opt);
+        if (type === 'colors') globalMasterData.colors.push(val);
+        if (type === 'patterns') globalMasterData.patterns.push(val);
+        
+        db.collection("master_settings").doc("config").set(globalMasterData, { merge: true }).then(() => {
+            document.getElementById(inputId).value = '';
+            updateDropdowns();
+            renderMasterLists();
         });
     }
 
-    function handleColorChange() {
-        const c = document.getElementById('colorSelect'), p = document.getElementById('patternSelect');
-        if (c && p && c.value !== NONE_OPTION) { p.value = NONE_OPTION; p.disabled = true; } else if (p) { p.disabled = false; }
+    function deleteMasterItem(type, index) {
+        if (type === 'colors') globalMasterData.colors.splice(index, 1);
+        if (type === 'patterns') globalMasterData.patterns.splice(index, 1);
+        db.collection("master_settings").doc("config").set(globalMasterData, { merge: true }).then(() => {
+            updateDropdowns();
+            renderMasterLists();
+        });
     }
 
-    function handlePatternChange() {
-        const c = document.getElementById('colorSelect'), p = document.getElementById('patternSelect');
-        if (c && p && p.value !== NONE_OPTION) { c.value = NONE_OPTION; c.disabled = true; } else if (c) { c.disabled = false; }
-    }
+    function saveOrUpdateDetailedProduct() {
+        const name = document.getElementById('newProdName').value.trim();
+        const target = parseFloat(document.getElementById('newProdTarget').value) || 0;
+        const waste = parseFloat(document.getElementById('newProdWaste').value) || 0;
+        const incentive = parseFloat(document.getElementById('newProdIncentive').value) || 0;
+        const lowWaste = parseFloat(document.getElementById('newQualityLowWaste').value) || 0;
+        const qualityBonus = parseFloat(document.getElementById('newQualityBonus').value) || 0;
+        const editIdx = document.getElementById('editingProductIndex').value;
 
-    // دوال المكابس والماكينات (إضافة وتعديل)
-    function saveOrUpdateDetailedMachine() {
-        const editId = document.getElementById('editingMachineDocId').value;
-        const machine = {
-            name: document.getElementById('mName').value.trim(),
-            type: document.getElementById('mType').value.trim(),
-            power: document.getElementById('mPower').value.trim(),
-            openingDimensions: `${document.getElementById('mLen').value || 0}×${document.getElementById('mWidth').value || 0}×${document.getElementById('mHeight').value || 0} سم`
-        };
-        if(!machine.name) { alert("اكتب اسم المكبس!"); return; }
+        if (!name) { alert("أدخل اسم المنتج"); return; }
 
-        if (editId === "") {
-            machine.maintenanceLog = [];
-            db.collection("machines_detailed_specs").add(machine).then(() => {
-                alert("تم حفظ المكبس بنجاح!");
-                resetMachineForm();
-            });
+        const prodObj = { name, target, waste, incentive, lowWaste, qualityBonus };
+        if (editIdx === "") {
+            globalMasterData.products.push(prodObj);
         } else {
-            db.collection("machines_detailed_specs").doc(editId).update(machine).then(() => {
-                alert("✅ تم تحديث بيانات المكبس بنجاح!");
-                resetMachineForm();
+            globalMasterData.products[editIdx] = prodObj;
+            document.getElementById('editingProductIndex').value = "";
+            document.getElementById('saveProductBtn').innerText = "إضافة أو تحديث المنتج ➕";
+        }
+
+        db.collection("master_settings").doc("config").set(globalMasterData, { merge: true }).then(() => {
+            document.getElementById('newProdName').value = '';
+            document.getElementById('newProdTarget').value = '';
+            document.getElementById('newProdWaste').value = '';
+            document.getElementById('newProdIncentive').value = '';
+            document.getElementById('newQualityLowWaste').value = '';
+            document.getElementById('newQualityBonus').value = '';
+            updateDropdowns();
+            renderMasterLists();
+        });
+    }
+
+    function editProductItem(idx) {
+        const p = globalMasterData.products[idx];
+        document.getElementById('newProdName').value = p.name;
+        document.getElementById('newProdTarget').value = p.target;
+        document.getElementById('newProdWaste').value = p.waste;
+        document.getElementById('newProdIncentive').value = p.incentive;
+        document.getElementById('newQualityLowWaste').value = p.lowWaste || '';
+        document.getElementById('newQualityBonus').value = p.qualityBonus || '';
+        document.getElementById('editingProductIndex').value = idx;
+        document.getElementById('saveProductBtn').innerText = "تحديث بيانات المنتج ✏️";
+    }
+
+    function deleteProductItem(idx) {
+        globalMasterData.products.splice(idx, 1);
+        db.collection("master_settings").doc("config").set(globalMasterData, { merge: true }).then(() => {
+            updateDropdowns();
+            renderMasterLists();
+        });
+    }
+
+    function loadWorkersAndSupervisorsDropdowns() {
+        db.collection("users_permissions").get().then((snapshot) => {
+            let workersOptions = `<option value="">${NONE_OPTION}</option>`;
+            let supervisorsOptions = `<option value="">${NONE_OPTION}</option>`;
+            
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                const name = d.fullName || doc.id;
+                if (d.isWorker) workersOptions += `<option value="${name}">${name}</option>`;
+                if (d.isSupervisor) supervisorsOptions += `<option value="${name}">${name}</option>`;
             });
-        }
-    }
 
-    function resetMachineForm() {
-        document.getElementById('editingMachineDocId').value = '';
-        document.getElementById('mName').value = ''; 
-        document.getElementById('mType').value = '';
-        document.getElementById('mPower').value = ''; 
-        document.getElementById('mLen').value = '';
-        document.getElementById('mWidth').value = ''; 
-        document.getElementById('mHeight').value = '';
-        const btn = document.getElementById('saveMachineBtn');
-        btn.innerText = "إضافة أو تحديث الماكينة 🛠️";
-        btn.style.backgroundColor = "var(--success)";
-    }
+            const workerSel = document.getElementById('workerSelect');
+            if(workerSel) workerSel.innerHTML = workersOptions;
+            const supSel = document.getElementById('supervisorSelect');
+            if(supSel) supSel.innerHTML = supervisorsOptions;
+        });
 
-    function editMachine(id, name, type, power, dims) {
-        document.getElementById('editingMachineDocId').value = id;
-        document.getElementById('mName').value = name;
-        document.getElementById('mType').value = type === '-' ? '' : type;
-        document.getElementById('mPower').value = power.replace(' طن', '') === '-' ? '' : power.replace(' طن', '');
-        
-        const parts = dims.split('×');
-        if(parts.length === 3) {
-            document.getElementById('mLen').value = parts[0].replace(' سم', '');
-            document.getElementById('mWidth').value = parts[1];
-            document.getElementById('mHeight').value = parts[2].replace(' سم', '');
-        }
-
-        const btn = document.getElementById('saveMachineBtn');
-        btn.innerText = "حفظ تعديلات الماكينة ✏️";
-        btn.style.backgroundColor = "var(--warning)";
-        window.scrollTo({ top: document.getElementById('masterTab').offsetTop, behavior: 'smooth' });
+        db.collection("machines").get().then((snapshot) => {
+            let mOptions = `<option value="">${NONE_OPTION}</option>`;
+            let fOptions = `<option value="">كل المكابس</option>`;
+            snapshot.forEach(doc => {
+                const mName = doc.data().name;
+                mOptions += `<option value="${mName}">${mName}</option>`;
+                fOptions += `<option value="${mName}">${mName}</option>`;
+            });
+            const mSel = document.getElementById('machineSelect');
+            if(mSel) mSel.innerHTML = mOptions;
+            const fSel = document.getElementById('filterMachine');
+            if(fSel) fSel.innerHTML = fOptions;
+        });
     }
 
     function loadMachinesTable() {
-        db.collection("machines_detailed_specs").onSnapshot((snapshot) => {
+        db.collection("machines").get().then((snapshot) => {
             const tbody = document.getElementById('machinesTableBody');
-            const select = document.getElementById('machineSelect');
-            const filterSelect = document.getElementById('filterMachine');
-            if(tbody) tbody.innerHTML = '';
-            if(select) select.innerHTML = '';
-            if(filterSelect) filterSelect.innerHTML = '<option value="">كل المكابس</option>';
-
-            let machineNamesList = [];
-            let counter = 1;
-            snapshot.forEach((doc) => {
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            let i = 1;
+            snapshot.forEach(doc => {
                 const m = doc.data();
-                machineNamesList.push(m.name);
-                if(tbody) {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><b>${counter++}</b></td>
-                            <td><span class="clickable" onclick="openMachineModal('${doc.id}')">${m.name}</span></td>
-                            <td>${m.type || '-'}</td>
-                            <td>${m.power ? m.power + ' طن' : '-'}</td>
-                            <td>${m.openingDimensions}</td>
-                            <td><b>${(m.maintenanceLog || []).length}</b> عمليات صيانة</td>
-                            <td>
-                                <button class="btn-edit" onclick="editMachine('${doc.id}', '${m.name}', '${m.type || '-'}', '${m.power ? m.power + ' طن' : '-'}', '${m.openingDimensions}')">تعديل</button>
-                                <button class="btn-del" onclick="deleteMachineDoc('${doc.id}')">حذف</button>
-                            </td>
-                        </tr>
-                    `;
-                }
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${i++}</td>
+                        <td><span class="clickable" onclick="openMachineModal('${doc.id}', '${m.name}')">${m.name}</span></td>
+                        <td>${m.type || '-'}</td>
+                        <td>${m.power || '-'} طن</td>
+                        <td>${m.len || 0} × ${m.width || 0} × ${m.height || 0} سم</td>
+                        <td><button class="btn-submit" style="padding:4px 8px; font-size:11px;" onclick="openMachineModal('${doc.id}', '${m.name}')">السجل والتحكم 🛠️</button></td>
+                        <td><button class="btn-del" onclick="deleteMachine('${doc.id}')">حذف</button></td>
+                    </tr>
+                `;
             });
-
-            if(select) {
-                if(machineNamesList.length === 0) select.innerHTML = '<option value="">أضف مكابس من السجل الفني أولاً</option>';
-                else machineNamesList.forEach(name => select.innerHTML += `<option value="${name}">${name}</option>`);
-            }
-            if(filterSelect) { machineNamesList.forEach(name => filterSelect.innerHTML += `<option value="${name}">${name}</option>`); }
         });
     }
 
-    function openMachineModal(docId) {
-        activeMachineIdForModal = docId;
-        db.collection("machines_detailed_specs").doc(docId).get().then((doc) => {
-            if(!doc.exists) return;
-            const m = doc.data();
-            document.getElementById('modalMachineTitle').innerText = "بطاقة وتاريخ صيانة: " + m.name;
-            document.getElementById('mModalType').innerText = m.type || '-';
-            document.getElementById('mModalPower').innerText = m.power ? m.power + ' طن' : '-';
-            document.getElementById('mModalDim').innerText = m.openingDimensions || '-';
+    function saveOrUpdateDetailedMachine() {
+        const name = document.getElementById('mName').value.trim();
+        const type = document.getElementById('mType').value.trim();
+        const power = document.getElementById('mPower').value.trim();
+        const len = parseFloat(document.getElementById('mLen').value) || 0;
+        const width = parseFloat(document.getElementById('mWidth').value) || 0;
+        const height = parseFloat(document.getElementById('mHeight').value) || 0;
+        const docId = document.getElementById('editingMachineDocId').value;
 
-            renderMaintenanceLogTable(m.maintenanceLog || []);
-            document.getElementById('machineModal').style.display = 'flex';
+        if (!name) { alert("أدخل اسم المكبس"); return; }
+        const data = { name, type, power, len, width, height };
+
+        const promise = docId ? db.collection("machines").doc(docId).set(data, { merge: true }) : db.collection("machines").add(data);
+        promise.then(() => {
+            document.getElementById('mName').value = '';
+            document.getElementById('mType').value = '';
+            document.getElementById('mPower').value = '';
+            document.getElementById('mLen').value = '';
+            document.getElementById('mWidth').value = '';
+            document.getElementById('mHeight').value = '';
+            document.getElementById('editingMachineDocId').value = '';
+            loadMachinesTable();
+            loadWorkersAndSupervisorsDropdowns();
         });
     }
 
-    function closeMachineModal() {
-        document.getElementById('machineModal').style.display = 'none';
-        activeMachineIdForModal = null;
-    }
-
-    function renderMaintenanceLogTable(logList) {
-        const tbody = document.getElementById('maintenanceTableBody');
-        tbody.innerHTML = '';
-        if(logList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="color:#64748b;">لا توجد سجلات صيانة مسجلة حتى الآن لهذا المكبس.</td></tr>`;
-            return;
+    function deleteMachine(id) {
+        if(confirm("هل أنت متأكد من حذف المكبس؟")) {
+            db.collection("machines").doc(id).delete().then(() => { loadMachinesTable(); loadWorkersAndSupervisorsDropdowns(); });
         }
-        let counter = 1;
-        logList.forEach(item => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><b>${counter++}</b></td>
-                    <td><b>${item.date}</b></td>
-                    <td>${item.type}</td>
-                    <td>${item.by}</td>
-                    <td>${item.note || '-'}</td>
-                </tr>
-            `;
+    }
+
+    function openMachineModal(id, name) {
+        activeMachineIdForModal = id;
+        document.getElementById('modalMachineTitle').innerText = "سجل وصيانة المكبس: " + name;
+        db.collection("machines").doc(id).get().then(doc => {
+            if(doc.exists) {
+                const m = doc.data();
+                document.getElementById('mModalType').innerText = m.type || '-';
+                document.getElementById('mModalPower').innerText = (m.power || '-') + " طن";
+                document.getElementById('mModalDim').innerText = `${m.len || 0}×${m.width || 0}×${m.height || 0} سم`;
+            }
+        });
+        loadMaintenanceRecords(id);
+        document.getElementById('machineModal').style.display = 'flex';
+    }
+
+    function closeMachineModal() { document.getElementById('machineModal').style.display = 'none'; }
+
+    function loadMaintenanceRecords(machineId) {
+        db.collection("machines").doc(machineId).collection("maintenance").orderBy("date", "desc").get().then(snapshot => {
+            const tbody = document.getElementById('maintenanceTableBody');
+            tbody.innerHTML = '';
+            let i = 1;
+            snapshot.forEach(doc => {
+                const r = doc.data();
+                tbody.innerHTML += `
+                    <tr><td>${i++}</td><td>${r.date}</td><td>${r.type}</td><td>${r.by}</td><td>${r.note || '-'}</td></tr>
+                `;
+            });
         });
     }
 
@@ -948,53 +820,16 @@
         const type = document.getElementById('mMainType').value.trim();
         const note = document.getElementById('mMainNote').value.trim();
 
-        if(!date || !by || !type) { alert("يرجى إدخال تاريخ الصيانة، اسم القائم بها، ونوع الصيانة!"); return; }
-
-        const newLogEntry = { date, by, type, note };
-        db.collection("machines_detailed_specs").doc(activeMachineIdForModal).update({
-            maintenanceLog: firebase.firestore.FieldValue.arrayUnion(newLogEntry)
-        }).then(() => {
-            alert("✅ تمت إضافة سجل الصيانة بنجاح!");
-            document.getElementById('mMainBy').value = '';
+        if(!date || !type || !by) { alert("أدخل بيانات الصيانة المطلوبة"); return; }
+        db.collection("machines").doc(activeMachineIdForModal).collection("maintenance").add({ date, by, type, note }).then(() => {
             document.getElementById('mMainType').value = '';
             document.getElementById('mMainNote').value = '';
-            openMachineModal(activeMachineIdForModal);
+            loadMaintenanceRecords(activeMachineIdForModal);
         });
     }
 
-    function deleteMachineDoc(id) { if(confirm("حذف الماكينة؟")) db.collection("machines_detailed_specs").doc(id).delete(); }
-    function handleLogout() { auth.signOut(); }
-
-    function calculateTotalIncentive(productName, g1, defectRate) {
-        const productSpec = (globalMasterData.products || []).find(p => (typeof p === 'string' ? p === productName : p.name === productName));
-        
-        if (!productSpec || typeof productSpec === 'string') return { quantityIncentive: 0, qualityIncentive: 0, total: 0 };
-
-        let quantityIncentive = 0;
-        let qualityIncentive = 0;
-
-        if (defectRate <= productSpec.maxWaste) {
-            const extraPieces = g1 - productSpec.target;
-            if (extraPieces > 0) {
-                quantityIncentive = extraPieces * (productSpec.incentiveValue || 0);
-            }
-        }
-
-        const lowWasteLimit = productSpec.qualityLowWaste || 0;
-        const baseBonus = productSpec.qualityBonus || 0;
-
-        if (lowWasteLimit > 0 && baseBonus > 0) {
-            const halfWasteLimit = lowWasteLimit / 2;
-            if (defectRate <= halfWasteLimit) {
-                qualityIncentive = baseBonus * 2;
-            } else if (defectRate <= lowWasteLimit) {
-                qualityIncentive = baseBonus;
-            }
-        }
-
-        const total = Number((quantityIncentive + qualityIncentive).toFixed(2));
-        return { quantityIncentive, qualityIncentive, total };
-    }
+    function handleColorChange() {}
+    function handlePatternChange() {}
 
     function addToStagingCart() {
         const date = document.getElementById('productionDate').value;
@@ -1005,157 +840,148 @@
         const product = document.getElementById('productSelect').value;
         const color = document.getElementById('colorSelect').value;
         const pattern = document.getElementById('patternSelect').value;
+        const g1 = parseFloat(document.getElementById('g1').value) || 0;
+        const g2 = parseFloat(document.getElementById('g2').value) || 0;
+        const g3 = parseFloat(document.getElementById('g3').value) || 0;
+        const waste = parseFloat(document.getElementById('waste').value) || 0;
 
-        if (!date || !shift || !machine || !worker || !product || supervisor === NONE_OPTION) {
-            alert("يرجى اختيار البيانات الأساسية للوردية!");
-            return;
-        }
-        if (color === NONE_OPTION && pattern === NONE_OPTION) {
-            alert("اختر لون سادة أو تصميم مطبوع!");
-            return;
-        }
-
-        const appearance = color !== NONE_OPTION ? `سادة (${color})` : `مطبوع (${pattern})`;
-        const g1 = Number(document.getElementById('g1').value);
-        const g2 = Number(document.getElementById('g2').value);
-        const g3 = Number(document.getElementById('g3').value);
-        const waste = Number(document.getElementById('waste').value);
-
-        if (g1 <= 0 && (g2 > 0 || g3 > 0 || waste > 0)) {
-            alert("خطأ: الفرز الأول لا يمكن أن يكون صفراً مع وجود عيوب!");
+        if(!date || !supervisor || !machine || !worker || !product) {
+            alert("برجاء إكمال الحقول الأساسية المطلوبة");
             return;
         }
 
-        const totalDefects = g2 + g3 + waste;
-        const defectRate = g1 > 0 ? Number(((totalDefects / g1) * 100).toFixed(2)) : 0;
-        const isPassed = defectRate <= 8;
+        const prodConfig = globalMasterData.products.find(p => p.name === product) || { target: 100, waste: 5, incentive: 1, lowWaste: 2, qualityBonus: 50 };
+        const totalProd = g1 + g2 + g3 + waste;
+        const defectCount = g2 + g3 + waste;
+        const defectRatio = totalProd > 0 ? (defectCount / totalProd) * 100 : 0;
         
-        const incentives = calculateTotalIncentive(product, g1, defectRate);
+        let incentiveTotal = 0;
+        if(g1 > prodConfig.target) {
+            incentiveTotal += (g1 - prodConfig.target) * prodConfig.incentive;
+        }
+        if(defectRatio <= (prodConfig.lowWaste || 2)) {
+            incentiveTotal += (prodConfig.qualityBonus || 0);
+        }
 
-        const recordItem = {
-            date, shift, supervisor, entryBy: document.getElementById('userNameDisplay').innerText.replace("المستخدم: ", ""),
-            machine, worker, product, appearance, g1, g2, g3, waste,
-            totalDefects, defectRate, isPassed, 
-            incentive: incentives.total,
-            quantityIncentive: incentives.quantityIncentive,
-            qualityIncentive: incentives.qualityIncentive,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
+        const item = { date, shift, supervisor, machine, worker, product, color, pattern, g1, g2, g3, waste, totalProd, defectRatio, incentiveTotal };
+        stagingCart.push(item);
 
-        stagingCart.push(recordItem);
-        renderStagingTable();
         document.getElementById('stagingCard').style.display = 'block';
-
-        document.getElementById('g1').value = 0;
-        document.getElementById('g2').value = 0;
-        document.getElementById('g3').value = 0;
-        document.getElementById('waste').value = 0;
+        renderStagingTable();
+        document.getElementById('g1').value = '0';
+        document.getElementById('g2').value = '0';
+        document.getElementById('g3').value = '0';
+        document.getElementById('waste').value = '0';
     }
 
     function renderStagingTable() {
         const tbody = document.getElementById('stagingBody');
-        tbody.innerHTML = '';
-        stagingCart.forEach((item, index) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><b>${index + 1}</b></td>
-                    <td><b>${item.machine}</b><br><small>${item.shift}</small></td>
-                    <td><b>${item.supervisor}</b></td>
-                    <td>${item.worker}</td>
-                    <td><b>${item.product}</b><br><span style="color:#555;">${item.appearance}</span></td>
-                    <td>${item.g1}</td>
-                    <td>عيوب: ${item.defectRate}% | الحافز: <b style="color:var(--success);">${item.incentive} ج.م</b></td>
-                    <td><button class="btn-del" onclick="removeFromStaging(${index})">حذف</button></td>
-                </tr>
-            `;
-        });
+        tbody.innerHTML = stagingCart.map((item, idx) => `
+            <tr>
+                <td>${idx+1}</td>
+                <td><b>${item.machine}</b></td>
+                <td>${item.supervisor}</td>
+                <td>${item.worker}</td>
+                <td>${item.product} <br><small style="color:#666">${item.color || ''} ${item.pattern || ''}</small></td>
+                <td><b>${item.g1}</b></td>
+                <td>ج2: ${item.g2} | ج3: ${item.g3} | تالف: ${item.waste} <br><b>الحافز: ${item.incentiveTotal} ج.م</b></td>
+                <td><button class="btn-del" onclick="removeFromStaging(${idx})">حذف</button></td>
+            </tr>
+        `).join('');
     }
 
-    function removeFromStaging(index) {
-        stagingCart.splice(index, 1);
+    function removeFromStaging(idx) {
+        stagingCart.splice(idx, 1);
         if(stagingCart.length === 0) document.getElementById('stagingCard').style.display = 'none';
         renderStagingTable();
     }
 
     function openReviewModal() {
-        if(stagingCart.length === 0) { alert("القائمة فارغة!"); return; }
-        const reviewContent = document.getElementById('reviewContent');
-        reviewContent.innerHTML = '';
-        
-        stagingCart.forEach((item, idx) => {
-            reviewContent.innerHTML += `
-                <div style="background:#f8fafc; padding:10px; border-radius:6px; margin-bottom:8px; border-right:4px solid ${item.isPassed?'var(--success)':'var(--danger)'};">
-                    <b>#${idx+1} - المكبس:</b> ${item.machine} | <b>العامل:</b> ${item.worker}<br>
-                    <b>المنتج:</b> ${item.product} (${item.appearance})<br>
-                    <b>فرز أول:</b> ${item.g1} | <b>العيوب:</b> ${item.totalDefects} (${item.defectRate}%)<br>
-                    <b>إجمالي حافز العامل:</b> <span style="color:var(--success); font-weight:bold;">${item.incentive} ج.م</span> (كمية: ${item.quantityIncentive} | جودة: ${item.qualityIncentive})
-                </div>
-            `;
-        });
+        if(stagingCart.length === 0) return;
+        const content = document.getElementById('reviewContent');
+        content.innerHTML = `
+            <p><b>إجمالي عدد السطور المدخلة:</b> ${stagingCart.length}</p>
+            <p><b>التاريخ والوردية:</b> ${stagingCart[0].date} - ${stagingCart[0].shift}</p>
+            <hr>
+            <ul>
+                ${stagingCart.map(s => `<li><b>${s.machine}</b> (${s.worker}): فرز أول (${s.g1}) | الحافز المتوقع: ${s.incentiveTotal} ج.م</li>`).join('')}
+            </ul>
+        `;
         document.getElementById('reviewModal').style.display = 'flex';
     }
 
     function closeReviewModal() { document.getElementById('reviewModal').style.display = 'none'; }
 
     function commitStagingToFirestore() {
-        closeReviewModal();
-        let batchPromises = stagingCart.map(record => db.collection("melamine_production").add(record));
-        
+        const currentUserEmail = auth.currentUser ? auth.currentUser.email : 'Admin';
+        const batchPromises = stagingCart.map(item => {
+            return db.collection("production_records").add({
+                ...item,
+                recordedBy: currentUserEmail,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                updated_by: "لا يوجد",
+                updated_at: "-"
+            });
+        });
+
         Promise.all(batchPromises).then(() => {
-            alert("✅ تم ترحيل وحفظ جميع سطور الوردية وحساب الحوافز بنجاح!");
+            alert("تم ترحيل البيانات بنجاح إلى قاعدة البيانات!");
             stagingCart = [];
             document.getElementById('stagingCard').style.display = 'none';
-        }).catch(err => alert("خطأ أثناء الحفظ: " + err.message));
+            closeReviewModal();
+            switchTab('historyTab');
+        });
     }
 
     function listenToFirebaseHistory() {
-        db.collection("melamine_production").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+        db.collection("production_records").orderBy("date", "desc").onSnapshot(snapshot => {
             cachedHistoryData = [];
-            snapshot.forEach((doc) => cachedHistoryData.push(doc.data()));
+            snapshot.forEach(doc => {
+                cachedHistoryData.push({ id: doc.id, ...doc.data() });
+            });
             renderHistoryTable(cachedHistoryData);
         });
     }
 
     function renderHistoryTable(data) {
         const tbody = document.getElementById('historyBody');
-        if(!tbody) return;
+        if (!tbody) return;
         tbody.innerHTML = '';
-        if(data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="13" style="padding:15px; color:#64748b;">لا توجد سجلات مطابقة.</td></tr>`;
-            return;
-        }
-        let counter = 1;
-        data.forEach((item) => {
+        data.forEach((r, idx) => {
+            const status = r.defectRatio <= 5 ? "ممتازة ✅" : "تحتاج مراجعة ⚠️";
             tbody.innerHTML += `
                 <tr>
-                    <td><b>${counter++}</b></td>
-                    <td><b>${item.date || ''}</b></td>
-                    <td style="color:var(--primary); font-weight:bold;">${item.shift || ''}</td>
-                    <td><b>${item.supervisor || '-'}</b></td>
-                    <td>${item.entryBy || ''}</td>
-                    <td>${item.machine || ''}</td>
-                    <td>${item.worker || ''}</td>
-                    <td><b>${item.product}</b><br><span style="font-size:11px; color:#555;">${item.appearance}</span></td>
-                    <td>${item.g1 || 0}</td>
-                    <td>${item.totalDefects || 0}</td>
-                    <td><b>${item.defectRate || 0}%</b></td>
-                    <td style="color:${item.isPassed ? 'green' : 'red'}; font-weight:bold;">${item.isPassed ? 'مقبول' : 'مرفوض'}</td>
-                    <td style="color:var(--success); font-weight:bold; font-size:14px;">${item.incentive || 0} ج.م</td>
+                    <td>${idx+1}</td>
+                    <td>${r.date}</td>
+                    <td>${r.shift}</td>
+                    <td>${r.supervisor}</td>
+                    <td>${r.recordedBy || '-'}</td>
+                    <td><b>${r.machine}</b></td>
+                    <td>${r.worker}</td>
+                    <td>${r.product} <br><small>${r.color || ''} ${r.pattern || ''}</small></td>
+                    <td><b>${r.g1}</b></td>
+                    <td>ج2: ${r.g2} | ج3: ${r.g3} | تالف: ${r.waste}</td>
+                    <td>${(r.defectRatio || 0).toFixed(1)}%</td>
+                    <td>${status}</td>
+                    <td><b>${r.incentiveTotal || 0} ج.م</b></td>
+                    <td>
+                        <button class="btn-edit" onclick="openCustomEditModal('${r.id}', ${r.g1}, ${r.g2}, ${r.g3}, ${r.waste})">تعديل ✏️</button>
+                    </td>
                 </tr>
             `;
         });
     }
 
     function applyFilters() {
-        const dVal = document.getElementById('filterDate').value;
-        const sVal = document.getElementById('filterShift').value;
-        const mVal = document.getElementById('filterMachine').value;
+        const fDate = document.getElementById('filterDate').value;
+        const fShift = document.getElementById('filterShift').value;
+        const fMachine = document.getElementById('filterMachine').value;
 
         let filtered = cachedHistoryData.filter(item => {
-            let matchDate = dVal ? item.date === dVal : true;
-            let matchShift = sVal ? item.shift === sVal : true;
-            let matchMachine = mVal ? item.machine === mVal : true;
-            return matchDate && matchShift && matchMachine;
+            if (fDate && item.date !== fDate) return false;
+            if (fShift && item.shift !== fShift) return false;
+            if (fMachine && item.machine !== fMachine) return false;
+            return true;
         });
         renderHistoryTable(filtered);
     }
@@ -1168,39 +994,143 @@
     }
 
     function exportFilteredExcel() {
-        let reportsData = [];
-        const dVal = document.getElementById('filterDate').value;
-        const sVal = document.getElementById('filterShift').value;
-        const mVal = document.getElementById('filterMachine').value;
+        let ws = XLSX.utils.json_to_sheet(cachedHistoryData);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "الإنتاج");
+        XLSX.writeFile(wb, "production_report.xlsx");
+    }
 
-        let exportList = cachedHistoryData.filter(item => {
-            let matchDate = dVal ? item.date === dVal : true;
-            let matchShift = sVal ? item.shift === sVal : true;
-            let matchMachine = mVal ? item.machine === mVal : true;
-            return matchDate && matchShift && matchMachine;
-        });
+    function handleAddNewUser(e) {
+        e.preventDefault();
+        const username = document.getElementById('newUsername').value.trim().toLowerCase();
+        const fullName = document.getElementById('newFullName').value.trim();
+        const pass = document.getElementById('newUserPass').value;
+        const isWorker = document.getElementById('isWorker').checked;
+        const isSupervisor = document.getElementById('isSupervisor').checked;
 
-        let excelCounter = 1;
-        exportList.forEach((data) => {
-            reportsData.push({
-                "مسلسل": excelCounter++,
-                "التاريخ": data.date, "الوردية": data.shift, "المشرف": data.supervisor, "المسجل": data.entryBy,
-                "المكبس": data.machine, "العامل": data.worker, "المنتج": data.product,
-                "المظهر": data.appearance, "فرز أول": data.g1, "إجمالي العيوب والتالف": data.totalDefects,
-                "نسبة العيوب": data.defectRate + '%', "الحالة": data.isPassed ? 'مقبول' : 'مرفوض',
-                "حافز الكمية": data.quantityIncentive || 0,
-                "حافز الجودة": data.qualityIncentive || 0,
-                "إجمالي الحافز (ج.م)": data.incentive || 0
+        const perms = {
+            entry: document.getElementById('p_entry').checked,
+            history: document.getElementById('p_history').checked,
+            excel: document.getElementById('p_excel').checked,
+            master: document.getElementById('p_master').checked,
+            users: document.getElementById('p_users').checked
+        };
+
+        auth.createUserWithEmailAndPassword(`${username}@almanar.factory`, pass).then(() => {
+            db.collection("users_permissions").doc(username).set({
+                fullName, isWorker, isSupervisor, perms
+            }).then(() => {
+                alert("تم إنشاء المستخدم بنجاح!");
+                loadWorkersAndSupervisorsDropdowns();
+                loadUsersTable();
+            });
+        }).catch(err => { alert("خطأ: " + err.message); });
+    }
+
+    function loadUsersTable() {
+        db.collection("users_permissions").get().then(snapshot => {
+            const tbody = document.getElementById('usersTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let i = 1;
+            snapshot.forEach(doc => {
+                const u = doc.data();
+                const p = u.perms || {};
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${i++}</td>
+                        <td><b>${doc.id}</b></td>
+                        <td>${u.fullName || '-'}</td>
+                        <td>${u.isWorker ? 'نعم' : 'لا'}</td>
+                        <td>${u.isSupervisor ? 'نعم' : 'لا'}</td>
+                        <td>${p.entry ? '✔️' : '❌'}</td>
+                        <td>${p.history ? '✔️' : '❌'}</td>
+                        <td>${p.excel ? '✔️' : '❌'}</td>
+                        <td>${p.master ? '✔️' : '❌'}</td>
+                        <td>${p.users ? '✔️' : '❌'}</td>
+                        <td><button class="btn-del" onclick="deleteUser('${doc.id}')">حذف</button></td>
+                    </tr>
+                `;
             });
         });
+    }
 
-        if(reportsData.length === 0) { alert("لا توجد بيانات مطابقة للتصدير."); return; }
-        const worksheet = XLSX.utils.json_to_sheet(reportsData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "تقارير_الإنتاج_والحوافز");
-        XLSX.writeFile(workbook, `تقرير_مصنع_المنار_والحوافز_${new Date().toISOString().slice(0,10)}.xlsx`);
+    function deleteUser(username) {
+        if(confirm(`هل تريد حذف المستخدم ${username}؟`)) {
+            db.collection("users_permissions").doc(username).delete().then(() => { loadUsersTable(); loadWorkersAndSupervisorsDropdowns(); });
+        }
+    }
+
+    function handleChangePassword(e) {
+        e.preventDefault();
+        const p1 = document.getElementById('newPass1').value;
+        const p2 = document.getElementById('newPass2').value;
+        const msg = document.getElementById('passMsg');
+        if(p1 !== p2) { msg.style.color = 'red'; msg.innerText = "كلمات المرور غير متطابقة!"; return; }
+
+        auth.currentUser.updatePassword(p1).then(() => {
+            msg.style.color = 'green';
+            msg.innerText = "تم تحديث كلمة المرور بنجاح!";
+        }).catch(err => {
+            msg.style.color = 'red';
+            msg.innerText = "حدث خطأ: يرجى تسجيل الخروج والدخول مرة أخرى.";
+        });
+    }
+
+    // دوال نظام التعديل عبر النافذة المنبثقة وتتبع المستخدم
+    function openCustomEditModal(id, g1, g2, g3, waste) {
+        document.getElementById('editDocId').value = id;
+        document.getElementById('editG1').value = g1;
+        document.getElementById('editG2').value = g2;
+        document.getElementById('editG3').value = g3;
+        document.getElementById('editWaste').value = waste;
+
+        // جلب معلومات آخر تعديل إن وجدت من الكاش أو الداتابيز
+        const record = cachedHistoryData.find(item => item.id === id);
+        if (record) {
+            document.getElementById('editInfoUser').innerText = record.updated_by || 'لا يوجد';
+            document.getElementById('editInfoTime').innerText = record.updated_at || '-';
+        }
+
+        document.getElementById('customEditModal').style.display = 'flex';
+    }
+
+    function saveCustomEdit() {
+        const id = document.getElementById('editDocId').value;
+        const g1 = parseFloat(document.getElementById('editG1').value) || 0;
+        const g2 = parseFloat(document.getElementById('editG2').value) || 0;
+        const g3 = parseFloat(document.getElementById('editG3').value) || 0;
+        const waste = parseFloat(document.getElementById('editWaste').value) || 0;
+
+        const record = cachedHistoryData.find(item => item.id === id);
+        if (!record) return;
+
+        // حساب القيم الجديدة للحافز والعيوب
+        const prodConfig = globalMasterData.products.find(p => p.name === record.product) || { target: 100, waste: 5, incentive: 1, lowWaste: 2, qualityBonus: 50 };
+        const totalProd = g1 + g2 + g3 + waste;
+        const defectCount = g2 + g3 + waste;
+        const defectRatio = totalProd > 0 ? (defectCount / totalProd) * 100 : 0;
+        
+        let incentiveTotal = 0;
+        if(g1 > prodConfig.target) {
+            incentiveTotal += (g1 - prodConfig.target) * prodConfig.incentive;
+        }
+        if(defectRatio <= (prodConfig.lowWaste || 2)) {
+            incentiveTotal += (prodConfig.qualityBonus || 0);
+        }
+
+        const currentUserEmail = auth.currentUser ? auth.currentUser.email.split('@')[0] : 'Admin';
+        const updateTimeStr = new Date().toLocaleString('ar-EG');
+
+        db.collection("production_records").doc(id).update({
+            g1, g2, g3, waste, totalProd, defectRatio, incentiveTotal,
+            updated_by: currentUserEmail,
+            updated_at: updateTimeStr
+        }).then(() => {
+            alert("تم حفظ التعديلات وتحديث سجل المتابعة بنجاح! ✅");
+            document.getElementById('customEditModal').style.display = 'none';
+        });
     }
 </script>
-
 </body>
 </html>
